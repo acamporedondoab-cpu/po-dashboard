@@ -13,7 +13,9 @@ node_modules
 # OS files
 .DS_Store
 
-# Secrets
-*.json
+# Secrets — service account key (never commit)
+purchased-order-tracker-*.json
+*-credentials.json
+*-service-account.json
 
 .env*

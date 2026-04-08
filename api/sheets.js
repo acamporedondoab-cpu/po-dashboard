@@ -3,10 +3,20 @@ import { google } from 'googleapis';
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
 function getAuth() {
-  const raw = process.env.GOOGLE_CREDENTIALS;
-  if (!raw) throw new Error('GOOGLE_CREDENTIALS env var not set');
+  let credentials;
 
-  const credentials = JSON.parse(raw);
+  if (process.env.GOOGLE_CREDENTIALS) {
+    // Local dev: full service account JSON as a single env var
+    credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
+  } else if (process.env.GOOGLE_CLIENT_EMAIL && process.env.GOOGLE_PRIVATE_KEY) {
+    // Vercel: individual vars (private key has literal \n that must be unescaped)
+    credentials = {
+      client_email: process.env.GOOGLE_CLIENT_EMAIL,
+      private_key:  process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    };
+  } else {
+    throw new Error('No Google credentials. Set GOOGLE_CREDENTIALS or GOOGLE_CLIENT_EMAIL + GOOGLE_PRIVATE_KEY.');
+  }
 
   return new google.auth.GoogleAuth({
     credentials,
