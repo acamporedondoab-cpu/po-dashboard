@@ -1,0 +1,3483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PO Dashboard</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Inter:wght@700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+  <!-- jsPDF + AutoTable for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            base:     '#0c0c0c',
+            surface:  '#141414',
+            elevated: '#1c1c1c',
+            border:   '#2a2a2a',
+            accent:   '#a3e635',
+            'accent-dim': '#65a30d',
+            'text-primary':   '#ffffff',
+            'text-secondary': '#a1a1aa',
+            'text-muted':     '#52525b',
+          },
+          fontFamily: {
+            display: ['Syne', 'sans-serif'],
+            body:    ['DM Sans', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    /* ── Base reset ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-base:      #0c0c0c;
+      --bg-surface:   #141414;
+      --bg-elevated:  #1c1c1c;
+      --bg-border:    #2a2a2a;
+      --accent:       #a3e635;
+      --accent-dim:   #65a30d;
+      --accent-glow:  rgba(163, 230, 53, 0.12);
+      --text-primary: #ffffff;
+      --text-secondary: #a1a1aa;
+      --text-muted:   #52525b;
+
+      /* Status */
+      --status-shipped:    #a3e635;
+      --status-pending:    #f59e0b;
+      --status-received:   #67e8f9;
+      --status-not-shipped:#ef4444;
+      --status-rfq:        #d8b4fe;
+      --status-quote:      #93c5fd;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg-base);
+      color: var(--text-primary);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Scrollbar ───────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg-base); }
+    ::-webkit-scrollbar-thumb { background: var(--bg-border); border-radius: 2px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    /* ── Layout shell ────────────────────────────────────────── */
+    #app {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Sidebar ─────────────────────────────────────────────── */
+    #sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--bg-border);
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .sidebar-logo {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid var(--bg-border);
+    }
+
+    .sidebar-logo-mark {
+      width: 32px;
+      height: 32px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .sidebar-logo-mark svg {
+      width: 18px;
+      height: 18px;
+      color: #000;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 12px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      overflow-y: auto;
+    }
+
+    .nav-section-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 12px 8px 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 13.5px;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      transition: background 0.15s ease, color 0.15s ease;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+
+    .nav-item:active {
+      background: rgba(163, 230, 53, 0.08);
+    }
+
+    .nav-item.active {
+      background: rgba(163, 230, 53, 0.12);
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .nav-item.active .nav-icon {
+      color: var(--accent);
+    }
+
+    .nav-icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      opacity: 0.7;
+    }
+
+    .nav-item.active .nav-icon {
+      opacity: 1;
+    }
+
+    .nav-item:hover .nav-icon {
+      opacity: 0.9;
+    }
+
+    /* Active indicator dot */
+    .nav-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      width: 3px;
+      height: 20px;
+      background: var(--accent);
+      border-radius: 0 2px 2px 0;
+    }
+
+    .nav-item { position: relative; }
+
+    /* Sidebar bottom */
+    .sidebar-footer {
+      padding: 16px 12px;
+      border-top: 1px solid var(--bg-border);
+    }
+
+    .sidebar-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .sidebar-user:hover { background: var(--bg-elevated); }
+
+    .user-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-dim), var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: #000;
+      flex-shrink: 0;
+    }
+
+    /* ── Main content ────────────────────────────────────────── */
+    #main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    /* Top bar */
+    #topbar {
+      height: 56px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      border-bottom: 1px solid var(--bg-border);
+      background: var(--bg-base);
+      gap: 16px;
+    }
+
+    .topbar-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
+
+    .topbar-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .last-updated {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    /* Page content */
+    #content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px;
+    }
+
+    /* Page sections — only one visible at a time */
+    .page-section { display: none; }
+    .page-section.active { display: block; }
+
+    /* ── Right panel ─────────────────────────────────────────── */
+    #right-panel {
+      width: 280px;
+      flex-shrink: 0;
+      background: var(--bg-surface);
+      border-left: 1px solid var(--bg-border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid var(--bg-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .panel-badge {
+      background: var(--accent-glow);
+      color: var(--accent);
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 20px;
+      border: 1px solid rgba(163, 230, 53, 0.2);
+    }
+
+    .panel-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 0;
+    }
+
+    /* Activity items */
+    .activity-item {
+      padding: 12px 20px;
+      border-bottom: 1px solid rgba(42, 42, 42, 0.5);
+      transition: background 0.15s ease;
+      cursor: default;
+    }
+
+    .activity-item:hover { background: var(--bg-elevated); }
+    .activity-item:last-child { border-bottom: none; }
+
+    .activity-type {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+
+    .activity-type.new-po   { color: var(--accent); }
+    .activity-type.status   { color: var(--status-received); }
+    .activity-type.supplier { color: var(--status-rfq); }
+
+    .activity-desc {
+      font-size: 12.5px;
+      color: var(--text-primary);
+      line-height: 1.4;
+      margin-bottom: 4px;
+    }
+
+    .activity-time {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Panel footer */
+    .panel-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--bg-border);
+    }
+
+    /* ── Shared card ─────────────────────────────────────────── */
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--bg-border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .card-hover {
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card-hover:hover {
+      border-color: rgba(163, 230, 53, 0.2);
+      box-shadow: 0 0 0 1px rgba(163, 230, 53, 0.06),
+                  0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    /* ── Shared table ────────────────────────────────────────── */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .data-table th {
+      text-align: left;
+      padding: 10px 14px;
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--bg-border);
+      white-space: nowrap;
+    }
+
+    .data-table td {
+      padding: 11px 14px;
+      color: var(--text-secondary);
+      border-bottom: 1px solid rgba(42,42,42,0.6);
+      vertical-align: middle;
+    }
+
+    .data-table tbody tr:hover td {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+
+    .data-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* ── Status badges ───────────────────────────────────────── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .badge-shipped      { background: #14532d; color: #a3e635; }
+    .badge-received     { background: #164e63; color: #67e8f9; }
+    .badge-not-shipped  { background: #7f1d1d; color: #fca5a5; }
+    .badge-quote        { background: #1e3a5f; color: #93c5fd; }
+    .badge-rfq          { background: #3b0764; color: #d8b4fe; }
+    .badge-pending      { background: #78350f; color: #fcd34d; }
+
+    /* ── Shared loading state ────────────────────────────────── */
+    .skeleton {
+      background: linear-gradient(90deg, var(--bg-elevated) 25%, var(--bg-border) 50%, var(--bg-elevated) 75%);
+      background-size: 200% 100%;
+      animation: skeleton-shimmer 1.4s ease-in-out infinite;
+      border-radius: 6px;
+    }
+
+    @keyframes skeleton-shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ── Empty state ─────────────────────────────────────────── */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      text-align: center;
+      gap: 8px;
+    }
+
+    .empty-state svg {
+      width: 36px;
+      height: 36px;
+      opacity: 0.3;
+      margin-bottom: 4px;
+    }
+
+    .empty-state p { font-size: 13px; }
+
+    /* ── Buttons ─────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transition: opacity 0.15s ease, transform 0.1s ease;
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-primary:focus-visible { box-shadow: 0 0 0 2px var(--bg-base), 0 0 0 4px var(--accent); }
+
+    .btn-ghost {
+      background: var(--bg-elevated);
+      color: var(--text-secondary);
+      border: 1px solid var(--bg-border);
+    }
+
+    .btn-ghost:hover { color: var(--text-primary); border-color: #3d3d3d; }
+    .btn-ghost:focus-visible { box-shadow: 0 0 0 2px var(--bg-base), 0 0 0 4px var(--bg-border); }
+
+    /* ── Inputs ──────────────────────────────────────────────── */
+    .input {
+      background: var(--bg-elevated);
+      border: 1px solid var(--bg-border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text-primary);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .input::placeholder { color: var(--text-muted); }
+
+    .input:hover { border-color: #3d3d3d; }
+
+    .input:focus {
+      border-color: rgba(163, 230, 53, 0.4);
+      box-shadow: 0 0 0 3px rgba(163, 230, 53, 0.08);
+    }
+
+    /* ── Select ──────────────────────────────────────────────── */
+    select.input {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2352525b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 30px;
+    }
+
+    /* ── Page transitions ────────────────────────────────────── */
+    .page-section.active {
+      animation: page-in 0.18s ease both;
+    }
+
+    @keyframes page-in {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Grain overlay (depth texture) ──────────────────────── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ═══════════════════════════════════════════════════════════
+       SIDEBAR
+  ════════════════════════════════════════════════════════════ -->
+  <nav id="sidebar">
+    <!-- Logo -->
+    <div class="sidebar-logo">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div class="sidebar-logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+            <polyline points="10 9 9 9 8 9"/>
+          </svg>
+        </div>
+        <div>
+          <div style="font-family:'Syne',sans-serif; font-size:13px; font-weight:800; letter-spacing:-0.02em; color:#fff; line-height:1.1;">PO Dashboard</div>
+          <div style="font-size:10px; color:var(--text-muted); margin-top:1px;">Field Service</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <div class="sidebar-nav">
+      <div class="nav-section-label">Analytics</div>
+
+      <div class="nav-item active" data-page="overview" tabindex="0" role="button" aria-current="page">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+        </svg>
+        Overview
+      </div>
+
+      <div class="nav-section-label" style="margin-top:6px;">Purchase Orders</div>
+
+      <div class="nav-item" data-page="po-register" tabindex="0" role="button">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+          <rect x="9" y="3" width="6" height="4" rx="1"/>
+          <line x1="9" y1="12" x2="15" y2="12"/>
+          <line x1="9" y1="16" x2="13" y2="16"/>
+        </svg>
+        PO Register
+      </div>
+
+      <div class="nav-item" data-page="vendor-spend" tabindex="0" role="button">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="1" x2="12" y2="23"/>
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+        Vendor Spend
+      </div>
+
+      <div class="nav-item" data-page="supplier-view" tabindex="0" role="button">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
+          <line x1="19" y1="8" x2="19" y2="14"/>
+          <line x1="22" y1="11" x2="16" y2="11"/>
+        </svg>
+        Supplier View
+      </div>
+
+      <div class="nav-item" data-page="customer-pricing" tabindex="0" role="button">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        Customer Pricing
+      </div>
+
+      <div class="nav-section-label" style="margin-top:6px;">Tracking</div>
+
+      <div class="nav-item" data-page="not-shipped" tabindex="0" role="button" style="position:relative;">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        Not Shipped
+        <span id="not-shipped-badge" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:#ef4444; color:#fff; font-size:10px; font-weight:700; min-width:18px; height:18px; border-radius:9px; align-items:center; justify-content:center; padding:0 4px; display:none;"></span>
+      </div>
+
+      <div class="nav-item" data-page="delivery-tracker" tabindex="0" role="button">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="1" y="3" width="15" height="13" rx="1"/>
+          <path d="M16 8h4l3 5v4h-7V8z"/>
+          <circle cx="5.5" cy="18.5" r="2.5"/>
+          <circle cx="18.5" cy="18.5" r="2.5"/>
+        </svg>
+        Delivery Tracker
+      </div>
+
+      <div class="nav-item" data-page="discount-threshold" tabindex="0" role="button">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+        Discount Threshold
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar">S</div>
+        <div>
+          <div style="font-size:12.5px; font-weight:500; color:var(--text-primary); line-height:1.2;">Shiv</div>
+          <div style="font-size:11px; color:var(--text-muted);">Field Service</div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       MAIN
+  ════════════════════════════════════════════════════════════ -->
+  <div id="main">
+
+    <!-- Top bar -->
+    <div id="topbar">
+      <div>
+        <div class="topbar-title" id="topbar-title">Overview</div>
+      </div>
+      <div class="topbar-right">
+        <div class="last-updated">
+          <div class="pulse-dot"></div>
+          <span id="last-updated-text">Connecting…</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scrollable content -->
+    <div id="content">
+
+      <!-- ── Page: Overview ──────────────────────────────────── -->
+      <section class="page-section active" id="page-overview">
+
+        <!-- KPI Cards -->
+        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px;">
+
+          <div class="card card-hover" style="position:relative; overflow:hidden;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
+              <span style="font-size:11px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-muted);">POs This Month</span>
+              <div style="width:32px; height:32px; background:rgba(163,230,53,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+              </div>
+            </div>
+            <div id="kpi-total-pos" style="font-family:'Inter',sans-serif; font-size:32px; font-weight:700; letter-spacing:-0.03em; font-variant-numeric:tabular-nums; color:#fff; line-height:1; margin-bottom:8px;">—</div>
+            <div style="font-size:12px; color:var(--text-muted);">Purchase orders</div>
+            <div style="position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(90deg, rgba(163,230,53,0.4), transparent);"></div>
+          </div>
+
+          <div class="card card-hover" style="position:relative; overflow:hidden;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
+              <span style="font-size:11px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-muted);">Supplier Cost</span>
+              <div style="width:32px; height:32px; background:rgba(239,68,68,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+              </div>
+            </div>
+            <div id="kpi-supplier-cost" style="font-family:'Inter',sans-serif; font-size:22px; font-weight:700; letter-spacing:-0.03em; font-variant-numeric:tabular-nums; color:#fff; line-height:1; margin-bottom:8px; white-space:nowrap;">—</div>
+            <div style="font-size:12px; color:var(--text-muted);">Total supplier spend</div>
+            <div style="position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(90deg, rgba(239,68,68,0.3), transparent);"></div>
+          </div>
+
+          <div class="card card-hover" style="position:relative; overflow:hidden;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
+              <span style="font-size:11px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-muted);">Customer Price</span>
+              <div style="width:32px; height:32px; background:rgba(59,130,246,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              </div>
+            </div>
+            <div id="kpi-revenue" style="font-family:'Inter',sans-serif; font-size:22px; font-weight:700; letter-spacing:-0.03em; font-variant-numeric:tabular-nums; color:#fff; line-height:1; margin-bottom:8px; white-space:nowrap;">—</div>
+            <div style="font-size:12px; color:var(--text-muted);">Customer billing</div>
+            <div style="position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(90deg, rgba(59,130,246,0.3), transparent);"></div>
+          </div>
+
+          <div class="card card-hover" style="position:relative; overflow:hidden;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
+              <span style="font-size:11px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-muted);">Gross Profit</span>
+              <div style="width:32px; height:32px; background:rgba(163,230,53,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
+            </div>
+            <div id="kpi-profit" style="font-family:'Inter',sans-serif; font-size:22px; font-weight:700; letter-spacing:-0.03em; font-variant-numeric:tabular-nums; color:var(--accent); line-height:1; margin-bottom:4px; white-space:nowrap;">—</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div id="kpi-margin-badge" style="font-size:11px; font-weight:600; padding:2px 7px; border-radius:20px; background:rgba(163,230,53,0.12); color:var(--accent);">—%</div>
+              <div style="font-size:12px; color:var(--text-muted);">margin</div>
+            </div>
+            <div style="position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(90deg, rgba(163,230,53,0.6), transparent);"></div>
+          </div>
+
+        </div><!-- /kpi grid -->
+
+        <!-- Charts row -->
+        <div style="display:grid; grid-template-columns:1.4fr 1fr; gap:16px;">
+
+          <!-- Line chart: Profit Over Time -->
+          <div class="card">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+              <div>
+                <div style="font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--text-primary);">Profit Over Time</div>
+                <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Gross profit per day</div>
+              </div>
+              <div style="font-size:11px; color:var(--accent); background:rgba(163,230,53,0.08); padding:3px 10px; border-radius:20px; border:1px solid rgba(163,230,53,0.15);">This month</div>
+            </div>
+            <div style="height:220px; position:relative;">
+              <canvas id="chart-profit-time"></canvas>
+            </div>
+          </div>
+
+          <!-- Donut chart: Spend by Supplier -->
+          <div class="card">
+            <div style="margin-bottom:20px;">
+              <div style="font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--text-primary);">Spend by Supplier</div>
+              <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Total supplier cost</div>
+            </div>
+            <div style="height:160px; position:relative; margin-bottom:16px;">
+              <canvas id="chart-spend-supplier"></canvas>
+            </div>
+            <div id="donut-legend" style="display:flex; flex-direction:column; gap:7px;"></div>
+          </div>
+
+        </div><!-- /charts row -->
+
+        <!-- Bottom row -->
+        <div style="display:grid; grid-template-columns:1.6fr 1fr; gap:16px;">
+
+          <!-- Recent POs table -->
+          <div class="card" style="padding:0; overflow:hidden;">
+            <div style="padding:16px 20px 14px; border-bottom:1px solid var(--bg-border); display:flex; align-items:center; justify-content:space-between;">
+              <div style="font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--text-primary);">Recent Purchase Orders</div>
+              <span style="font-size:11px; color:var(--text-muted);">Last 5</span>
+            </div>
+            <div style="overflow-x:auto;">
+            <table class="data-table" style="min-width:500px;">
+              <thead>
+                <tr>
+                  <th>PO Number</th>
+                  <th>Supplier</th>
+                  <th>Date</th>
+                  <th>Cost</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="recent-pos-body">
+                <tr><td colspan="5"><div class="skeleton" style="height:14px; margin:4px 0;"></div></td></tr>
+                <tr><td colspan="5"><div class="skeleton" style="height:14px; margin:4px 0;"></div></td></tr>
+                <tr><td colspan="5"><div class="skeleton" style="height:14px; margin:4px 0;"></div></td></tr>
+              </tbody>
+            </table>
+            </div>
+          </div>
+
+          <!-- Delivery status breakdown -->
+          <div class="card">
+            <div style="font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:16px;">Delivery Status</div>
+            <div id="status-breakdown" style="display:flex; flex-direction:column; gap:10px;">
+              <div class="skeleton" style="height:40px; border-radius:8px;"></div>
+              <div class="skeleton" style="height:40px; border-radius:8px;"></div>
+              <div class="skeleton" style="height:40px; border-radius:8px;"></div>
+            </div>
+          </div>
+
+        </div><!-- /bottom row -->
+
+      </section>
+
+      <!-- ── Page: PO Register ───────────────────────────────── -->
+      <section class="page-section" id="page-po-register">
+
+        <!-- Toolbar -->
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <!-- Search -->
+          <div style="position:relative; flex:1; min-width:200px;">
+            <svg style="position:absolute; left:10px; top:50%; transform:translateY(-50%); width:14px; height:14px; color:var(--text-muted); pointer-events:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="por-search" class="input" type="text" placeholder="Search PO number, supplier, item number…" style="padding-left:34px; width:100%;" />
+          </div>
+
+          <!-- Filter: Supplier -->
+          <select id="por-filter-supplier" class="input" style="min-width:160px;">
+            <option value="">All Suppliers</option>
+          </select>
+
+          <!-- Filter: Status -->
+          <select id="por-filter-status" class="input" style="min-width:140px;">
+            <option value="">All Statuses</option>
+            <option>Shipped</option>
+            <option>Pending</option>
+            <option>Not Shipped</option>
+            <option>Received</option>
+            <option>Quote Received</option>
+            <option>Request For Quote</option>
+          </select>
+
+          <!-- Date from/to -->
+          <input id="por-date-from" class="input" type="date" title="Date from" style="width:140px;" />
+          <input id="por-date-to"   class="input" type="date" title="Date to"   style="width:140px;" />
+
+          <!-- Export PDF -->
+          <button id="por-export" class="btn btn-ghost" style="white-space:nowrap;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export PDF
+          </button>
+        </div>
+
+        <!-- Results info -->
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <div id="por-count" style="font-size:12px; color:var(--text-muted);">Loading…</div>
+          <div style="font-size:12px; color:var(--text-muted);" id="por-page-info"></div>
+        </div>
+
+        <!-- Table -->
+        <div class="card" style="padding:0; overflow:hidden;">
+          <div style="overflow-x:auto;">
+            <table class="data-table" id="por-table">
+              <thead>
+                <tr>
+                  <th style="width:36px; text-align:center; padding:0 8px;"><input type="checkbox" id="por-select-all" title="Select all" style="cursor:pointer; accent-color:var(--accent);"></th>
+                  <th class="sortable" data-col="supplier_name"  style="cursor:pointer; user-select:none;">Supplier <span class="sort-icon">↕</span></th>
+                  <th class="sortable" data-col="job_number"     style="cursor:pointer; user-select:none;">Job # <span class="sort-icon">↕</span></th>
+                  <th class="sortable" data-col="po_number"      style="cursor:pointer; user-select:none;">PO Number <span class="sort-icon">↕</span></th>
+                  <th class="sortable" data-col="date_required_by" style="cursor:pointer; user-select:none;">Date Required <span class="sort-icon">↕</span></th>
+                  <th>Lines</th>
+                  <th class="sortable" data-col="price_ex_tax"   style="cursor:pointer; user-select:none;">Supplier Cost <span class="sort-icon">↕</span></th>
+                  <th class="sortable" data-col="customer_price" style="cursor:pointer; user-select:none;">Cust. Price <span class="sort-icon">↕</span></th>
+                  <th class="sortable" data-col="gross_profit"   style="cursor:pointer; user-select:none;">Profit <span class="sort-icon">↕</span></th>
+                  <th class="sortable" data-col="margin_pct"     style="cursor:pointer; user-select:none;">Margin <span class="sort-icon">↕</span></th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="por-tbody">
+                <tr><td colspan="10"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+                <tr><td colspan="10"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+                <tr><td colspan="10"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+                <tr><td colspan="10"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+                <tr><td colspan="10"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-top:1px solid var(--bg-border);">
+            <button id="por-prev" class="btn btn-ghost" style="padding:6px 14px; font-size:12px;">← Prev</button>
+            <div id="por-pagination-pages" style="display:flex; gap:4px; align-items:center;"></div>
+            <button id="por-next" class="btn btn-ghost" style="padding:6px 14px; font-size:12px;">Next →</button>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ── Page: Vendor Spend ──────────────────────────────── -->
+      <section class="page-section" id="page-vendor-spend">
+
+        <!-- Supplier summary cards -->
+        <div id="vs-supplier-cards" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:16px;">
+          <div class="card skeleton" style="height:110px;"></div>
+          <div class="card skeleton" style="height:110px;"></div>
+          <div class="card skeleton" style="height:110px;"></div>
+        </div>
+
+        <!-- Chart + table row -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+
+          <!-- Horizontal bar chart -->
+          <div class="card">
+            <div style="margin-bottom:18px;">
+              <div style="font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--text-primary);">Spend by Supplier</div>
+              <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Total supplier cost</div>
+            </div>
+            <div style="position:relative;" id="vs-chart-wrap">
+              <canvas id="chart-vendor-bar"></canvas>
+            </div>
+          </div>
+
+          <!-- Summary table -->
+          <div class="card" style="padding:0; overflow:hidden;">
+            <div style="padding:16px 20px 14px; border-bottom:1px solid var(--bg-border);">
+              <div style="font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--text-primary);">Supplier Breakdown</div>
+            </div>
+            <div style="overflow-x:auto;">
+            <table class="data-table" id="vs-table" style="min-width:500px;">
+              <thead>
+                <tr>
+                  <th>Supplier</th>
+                  <th style="text-align:right; padding-right:16px;">POs</th>
+                  <th style="text-align:right; padding-right:16px;">Lines</th>
+                  <th style="text-align:right; padding-right:16px;">Total Spend</th>
+                  <th style="text-align:right; padding-right:16px;">Avg / PO</th>
+                </tr>
+              </thead>
+              <tbody id="vs-tbody">
+                <tr><td colspan="5"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+                <tr><td colspan="5"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+                <tr><td colspan="5"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+              </tbody>
+            </table>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ── Page: Supplier View ─────────────────────────────── -->
+      <section class="page-section" id="page-supplier-view">
+
+        <!-- Filter bar -->
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <select id="sv-filter-supplier" class="input" style="min-width:180px;">
+            <option value="">All Suppliers</option>
+          </select>
+          <select id="sv-filter-status" class="input" style="min-width:160px;">
+            <option value="">All Statuses</option>
+            <option>Shipped</option>
+            <option>Pending</option>
+            <option>Not Shipped</option>
+            <option>Received</option>
+            <option>Quote Received</option>
+            <option>Request For Quote</option>
+          </select>
+          <input id="sv-date-from" class="input" type="date" title="Required by: from" style="width:145px;" />
+          <input id="sv-date-to"   class="input" type="date" title="Required by: to"   style="width:145px;" />
+          <div style="position:relative; flex:1; min-width:160px;">
+            <svg style="position:absolute; left:10px; top:50%; transform:translateY(-50%); width:14px; height:14px; color:var(--text-muted); pointer-events:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="sv-search" class="input" type="text" placeholder="Search PO number, supplier, item code…" style="padding-left:34px; width:100%;" />
+          </div>
+          <button id="sv-clear" class="btn btn-ghost" style="white-space:nowrap;">Clear</button>
+        </div>
+
+        <!-- Count -->
+        <div id="sv-count" style="font-size:12px; color:var(--text-muted);">Loading…</div>
+
+        <!-- Table -->
+        <div class="card" style="padding:0; overflow:hidden;">
+          <div style="overflow-x:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Supplier</th>
+                  <th style="white-space:nowrap;">Date Req. By</th>
+                  <th>Job #</th>
+                  <th>PO Number</th>
+                  <th style="text-align:right; padding-right:16px;">Lines</th>
+                  <th style="text-align:right; padding-right:16px;">Supplier Cost</th>
+                  <th style="text-align:right; padding-right:16px;">Cust. Price</th>
+                  <th style="text-align:right; padding-right:16px;">Gross Profit</th>
+                  <th style="text-align:right; padding-right:16px;">Margin</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="sv-tbody">
+                <tr><td colspan="10"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+                <tr><td colspan="10"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+                <tr><td colspan="10"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+                <tr><td colspan="10"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ── Page: Customer Pricing ───────────────────────────── -->
+      <section class="page-section" id="page-customer-pricing">
+
+        <!-- Job summary cards -->
+        <div id="cp-job-cards" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:16px;">
+          <div class="card skeleton" style="height:110px;"></div>
+          <div class="card skeleton" style="height:110px;"></div>
+          <div class="card skeleton" style="height:110px;"></div>
+        </div>
+
+        <!-- Chart + table row -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+
+          <!-- Horizontal bar chart -->
+          <div class="card">
+            <div style="margin-bottom:18px;">
+              <div style="font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--text-primary);">Revenue by Customer</div>
+              <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Total customer price</div>
+            </div>
+            <div style="position:relative;" id="cp-chart-wrap">
+              <canvas id="chart-customer-bar"></canvas>
+            </div>
+          </div>
+
+          <!-- Breakdown table -->
+          <div class="card" style="padding:0; overflow:hidden;">
+            <div style="padding:16px 20px 14px; border-bottom:1px solid var(--bg-border);">
+              <div style="font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--text-primary);">Job Breakdown</div>
+            </div>
+            <div style="overflow-x:auto;">
+            <table class="data-table" id="cp-table" style="min-width:560px;">
+              <thead>
+                <tr>
+                  <th>Customer</th>
+                  <th style="text-align:right; padding-right:16px;">Lines</th>
+                  <th style="text-align:right; padding-right:16px;">Customer Price</th>
+                  <th style="text-align:right; padding-right:16px;">Gross Profit</th>
+                  <th style="text-align:right; padding-right:16px;">Margin</th>
+                </tr>
+              </thead>
+              <tbody id="cp-tbody">
+                <tr><td colspan="5"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+                <tr><td colspan="5"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+                <tr><td colspan="5"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+              </tbody>
+            </table>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ── Page: Not Shipped ─────────────────────────────────── -->
+      <section class="page-section" id="page-not-shipped">
+
+        <!-- Summary cards -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:16px;">
+          <div class="card" style="position:relative; overflow:hidden;">
+            <div style="font-size:11px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px;">Not Shipped POs</div>
+            <div id="ns-count" style="font-family:'Inter',sans-serif; font-size:32px; font-weight:700; font-variant-numeric:tabular-nums; color:#ef4444; line-height:1; margin-bottom:4px;">—</div>
+            <div style="font-size:12px; color:var(--text-muted);">Awaiting shipment</div>
+            <div style="position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(90deg, rgba(239,68,68,0.5), transparent);"></div>
+          </div>
+          <div class="card" style="position:relative; overflow:hidden;">
+            <div style="font-size:11px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px;">Supplier Cost</div>
+            <div id="ns-cost" style="font-family:'Inter',sans-serif; font-size:32px; font-weight:700; font-variant-numeric:tabular-nums; color:#ef4444; line-height:1; margin-bottom:4px;">—</div>
+            <div style="font-size:12px; color:var(--text-muted);">On hold</div>
+            <div style="position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(90deg, rgba(239,68,68,0.5), transparent);"></div>
+          </div>
+          <div class="card" style="position:relative; overflow:hidden;">
+            <div style="font-size:11px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px;">Customer Price</div>
+            <div id="ns-revenue" style="font-family:'Inter',sans-serif; font-size:32px; font-weight:700; font-variant-numeric:tabular-nums; color:#ef4444; line-height:1; margin-bottom:4px;">—</div>
+            <div style="font-size:12px; color:var(--text-muted);">Pending</div>
+            <div style="position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(90deg, rgba(239,68,68,0.5), transparent);"></div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="card" style="padding:0; overflow:hidden;">
+          <div style="padding:16px 20px 14px; border-bottom:1px solid var(--bg-border);">
+            <div style="font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--text-primary);">Not Shipped Purchase Orders</div>
+          </div>
+          <div style="overflow-x:auto;">
+          <table class="data-table" style="min-width:700px;">
+            <thead>
+              <tr>
+                <th>PO Number</th>
+                <th>Supplier</th>
+                <th>Customer</th>
+                <th>Job #</th>
+                <th>Date Req. By</th>
+                <th style="text-align:right; padding-right:16px;">Supplier Cost</th>
+                <th style="text-align:right; padding-right:16px;">Customer Price</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="ns-tbody">
+              <tr><td colspan="8"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+              <tr><td colspan="8"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+            </tbody>
+          </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ── Page: Delivery Tracker ──────────────────────────── -->
+      <section class="page-section" id="page-delivery-tracker">
+
+        <!-- Summary badges -->
+        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px;">
+          <div class="card" style="padding:16px; text-align:center; border-color:rgba(239,68,68,0.25);">
+            <div style="font-size:11px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:#ef4444; margin-bottom:6px;">Overdue</div>
+            <div id="dt-count-overdue" style="font-family:'Inter',sans-serif; font-size:28px; font-weight:700; font-variant-numeric:tabular-nums; color:#ef4444;">—</div>
+          </div>
+          <div class="card" style="padding:16px; text-align:center; border-color:rgba(245,158,11,0.25);">
+            <div style="font-size:11px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:#f59e0b; margin-bottom:6px;">Due Soon</div>
+            <div id="dt-count-soon" style="font-family:'Inter',sans-serif; font-size:28px; font-weight:700; font-variant-numeric:tabular-nums; color:#f59e0b;">—</div>
+          </div>
+          <div class="card" style="padding:16px; text-align:center; border-color:rgba(163,230,53,0.2);">
+            <div style="font-size:11px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:var(--accent); margin-bottom:6px;">On Track</div>
+            <div id="dt-count-ontrack" style="font-family:'Inter',sans-serif; font-size:28px; font-weight:700; font-variant-numeric:tabular-nums; color:var(--accent);">—</div>
+          </div>
+          <div class="card" style="padding:16px; text-align:center; border-color:rgba(103,232,249,0.2);">
+            <div style="font-size:11px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:#67e8f9; margin-bottom:6px;">Received</div>
+            <div id="dt-count-received" style="font-family:'Inter',sans-serif; font-size:28px; font-weight:700; font-variant-numeric:tabular-nums; color:#67e8f9;">—</div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="card" style="padding:0; overflow:hidden;">
+          <div style="padding:14px 20px 12px; border-bottom:1px solid var(--bg-border); display:flex; align-items:center; justify-content:space-between;">
+            <div style="font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--text-primary);">All Deliveries — Sorted by Urgency</div>
+            <div style="font-size:11px; color:var(--text-muted);">Today: <span id="dt-today"></span></div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width:110px;">Urgency</th>
+                  <th>Supplier</th>
+                  <th>PO Number</th>
+                  <th>Job #</th>
+                  <th>Description</th>
+                  <th style="text-align:right; padding-right:16px;">Qty</th>
+                  <th style="white-space:nowrap;">Date Required By</th>
+                  <th>Delivery Status</th>
+                </tr>
+              </thead>
+              <tbody id="dt-tbody">
+                <tr><td colspan="8"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+                <tr><td colspan="8"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+                <tr><td colspan="8"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+                <tr><td colspan="8"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ── Page: Discount Threshold ───────────────────────── -->
+      <section class="page-section" id="page-discount-threshold">
+
+        <!-- Progress cards -->
+        <div id="dt2-cards" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:16px;"></div>
+
+        <!-- Editable table -->
+        <div class="card" style="padding:0; overflow:hidden;">
+          <div style="padding:14px 20px 12px; border-bottom:1px solid var(--bg-border); display:flex; align-items:center; justify-content:space-between;">
+            <div style="font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--text-primary);">Threshold Settings</div>
+            <div style="font-size:11px; color:var(--text-muted);">Click a threshold amount to edit</div>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Supplier Name</th>
+                <th style="text-align:right; padding-right:20px;">Threshold Amount</th>
+                <th style="text-align:right; padding-right:20px;">Actual Spend</th>
+                <th style="text-align:right; padding-right:20px;">% Reached</th>
+                <th style="text-align:center;">Status</th>
+              </tr>
+            </thead>
+            <tbody id="dt2-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- Save toast -->
+        <div id="dt2-toast" style="position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--bg-elevated); border:1px solid var(--bg-border); border-radius:10px; padding:10px 20px; font-size:13px; color:var(--text-primary); opacity:0; pointer-events:none; transition:opacity 0.2s ease, transform 0.2s ease; z-index:100;"></div>
+
+      </section>
+
+    </div><!-- /#content -->
+  </div><!-- /#main -->
+
+  <!-- ═══════════════════════════════════════════════════════════
+       RIGHT PANEL
+  ════════════════════════════════════════════════════════════ -->
+  <aside id="right-panel">
+    <div class="panel-header">
+      <span class="panel-title">Activity Feed</span>
+      <span class="panel-badge" id="activity-count">Live</span>
+    </div>
+
+    <div class="panel-body" id="activity-feed">
+      <!-- Populated by JS -->
+    </div>
+
+    <div class="panel-footer">
+      <div style="font-size:11px; color:var(--text-muted); text-align:center; line-height:1.5;">
+        Auto-refreshes every 30s<br>
+        <span id="panel-last-refresh" style="color:var(--text-muted);">—</span>
+      </div>
+    </div>
+  </aside>
+
+</div><!-- /#app -->
+
+<!-- ═══════════════════════════════════════════════════════════
+     JAVASCRIPT — Navigation + Data Layer
+════════════════════════════════════════════════════════════ -->
+<script>
+// ── Page titles ────────────────────────────────────────────
+const PAGE_TITLES = {
+  'overview':           'Overview',
+  'po-register':        'PO Register',
+  'vendor-spend':       'Vendor Spend',
+  'supplier-view':      'Supplier View',
+  'customer-pricing':   'Customer Pricing',
+  'not-shipped':        'Not Shipped',
+  'delivery-tracker':   'Delivery Tracker',
+  'discount-threshold': 'Discount Threshold',
+};
+
+// ── Navigation ─────────────────────────────────────────────
+const navItems = document.querySelectorAll('.nav-item');
+const pageSections = document.querySelectorAll('.page-section');
+const topbarTitle = document.getElementById('topbar-title');
+
+function navigateTo(pageId) {
+  // Update nav items
+  navItems.forEach(item => {
+    const isActive = item.dataset.page === pageId;
+    item.classList.toggle('active', isActive);
+    item.setAttribute('aria-current', isActive ? 'page' : 'false');
+  });
+
+  // Update page sections
+  pageSections.forEach(section => {
+    const isActive = section.id === `page-${pageId}`;
+    section.classList.toggle('active', isActive);
+  });
+
+  // Update topbar title
+  topbarTitle.textContent = PAGE_TITLES[pageId] || pageId;
+
+  // Scroll content area to top
+  document.getElementById('content').scrollTop = 0;
+}
+
+navItems.forEach(item => {
+  item.addEventListener('click', () => navigateTo(item.dataset.page));
+  item.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      navigateTo(item.dataset.page);
+    }
+  });
+});
+
+// ── Sample data (fallback when API not available) ──────────
+window.SAMPLE_DATA = {
+  kpi: {
+    totalPOs: 4,
+    totalSupplierCost: 2264.30,
+    totalCustomerRevenue: 3354.75,
+    totalGrossProfit: 1090.45,
+    avgMargin: 32.5,
+  },
+  suppliers: [
+    { name: 'TPS Machining & Welding', spend: 1039.80, pos: 1 },
+    { name: 'Urban Trade Warehouse',   spend: 224.00,   pos: 2 },
+    { name: 'West Supply Co',          spend: 2000.00,  pos: 3 },
+  ],
+};
+
+// ── API client ─────────────────────────────────────────────
+window.API = {
+  async get(tab) {
+    try {
+      const res = await fetch(`/api/sheets?tab=${tab}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      const data = json.data || [];
+      if (data.length > 0) window._lastApiSuccess = Date.now();
+      return data.length > 0 ? data : null;
+    } catch (err) {
+      console.warn(`[API] GET ?tab=${tab} failed:`, err.message);
+      return null; // null = caller uses sample data
+    }
+  },
+
+  async updateThreshold(supplier_name, threshold_amount) {
+    const res = await fetch('/api/sheets', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ supplier_name, threshold_amount }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  },
+};
+
+// ── Utility helpers ────────────────────────────────────────
+window.Utils = {
+  formatCurrency(val) {
+    const n = parseFloat(String(val).replace(/[^0-9.-]/g, ''));
+    if (isNaN(n)) return '—';
+    return '$' + n.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  },
+
+  formatPct(val) {
+    const n = parseFloat(String(val).replace(/[^0-9.-]/g, ''));
+    if (isNaN(n)) return '—';
+    return n.toFixed(2) + '%';
+  },
+
+  formatDate(val) {
+    if (!val) return '—';
+    const d = new Date(val);
+    if (isNaN(d)) return val;
+    return d.toLocaleDateString('en-AU', { day:'2-digit', month:'short', year:'numeric' })
+             .replace(/ /g, '-');
+  },
+
+  statusBadge(status) {
+    const map = {
+      'Shipped':           'badge-shipped',
+      'Received':          'badge-received',
+      'Not Shipped':       'badge-not-shipped',
+      'Quote Received':    'badge-quote',
+      'Request For Quote': 'badge-rfq',
+      'Pending':           'badge-pending',
+    };
+    const cls = map[status] || 'badge-pending';
+    return `<span class="badge ${cls}">${status || '—'}</span>`;
+  },
+
+  marginColor(pct) {
+    const n = parseFloat(pct);
+    if (isNaN(n)) return 'var(--text-muted)';
+    if (n >= 30) return 'var(--accent)';
+    if (n >= 15) return '#f59e0b';
+    return '#ef4444';
+  },
+
+  timeAgo(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    const diff = Date.now() - d.getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1)  return 'Just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24)  return `${hrs}h ago`;
+    return `${Math.floor(hrs / 24)}d ago`;
+  },
+};
+
+// ── Connection state ───────────────────────────────────────
+let _lastSuccessfulRefresh = Date.now();
+let _consecutiveFailures   = 0;
+let _isConnected           = true;
+
+function setConnectionState(ok) {
+  _isConnected = ok;
+  const dot  = document.querySelector('.pulse-dot');
+  const text = document.getElementById('last-updated-text');
+  if (!dot || !text) return;
+
+  if (ok) {
+    dot.style.background  = 'var(--accent)';
+    dot.style.animation   = 'pulse 2s ease-in-out infinite';
+    hideStaleWarning();
+  } else {
+    dot.style.background  = '#f59e0b';
+    dot.style.animation   = 'none';
+    dot.style.opacity     = '1';
+    showStaleWarning();
+  }
+}
+
+// ── Stale data warning banner ──────────────────────────────
+let _staleEl = null;
+
+function showStaleWarning() {
+  if (_staleEl) return;
+  _staleEl = document.createElement('div');
+  _staleEl.id = 'stale-warning';
+  _staleEl.innerHTML = `
+    <div style="display:flex; align-items:center; gap:8px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>Unable to reach data source — showing cached data. Retrying…</span>
+    </div>`;
+  Object.assign(_staleEl.style, {
+    position: 'fixed', top: '56px', left: '240px', right: '280px',
+    background: 'rgba(245,158,11,0.12)', borderBottom: '1px solid rgba(245,158,11,0.25)',
+    color: '#f59e0b', fontSize: '12px', padding: '8px 20px',
+    zIndex: '50', fontWeight: '500',
+  });
+  document.body.appendChild(_staleEl);
+}
+
+function hideStaleWarning() {
+  if (_staleEl) { _staleEl.remove(); _staleEl = null; }
+}
+
+// ── Last updated ticker ────────────────────────────────────
+let _lastRefreshedAt = Date.now();
+
+function updateLastRefreshed(success = true) {
+  if (success) {
+    _lastRefreshedAt       = Date.now();
+    _lastSuccessfulRefresh = Date.now();
+    _consecutiveFailures   = 0;
+    setConnectionState(true);
+  } else {
+    _consecutiveFailures++;
+    if (_consecutiveFailures >= 2) setConnectionState(false);
+  }
+
+  const el     = document.getElementById('last-updated-text');
+  const footer = document.getElementById('panel-last-refresh');
+  const now    = new Date(_lastRefreshedAt);
+  const timeStr = now.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
+  if (el)     el.textContent     = `Updated ${timeStr}`;
+  if (footer) footer.textContent = `Last refresh: ${timeStr}`;
+}
+
+// Ticker: update label to show how long ago
+setInterval(() => {
+  const el = document.getElementById('last-updated-text');
+  if (!el) return;
+  const secs = Math.floor((Date.now() - _lastRefreshedAt) / 1000);
+  if (secs < 60) return; // show "Updated HH:MM" for the first minute
+  const mins = Math.floor(secs / 60);
+  el.textContent = `${mins}m ago`;
+}, 15000);
+
+// Set initial state
+updateLastRefreshed(true);
+
+// ── 30-second polling ──────────────────────────────────────
+window.POLL_INTERVAL = 30000;
+window._pollCallbacks = [];
+
+window.registerPollCallback = function(fn) {
+  window._pollCallbacks.push(fn);
+};
+
+setInterval(async () => {
+  let anyFailed = false;
+  for (const fn of window._pollCallbacks) {
+    try {
+      await fn();
+    } catch (e) {
+      anyFailed = true;
+      console.warn('[poll] callback error:', e.message);
+    }
+  }
+  updateLastRefreshed(!anyFailed);
+}, window.POLL_INTERVAL);
+
+// ── Activity Feed ───────────────────────────────────────────
+(function() {
+  const feed = document.getElementById('activity-feed');
+  const badge = document.getElementById('activity-count');
+
+  const TYPE_CLASS = {
+    'new po':       'new-po',
+    'status update':'status',
+    'new supplier': 'supplier',
+    'enriched':     'supplier',
+    'updated':      'status',
+  };
+
+  function typeClass(type) {
+    return TYPE_CLASS[(type || '').toLowerCase()] || 'new-po';
+  }
+
+  function parseTS(ts) {
+    if (!ts) return new Date(NaN);
+    // "2026-04-09 00:32:33" → "2026-04-09T00:32:33"
+    return new Date(String(ts).replace(' ', 'T'));
+  }
+
+  function timeAgo(ts) {
+    if (!ts) return '';
+    const d = parseTS(ts);
+    if (isNaN(d)) return ts;
+    const secs = Math.floor((Date.now() - d) / 1000);
+    if (secs < 60)   return 'Just now';
+    if (secs < 3600) return Math.floor(secs / 60) + ' min ago';
+    if (secs < 86400) return Math.floor(secs / 3600) + ' hr ago';
+    return Math.floor(secs / 86400) + 'd ago';
+  }
+
+  function render(items) {
+    if (!items || items.length === 0) {
+      feed.innerHTML = '<div style="padding:20px;color:var(--text-muted);font-size:12px;text-align:center;">No activity yet</div>';
+      badge.textContent = '0';
+      return;
+    }
+    badge.textContent = items.length;
+    feed.innerHTML = items.map(item => `
+      <div class="activity-item">
+        <div class="activity-type ${typeClass(item.type)}">${item.type || 'Update'}</div>
+        <div class="activity-desc">${item.description || ''}</div>
+        <div class="activity-time">${timeAgo(item.timestamp)}</div>
+      </div>
+    `).join('');
+  }
+
+  async function load() {
+    const data = await window.API.get('activity');
+    if (!data || !data.length) { render([]); return; }
+    // Show most recent first (reverse chronological)
+    const sorted = [...data].sort((a, b) => parseTS(b.timestamp) - parseTS(a.timestamp));
+    render(sorted.slice(0, 20));
+  }
+
+  load();
+  window.registerPollCallback(load);
+})();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     DISCOUNT THRESHOLD PAGE
+════════════════════════════════════════════════════════════ -->
+<script>
+(function initDiscountThreshold() {
+
+  let rows = [];  // { supplier_name, threshold, actual_spend }
+
+  // ── Sample data ────────────────────────────────────────────
+  const SAMPLE = [
+    { supplier_name: 'TPS Machining & Welding', threshold: 2000,  actual_spend: 1039.80 },
+    { supplier_name: 'Urban Trade Warehouse',   threshold: 500,   actual_spend: 224.00  },
+    { supplier_name: 'West Supply Co',          threshold: 1500,  actual_spend: 1000.30 },
+  ];
+
+  // ── Status logic ───────────────────────────────────────────
+  function getStatus(pct) {
+    if (pct >= 100) return { label: 'THRESHOLD MET', color: '#a3e635', bg: 'rgba(163,230,53,0.12)' };
+    if (pct >= 80)  return { label: 'CLOSE',         color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' };
+    return               { label: 'BELOW',           color: '#ef4444', bg: 'rgba(239,68,68,0.10)'  };
+  }
+
+  function barColor(pct) {
+    if (pct >= 100) return '#a3e635';
+    if (pct >= 80)  return '#f59e0b';
+    if (pct >= 50)  return '#fb923c';
+    return '#ef4444';
+  }
+
+  // ── Toast ──────────────────────────────────────────────────
+  function showToast(msg, isError = false) {
+    const el = document.getElementById('dt2-toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.style.borderColor = isError ? 'rgba(239,68,68,0.4)' : 'rgba(163,230,53,0.3)';
+    el.style.opacity = '1';
+    el.style.transform = 'translateX(-50%) translateY(0)';
+    clearTimeout(el._timer);
+    el._timer = setTimeout(() => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateX(-50%) translateY(20px)';
+    }, 3000);
+  }
+
+  // ── Render progress cards ──────────────────────────────────
+  function renderCards() {
+    const el = document.getElementById('dt2-cards');
+    if (!el) return;
+    el.innerHTML = rows.map(r => {
+      const pct    = r.threshold > 0 ? Math.min((r.actual_spend / r.threshold) * 100, 100) : 0;
+      const rawPct = r.threshold > 0 ? (r.actual_spend / r.threshold) * 100 : 0;
+      const status = getStatus(rawPct);
+      const fill   = barColor(rawPct);
+      const shortName = r.supplier_name.length > 24 ? r.supplier_name.slice(0,22)+'…' : r.supplier_name;
+      return `
+        <div class="card card-hover">
+          <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:12px;">
+            <div style="font-size:12px; font-weight:600; color:var(--text-primary); line-height:1.3;" title="${r.supplier_name}">${shortName}</div>
+            <span class="badge" style="${status.bg}; color:${status.color}; font-size:10px; font-weight:700; letter-spacing:0.05em;">${status.label}</span>
+          </div>
+          <div style="display:flex; align-items:baseline; gap:6px; margin-bottom:10px;">
+            <div style="font-family:'Inter',sans-serif; font-size:22px; font-weight:700; color:${fill}; letter-spacing:-0.03em; font-variant-numeric:tabular-nums;">${rawPct.toFixed(0)}%</div>
+            <div style="font-size:11px; color:var(--text-muted);">of ${Utils.formatCurrency(r.threshold)}</div>
+          </div>
+          <div style="height:6px; background:var(--bg-elevated); border-radius:3px; overflow:hidden; margin-bottom:8px;">
+            <div style="height:100%; width:${pct}%; background:${fill}; border-radius:3px; transition:width 0.6s ease;"></div>
+          </div>
+          <div style="font-size:11.5px; color:var(--text-muted);">${Utils.formatCurrency(r.actual_spend)} spent · ${Utils.formatCurrency(Math.max(0, r.threshold - r.actual_spend))} remaining</div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── Render table ───────────────────────────────────────────
+  function renderTable() {
+    const tbody = document.getElementById('dt2-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = rows.map((r, idx) => {
+      const rawPct = r.threshold > 0 ? (r.actual_spend / r.threshold) * 100 : 0;
+      const status = getStatus(rawPct);
+      const fill   = barColor(rawPct);
+      const barW   = Math.min(rawPct, 100).toFixed(1);
+      return `
+        <tr>
+          <td style="font-weight:500; color:var(--text-primary);">${r.supplier_name}</td>
+          <td style="text-align:right; padding-right:20px;">
+            <div class="threshold-cell" data-idx="${idx}" style="display:inline-flex; align-items:center; gap:8px; cursor:pointer; padding:4px 8px; border-radius:6px; transition:background 0.15s ease;" title="Click to edit">
+              <span class="threshold-val" style="font-weight:600; color:var(--text-primary);">${Utils.formatCurrency(r.threshold)}</span>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </div>
+          </td>
+          <td style="text-align:right; padding-right:20px; color:var(--text-secondary);">${Utils.formatCurrency(r.actual_spend)}</td>
+          <td style="text-align:right; padding-right:20px;">
+            <div style="display:flex; align-items:center; justify-content:flex-end; gap:10px;">
+              <div style="width:80px; height:4px; background:var(--bg-elevated); border-radius:2px; overflow:hidden;">
+                <div style="height:100%; width:${barW}%; background:${fill}; border-radius:2px;"></div>
+              </div>
+              <span style="font-weight:600; color:${fill}; min-width:42px; text-align:right;">${rawPct.toFixed(1)}%</span>
+            </div>
+          </td>
+          <td style="text-align:center;">
+            <span class="badge" style="background:${status.bg}; color:${status.color}; font-size:10.5px; font-weight:700; letter-spacing:0.04em;">${status.label}</span>
+          </td>
+        </tr>`;
+    }).join('');
+
+    // Wire edit clicks
+    tbody.querySelectorAll('.threshold-cell').forEach(cell => {
+      cell.addEventListener('mouseenter', () => { cell.style.background = 'var(--bg-elevated)'; });
+      cell.addEventListener('mouseleave', () => { cell.style.background = ''; });
+      cell.addEventListener('click', () => openEditor(cell, +cell.dataset.idx));
+    });
+  }
+
+  // ── Inline editor ──────────────────────────────────────────
+  function openEditor(cell, idx) {
+    if (cell.querySelector('input')) return; // already open
+    const r   = rows[idx];
+    const val = cell.querySelector('.threshold-val');
+    const cur = r.threshold;
+
+    cell.innerHTML = `
+      <input type="number" value="${cur}" min="0" step="50"
+        style="width:100px; background:var(--bg-base); border:1px solid var(--accent); border-radius:6px; padding:4px 8px; color:#fff; font-size:13px; font-weight:600; outline:none;" />
+      <button data-action="save" style="padding:4px 10px; background:var(--accent); color:#000; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Save</button>
+      <button data-action="cancel" style="padding:4px 8px; background:var(--bg-elevated); color:var(--text-secondary); border:1px solid var(--bg-border); border-radius:6px; font-size:12px; cursor:pointer;">✕</button>`;
+
+    const input = cell.querySelector('input');
+    input.focus();
+    input.select();
+
+    async function doSave() {
+      const newVal = parseFloat(input.value);
+      if (isNaN(newVal) || newVal < 0) { showToast('Invalid amount', true); return; }
+      rows[idx].threshold = newVal;
+      renderCards();
+      renderTable();
+      showToast(`Threshold updated: ${Utils.formatCurrency(newVal)}`);
+      // Push to API (fire-and-forget; no credentials locally)
+      try { await window.API.updateThreshold(r.supplier_name, newVal); } catch {}
+    }
+
+    cell.querySelector('[data-action="save"]').addEventListener('click', doSave);
+    cell.querySelector('[data-action="cancel"]').addEventListener('click', () => { renderTable(); });
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') doSave();
+      if (e.key === 'Escape') renderTable();
+    });
+  }
+
+  // ── Load ───────────────────────────────────────────────────
+  async function load() {
+    // "Discount Threshold" tab has supplier_name, threshold, actual_spend, % Reached, status
+    // "Thresholds" tab has supplier_name, threshold_amount (editable, no actual_spend)
+    // Always prefer discount tab (full data), merge threshold_amount from thresholds if missing
+    const [discountRaw, thresholdsRaw] = await Promise.all([
+      window.API.get('discount'),
+      window.API.get('thresholds'),
+    ]);
+
+    const n = (s) => parseFloat(String(s || '').replace(/[^0-9.-]/g, '')) || 0;
+
+    if (discountRaw && discountRaw.length) {
+      // Build a threshold-amount lookup from thresholds tab (for inline edit sync)
+      const tMap = {};
+      if (thresholdsRaw) {
+        thresholdsRaw.forEach(r => {
+          const name = r.supplier_name || r[Object.keys(r)[0]] || '';
+          if (name) tMap[name.toLowerCase()] = n(r.threshold_amount || r[Object.keys(r)[1]]);
+        });
+      }
+
+      rows = discountRaw.map(r => {
+        const name   = r.supplier_name || r[Object.keys(r)[0]] || '—';
+        // "% Reached" normalises to key "_reached" via parseGeneric
+        const pctKey = Object.keys(r).find(k => k.includes('reached')) || '';
+        return {
+          supplier_name: name,
+          threshold:     n(r.threshold || r.threshold_amount || tMap[name.toLowerCase()]),
+          actual_spend:  n(r.actual_spend || r.spend),
+          pct_reached:   n(pctKey ? r[pctKey] : ''),
+          status:        r.status || '',
+        };
+      }).filter(r => r.supplier_name && r.supplier_name !== '—');
+
+      // Supplement with any suppliers only in thresholds tab (no spend yet)
+      if (thresholdsRaw) {
+        const existing = new Set(rows.map(r => r.supplier_name.toLowerCase()));
+        thresholdsRaw.forEach(r => {
+          const name = r.supplier_name || r[Object.keys(r)[0]] || '';
+          if (name && !existing.has(name.toLowerCase())) {
+            rows.push({ supplier_name: name, threshold: n(r.threshold_amount || r[Object.keys(r)[1]]), actual_spend: 0, pct_reached: 0, status: 'BELOW' });
+          }
+        });
+      }
+    } else if (thresholdsRaw && thresholdsRaw.length) {
+      rows = thresholdsRaw.map(r => ({
+        supplier_name: r.supplier_name || r[Object.keys(r)[0]] || '—',
+        threshold:     n(r.threshold_amount || r[Object.keys(r)[1]]),
+        actual_spend:  0,
+        pct_reached:   0,
+        status:        'BELOW',
+      })).filter(r => r.supplier_name && r.supplier_name !== '—');
+    } else {
+      rows = SAMPLE;
+    }
+
+    renderCards();
+    renderTable();
+  }
+
+  load();
+  window.registerPollCallback(load);
+
+})();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     CUSTOMER PRICING PAGE
+════════════════════════════════════════════════════════════ -->
+<script>
+(function initCustomerPricing() {
+
+  const n = s => parseFloat(String(s || '').replace(/[^0-9.-]/g, '')) || 0;
+
+  // ── Aggregate supplier_view rows by customer_name ──────────
+  function aggregate(rows) {
+    const map = {};
+    rows.forEach(r => {
+      if (r.delivery_status === 'Not Shipped') return;
+      const customer = r.customer_name || '—';
+      if (!map[customer]) map[customer] = { customer, lines: 0, revenue: 0, profit: 0 };
+      map[customer].lines++;
+      map[customer].revenue += n(r.customer_total || r.customer_price || 0);
+      map[customer].profit  += n(r.gross_profit   || 0);
+    });
+    return Object.values(map)
+      .map(j => ({ ...j, margin: j.revenue > 0 ? (j.profit / j.revenue * 100) : 0 }))
+      .sort((a, b) => b.revenue - a.revenue);
+  }
+
+  // ── Cards ──────────────────────────────────────────────────
+  const CARD_COLORS = ['#a3e635','#818cf8','#fb923c','#34d399','#f472b6','#38bdf8'];
+  function renderCards(jobs) {
+    const wrap = document.getElementById('cp-job-cards');
+    if (!wrap) return;
+    if (!jobs.length) { wrap.innerHTML = ''; return; }
+    wrap.innerHTML = jobs.slice(0, 6).map((j, i) => {
+      const color = CARD_COLORS[i % CARD_COLORS.length];
+      return `
+        <div class="card card-hover" style="position:relative; overflow:hidden;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+            <div style="font-size:11px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:140px;" title="${j.customer}">${j.customer}</div>
+            <div style="width:30px; height:30px; background:${color}20; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            </div>
+          </div>
+          <div style="font-family:'Inter',sans-serif; font-size:20px; font-weight:700; letter-spacing:-0.03em; font-variant-numeric:tabular-nums; color:${color}; margin-bottom:10px;">${Utils.formatCurrency(j.revenue)}</div>
+          <div style="display:flex; gap:16px;">
+            <div>
+              <div style="font-size:10px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-muted); margin-bottom:2px;">Profit</div>
+              <div style="font-family:'Inter',sans-serif; font-size:13px; font-weight:600; font-variant-numeric:tabular-nums; color:var(--text-secondary);">${Utils.formatCurrency(j.profit)}</div>
+            </div>
+            <div>
+              <div style="font-size:10px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-muted); margin-bottom:2px;">Margin</div>
+              <div style="font-family:'Inter',sans-serif; font-size:13px; font-weight:600; font-variant-numeric:tabular-nums; color:var(--text-secondary);">${j.margin.toFixed(1)}%</div>
+            </div>
+          </div>
+          <div style="position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(90deg, ${color}66, transparent);"></div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── Bar chart ──────────────────────────────────────────────
+  let _cpChart = null;
+  function renderBarChart(jobs) {
+    const wrap = document.getElementById('cp-chart-wrap');
+    if (!wrap) return;
+    const labels  = jobs.map(j => j.customer);
+    const data    = jobs.map(j => j.revenue);
+    const colors  = jobs.map((_, i) => CARD_COLORS[i % CARD_COLORS.length]);
+    const h       = Math.max(jobs.length * 36, 100);
+    wrap.style.height = h + 'px';
+
+    if (_cpChart) { _cpChart.destroy(); _cpChart = null; }
+    _cpChart = new Chart(document.getElementById('chart-customer-bar'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{ data, backgroundColor: colors, borderRadius: 4, barThickness: 18 }],
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1c1c1c',
+            borderColor: '#2a2a2a',
+            borderWidth: 1,
+            titleColor: '#a1a1aa',
+            bodyColor: '#ffffff',
+            padding: 10,
+            callbacks: { label: ctx => ' ' + Utils.formatCurrency(ctx.parsed.x) },
+          },
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(42,42,42,0.6)', drawBorder: false },
+            ticks: { color: '#52525b', font: { size: 11 }, callback: v => '$' + v.toLocaleString() },
+            beginAtZero: true,
+          },
+          y: { grid: { display: false }, ticks: { color: '#a1a1aa', font: { size: 12 } } },
+        },
+      },
+    });
+  }
+
+  // ── Table ──────────────────────────────────────────────────
+  function renderTable(jobs) {
+    const tbody = document.getElementById('cp-tbody');
+    if (!tbody) return;
+    if (!jobs.length) {
+      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state" style="padding:20px;"><p>No data</p></div></td></tr>`;
+      return;
+    }
+    const totalRev = jobs.reduce((a, j) => a + j.revenue, 0);
+    tbody.innerHTML = jobs.map(j => {
+      const pct = totalRev > 0 ? (j.revenue / totalRev * 100).toFixed(1) : '0';
+      return `
+        <tr>
+          <td>
+            <div style="font-weight:500; color:var(--text-primary);">${j.customer}</div>
+            <div style="margin-top:4px; height:3px; background:var(--bg-elevated); border-radius:2px; overflow:hidden;">
+              <div style="height:100%; width:${pct}%; background:var(--accent); border-radius:2px;"></div>
+            </div>
+          </td>
+          <td style="text-align:right; padding-right:16px; font-family:'Inter',sans-serif; font-variant-numeric:tabular-nums; color:var(--text-secondary);">${j.lines}</td>
+          <td style="text-align:right; padding-right:16px; font-family:'Inter',sans-serif; font-variant-numeric:tabular-nums; font-weight:600; color:var(--accent);">${Utils.formatCurrency(j.revenue)}</td>
+          <td style="text-align:right; padding-right:16px; font-family:'Inter',sans-serif; font-variant-numeric:tabular-nums; color:var(--status-received);">${Utils.formatCurrency(j.profit)}</td>
+          <td style="text-align:right; padding-right:16px; font-family:'Inter',sans-serif; font-variant-numeric:tabular-nums; color:var(--text-secondary);">${j.margin.toFixed(1)}%</td>
+        </tr>`;
+    }).join('');
+  }
+
+  // ── Load ───────────────────────────────────────────────────
+  async function load() {
+    const raw = await window.API.get('supplier_view');
+    if (!raw || !raw.length) return;
+    const jobs = aggregate(raw);
+    renderCards(jobs);
+    renderBarChart(jobs);
+    renderTable(jobs);
+  }
+
+  load();
+  window.registerPollCallback(load);
+
+})();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     NOT SHIPPED PAGE
+════════════════════════════════════════════════════════════ -->
+<script>
+(function initNotShipped() {
+
+  const parseMoney = v => parseFloat(String(v || '').replace(/[^0-9.-]/g, '')) || 0;
+
+  const _MO2 = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
+  function toISO(val) {
+    if (!val) return '';
+    if (/^\d{4}-\d{2}-\d{2}/.test(val)) return val.slice(0,10);
+    const m = val.match(/^(\d{1,2})[-\/]([A-Za-z]+)[-\/](\d{4})/);
+    if (m) return `${m[3]}-${_MO2[m[2].slice(0,3).toLowerCase()]||'01'}-${m[1].padStart(2,'0')}`;
+    const p = val.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (p) return `${p[3]}-${p[2].padStart(2,'0')}-${p[1].padStart(2,'0')}`;
+    return val;
+  }
+
+  function updateBadge(count) {
+    const badge = document.getElementById('not-shipped-badge');
+    if (!badge) return;
+    if (count > 0) {
+      badge.textContent = count;
+      badge.style.display = 'flex';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  async function load() {
+    const headers = await window.API.get('po_headers');
+    if (!headers) { updateBadge(0); return; }
+
+    const rows = headers.filter(r => r.delivery_status === 'Not Shipped');
+    updateBadge(rows.length);
+
+    // Summary cards
+    const totalCost = rows.reduce((a, r) => a + parseMoney(r.total_supplier_cost), 0);
+    const totalRev  = rows.reduce((a, r) => a + parseMoney(r.total_customer_price), 0);
+    const nsCount   = document.getElementById('ns-count');
+    const nsCost    = document.getElementById('ns-cost');
+    const nsRev     = document.getElementById('ns-revenue');
+    if (nsCount) nsCount.textContent = rows.length;
+    if (nsCost)  nsCost.textContent  = Utils.formatCurrency(totalCost);
+    if (nsRev)   nsRev.textContent   = Utils.formatCurrency(totalRev);
+
+    // Table
+    const tbody = document.getElementById('ns-tbody');
+    if (!tbody) return;
+
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state" style="padding:30px; text-align:center;"><p style="color:var(--status-received);">All POs shipped</p></div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td style="font-family:monospace; font-size:12px; color:var(--accent); white-space:nowrap;">${r.po_number || '—'}</td>
+        <td style="white-space:nowrap;">${r.supplier_name || '—'}</td>
+        <td style="white-space:nowrap;">${r.client_name || '—'}</td>
+        <td style="font-size:12px; color:var(--text-muted);">${r.job_number || '—'}</td>
+        <td style="white-space:nowrap;">${Utils.formatDate(toISO(r.date_required_by))}</td>
+        <td style="text-align:right; padding-right:16px; font-family:'Inter',sans-serif; font-variant-numeric:tabular-nums; font-weight:600; color:#ef4444;">${Utils.formatCurrency(parseMoney(r.total_supplier_cost))}</td>
+        <td style="text-align:right; padding-right:16px; font-family:'Inter',sans-serif; font-variant-numeric:tabular-nums; color:var(--text-secondary);">${Utils.formatCurrency(parseMoney(r.total_customer_price))}</td>
+        <td>${Utils.statusBadge(r.delivery_status)}</td>
+      </tr>`).join('');
+  }
+
+  load();
+  window.registerPollCallback(load);
+
+})();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     DELIVERY TRACKER PAGE
+════════════════════════════════════════════════════════════ -->
+<script>
+(function initDeliveryTracker() {
+
+  // ── Date normaliser (handles "30-Apr-2026") ────────────────
+  const _MO = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
+  function toISO(val) {
+    if (!val) return '';
+    if (/^\d{4}-\d{2}-\d{2}/.test(val)) return val.slice(0,10);
+    const m = val.match(/^(\d{1,2})[-\/]([A-Za-z]+)[-\/](\d{4})/);
+    if (m) return `${m[3]}-${_MO[m[2].slice(0,3).toLowerCase()]||'01'}-${m[1].padStart(2,'0')}`;
+    const p = val.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (p) return `${p[3]}-${p[2].padStart(2,'0')}-${p[1].padStart(2,'0')}`;
+    return val;
+  }
+
+  // ── Urgency logic ──────────────────────────────────────────
+  function getUrgency(dateStr, status) {
+    if (status === 'Received') return 'RECEIVED';
+    if (!dateStr) return 'ON TRACK';
+    const iso     = toISO(dateStr);
+    const today    = new Date(); today.setHours(0,0,0,0);
+    const required = new Date(iso + 'T00:00:00');
+    if (isNaN(required)) return 'ON TRACK';
+    const daysUntil = Math.ceil((required - today) / (1000 * 60 * 60 * 24));
+    if (daysUntil < 0)  return 'OVERDUE';
+    if (daysUntil <= 3) return 'DUE SOON';
+    return 'ON TRACK';
+  }
+
+  const URGENCY_ORDER = { 'OVERDUE': 0, 'DUE SOON': 1, 'ON TRACK': 2, 'RECEIVED': 3 };
+
+  const URGENCY_STYLE = {
+    'OVERDUE':  { color: '#ef4444', bg: 'rgba(239,68,68,0.08)',   badge: 'background:rgba(239,68,68,0.15); color:#ef4444;',   rowBg: 'rgba(239,68,68,0.04)'  },
+    'DUE SOON': { color: '#f59e0b', bg: 'rgba(245,158,11,0.08)',  badge: 'background:rgba(245,158,11,0.15); color:#f59e0b;',  rowBg: 'rgba(245,158,11,0.04)' },
+    'ON TRACK': { color: '#a3e635', bg: 'rgba(163,230,53,0.06)',  badge: 'background:rgba(163,230,53,0.12); color:#a3e635;',  rowBg: ''                      },
+    'RECEIVED': { color: '#67e8f9', bg: 'rgba(103,232,249,0.06)', badge: 'background:rgba(103,232,249,0.12); color:#67e8f9;', rowBg: ''                      },
+  };
+
+  // ── Sample data ────────────────────────────────────────────
+  // Dates relative to today so urgency always works in demo
+  function makeSample() {
+    const today = new Date();
+    const d = (offset) => {
+      const dt = new Date(today);
+      dt.setDate(dt.getDate() + offset);
+      return dt.toISOString().slice(0, 10);
+    };
+    return [
+      { supplier_name:'West Supply Co',          po_number:'PO-252701-003', job_number:'JOB-1035', description:'Hydraulic hose 1/2" x 2m',   qty:'5',  date_required_by: d(-2),  delivery_status:'Not Shipped' },
+      { supplier_name:'Urban Trade Warehouse',   po_number:'PO-252845-002', job_number:'JOB-1038', description:'Conduit 20mm x 3m',           qty:'10', date_required_by: d(2),   delivery_status:'Pending'     },
+      { supplier_name:'Urban Trade Warehouse',   po_number:'PO-252845-002', job_number:'JOB-1038', description:'Junction box IP66',           qty:'3',  date_required_by: d(2),   delivery_status:'Pending'     },
+      { supplier_name:'TPS Machining & Welding', po_number:'PO-252926-001', job_number:'JOB-1042', description:'Steel plate 10mm x 500mm',    qty:'4',  date_required_by: d(5),   delivery_status:'Shipped'     },
+      { supplier_name:'TPS Machining & Welding', po_number:'PO-252926-001', job_number:'JOB-1042', description:'Weld consumables pack',       qty:'2',  date_required_by: d(5),   delivery_status:'Shipped'     },
+      { supplier_name:'West Supply Co',          po_number:'PO-252700-001', job_number:'JOB-1031', description:'Filter element x5',           qty:'2',  date_required_by: d(-3),  delivery_status:'Received'    },
+      { supplier_name:'West Supply Co',          po_number:'PO-252700-001', job_number:'JOB-1031', description:'O-ring kit assorted',         qty:'1',  date_required_by: d(-3),  delivery_status:'Received'    },
+    ];
+  }
+
+  // ── Render ─────────────────────────────────────────────────
+  function render(rows) {
+    // Set today label
+    const todayEl = document.getElementById('dt-today');
+    if (todayEl) todayEl.textContent = Utils.formatDate(new Date().toISOString().slice(0,10));
+
+    // Attach urgency + sort
+    const enriched = rows.map(r => ({
+      ...r,
+      urgency: getUrgency(r.date_required_by, r.delivery_status),
+    })).sort((a, b) => {
+      const ou = URGENCY_ORDER[a.urgency] - URGENCY_ORDER[b.urgency];
+      if (ou !== 0) return ou;
+      // Within same urgency: sort by date ascending
+      return (a.date_required_by || '').localeCompare(b.date_required_by || '');
+    });
+
+    // Count badges
+    const counts = { OVERDUE: 0, 'DUE SOON': 0, 'ON TRACK': 0, RECEIVED: 0 };
+    enriched.forEach(r => { if (counts[r.urgency] !== undefined) counts[r.urgency]++; });
+    document.getElementById('dt-count-overdue') .textContent = counts['OVERDUE'];
+    document.getElementById('dt-count-soon')    .textContent = counts['DUE SOON'];
+    document.getElementById('dt-count-ontrack') .textContent = counts['ON TRACK'];
+    document.getElementById('dt-count-received').textContent = counts['RECEIVED'];
+
+    // Table
+    const tbody = document.getElementById('dt-tbody');
+    if (!tbody) return;
+
+    if (!enriched.length) {
+      tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state" style="padding:30px;"><p>No delivery data</p></div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = enriched.map(r => {
+      const s = URGENCY_STYLE[r.urgency];
+      const today = new Date(); today.setHours(0,0,0,0);
+      const req   = new Date(toISO(r.date_required_by) + 'T00:00:00');
+      const days  = isNaN(req) ? null : Math.ceil((req - today) / 86400000);
+      const daysLabel = days === null ? '' : days < 0 ? `${Math.abs(days)}d overdue` : days === 0 ? 'Today' : `${days}d`;
+
+      return `
+        <tr style="${s.rowBg ? 'background:'+s.rowBg+';' : ''}">
+          <td>
+            <span class="badge" style="${s.badge} font-size:10.5px; font-weight:700; letter-spacing:0.05em; padding:3px 9px;">${r.urgency}</span>
+          </td>
+          <td style="white-space:nowrap;">${r.supplier_name || '—'}</td>
+          <td style="font-family:monospace; font-size:12px; color:var(--accent); white-space:nowrap;">${r.po_number || '—'}</td>
+          <td style="font-size:12px; color:var(--text-muted);">${r.job_number || '—'}</td>
+          <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${r.description||''}">${r.description || '—'}</td>
+          <td style="text-align:right; padding-right:16px;">${r.qty || '—'}</td>
+          <td style="white-space:nowrap;">
+            <div style="font-size:12.5px;">${Utils.formatDate(toISO(r.date_required_by))}</div>
+            ${daysLabel && r.urgency !== 'RECEIVED' ? `<div style="font-size:11px; color:${s.color}; margin-top:1px;">${daysLabel}</div>` : ''}
+          </td>
+          <td>${Utils.statusBadge(r.delivery_status)}</td>
+        </tr>`;
+    }).join('');
+  }
+
+  // ── Load ───────────────────────────────────────────────────
+  async function load() {
+    const [headers, lines] = await Promise.all([
+      window.API.get('po_headers'),
+      window.API.get('po_line_items'),
+    ]);
+
+    if (!headers) { render(makeSample()); return; }
+
+    // Build a map of po_number → aggregated line data
+    const lineMap = {};
+    if (lines) {
+      lines.forEach(r => {
+        const po = r.po_number || '';
+        if (!po) return;
+        if (!lineMap[po]) lineMap[po] = { itemCodes: [], totalQty: 0 };
+        const code = r.item_number || r.item_code || r.item_ || r.item || '';
+        if (code && !lineMap[po].itemCodes.includes(code)) lineMap[po].itemCodes.push(code);
+        const q = parseFloat(String(r.qty || '').replace(/[^0-9.-]/g, '')) || 0;
+        lineMap[po].totalQty += q;
+      });
+    }
+
+    // Merge line data into each header row
+    const enriched = headers.map(r => {
+      const agg = lineMap[r.po_number] || { itemCodes: [], totalQty: 0 };
+      return {
+        ...r,
+        description: agg.itemCodes.join(', ') || r.description || '',
+        qty: agg.totalQty > 0 ? agg.totalQty : (r.qty || ''),
+      };
+    });
+
+    render(enriched);
+  }
+
+  load();
+  window.registerPollCallback(load);
+
+})();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SUPPLIER VIEW PAGE
+════════════════════════════════════════════════════════════ -->
+<script>
+(function initSupplierView() {
+
+  let allRows    = [];
+  let filtered   = [];
+  let expandedPOs = new Set();
+
+  // ── Date normaliser (handles "30-Apr-2026", "27/04/2026", ISO) ────────────
+  const MO = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
+  function toISO(val) {
+    if (!val) return '';
+    if (/^\d{4}-\d{2}-\d{2}/.test(val)) return val.slice(0,10);
+    const m = val.match(/^(\d{1,2})[-\/]([A-Za-z]+)[-\/](\d{4})/);
+    if (m) return `${m[3]}-${MO[m[2].slice(0,3).toLowerCase()]||'01'}-${m[1].padStart(2,'0')}`;
+    const p = val.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (p) return `${p[3]}-${p[2].padStart(2,'0')}-${p[1].padStart(2,'0')}`;
+    return val;
+  }
+
+  // ── Normalise parseGeneric key drift ──────────────────────────────────────
+  // "Line #" → line_   "Margin %" → margin_
+  function normalizeRow(r) {
+    return Object.assign({}, r, {
+      line_number: r.line_number || r.line_   || '',
+      item_code:   r.item_number || r.item_code || r.item_ || '',
+      margin_pct:  r.margin_pct  || r.margin_  || '',
+      date_required_by: toISO(r.date_required_by || ''),
+    });
+  }
+
+  // ── Group line items by PO ────────────────────────────────────────────────
+  function groupByPO(rows) {
+    const map = new Map();
+    rows.forEach(r => {
+      const key = r.po_number || '—';
+      if (!map.has(key)) {
+        map.set(key, {
+          po_number:        r.po_number,
+          supplier_name:    r.supplier_name,
+          customer_name:    r.customer_name,
+          job_number:       r.job_number,
+          date_required_by: r.date_required_by,
+          delivery_status:  r.delivery_status,
+          lines: [],
+          supplier_cost:  0,
+          customer_price: 0,
+          gross_profit:   0,
+        });
+      }
+      const g = map.get(key);
+      g.lines.push(r);
+      g.supplier_cost  += parseFloat(String(r.price_ex_tax  || r.amount_ex_tax || '').replace(/[^0-9.-]/g,'')) || 0;
+      g.customer_price += parseFloat(String(r.customer_price || '').replace(/[^0-9.-]/g,'')) || 0;
+      g.gross_profit   += parseFloat(String(r.gross_profit   || '').replace(/[^0-9.-]/g,'')) || 0;
+    });
+    return Array.from(map.values());
+  }
+
+  // ── Populate supplier dropdown ────────────────────────────────────────────
+  function populateSuppliers(rows) {
+    const sel = document.getElementById('sv-filter-supplier');
+    if (!sel) return;
+    const suppliers = [...new Set(rows.map(r => r.supplier_name).filter(Boolean))].sort();
+    const current = sel.value;
+    sel.innerHTML = '<option value="">All Suppliers</option>' +
+      suppliers.map(s => `<option${s===current?' selected':''}>${s}</option>`).join('');
+  }
+
+  // ── Filter ────────────────────────────────────────────────────────────────
+  function applyFilters() {
+    const supplier = document.getElementById('sv-filter-supplier')?.value || '';
+    const status   = document.getElementById('sv-filter-status')?.value   || '';
+    const dateFrom = document.getElementById('sv-date-from')?.value       || '';
+    const dateTo   = document.getElementById('sv-date-to')?.value         || '';
+    const q        = (document.getElementById('sv-search')?.value         || '').toLowerCase();
+
+    filtered = allRows.filter(r => {
+      if (supplier && r.supplier_name !== supplier) return false;
+      if (status   && r.delivery_status !== status)  return false;
+      if (dateFrom && r.date_required_by && r.date_required_by < dateFrom) return false;
+      if (dateTo   && r.date_required_by && r.date_required_by > dateTo)   return false;
+      if (q) {
+        const haystack = Object.values(r)
+          .filter(v => typeof v === 'string')
+          .join(' ')
+          .toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      return true;
+    });
+
+    renderTable();
+  }
+
+  // ── Render grouped table ──────────────────────────────────────────────────
+  function renderTable() {
+    const tbody   = document.getElementById('sv-tbody');
+    const countEl = document.getElementById('sv-count');
+    if (!tbody) return;
+
+    const groups = groupByPO(filtered);
+    const n = groups.length;
+    if (countEl) countEl.textContent = `${n.toLocaleString()} PO${n !== 1 ? 's' : ''} (${filtered.length} lines)`;
+
+    if (!n) {
+      tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state" style="padding:30px;"><p>No results match your filters</p></div></td></tr>`;
+      return;
+    }
+
+    const rows = [];
+    groups.forEach(g => {
+      const poKey  = g.po_number || '—';
+      const open   = expandedPOs.has(poKey);
+      const margin = g.customer_price > 0 ? (g.gross_profit / g.customer_price * 100) : 0;
+
+      // ── Group (summary) row ──
+      rows.push(`
+        <tr class="sv-group-row" data-po="${poKey}" style="cursor:pointer; background:var(--bg-card);">
+          <td style="white-space:nowrap; font-weight:500;">
+            <span style="display:inline-flex; align-items:center; gap:6px;">
+              <svg style="width:12px; height:12px; transition:transform .2s; transform:rotate(${open?90:0}deg); flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+              ${g.supplier_name || '—'}
+            </span>
+          </td>
+          <td style="white-space:nowrap; font-size:12px;">${Utils.formatDate(g.date_required_by)}</td>
+          <td style="font-size:12px; color:var(--text-muted);">${g.job_number || '—'}</td>
+          <td style="font-family:monospace; font-size:12px; color:var(--accent); white-space:nowrap;">${poKey}</td>
+          <td style="text-align:right; padding-right:16px; color:var(--text-muted); font-size:12px;">${g.lines.length}</td>
+          <td style="text-align:right; padding-right:16px; font-weight:500;">${Utils.formatCurrency(g.supplier_cost)}</td>
+          <td style="text-align:right; padding-right:16px;">${Utils.formatCurrency(g.customer_price)}</td>
+          <td style="text-align:right; padding-right:16px; color:var(--accent); font-weight:500;">${Utils.formatCurrency(g.gross_profit)}</td>
+          <td style="text-align:right; padding-right:16px; font-weight:600; color:${Utils.marginColor(margin)};">${margin > 0 ? margin.toFixed(1)+'%' : '—'}</td>
+          <td>${Utils.statusBadge(g.delivery_status)}</td>
+        </tr>`);
+
+      // ── Expanded detail row ──
+      if (open) {
+        rows.push(`
+          <tr class="sv-detail-row" data-po="${poKey}">
+            <td colspan="10" style="padding:0; background:var(--bg-base);">
+              <div style="padding:10px 20px 14px 36px;">
+                <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                  <thead>
+                    <tr style="border-bottom:1px solid var(--bg-border);">
+                      <th style="padding:4px 8px 6px; text-align:left; color:var(--text-muted); font-weight:600; font-size:10.5px; letter-spacing:0.04em; text-transform:uppercase;">Line #</th>
+                      <th style="padding:4px 8px 6px; text-align:left; color:var(--text-muted); font-weight:600; font-size:10.5px; letter-spacing:0.04em; text-transform:uppercase;">Description</th>
+                      <th style="padding:4px 8px 6px; text-align:left; color:var(--text-muted); font-weight:600; font-size:10.5px; letter-spacing:0.04em; text-transform:uppercase;">Item Code</th>
+                      <th style="padding:4px 8px 6px; text-align:right; color:var(--text-muted); font-weight:600; font-size:10.5px; letter-spacing:0.04em; text-transform:uppercase;">Qty</th>
+                      <th style="padding:4px 8px 6px; text-align:right; color:var(--text-muted); font-weight:600; font-size:10.5px; letter-spacing:0.04em; text-transform:uppercase;">Supplier Cost</th>
+                      <th style="padding:4px 8px 6px; text-align:right; color:var(--text-muted); font-weight:600; font-size:10.5px; letter-spacing:0.04em; text-transform:uppercase;">Cust. Price</th>
+                      <th style="padding:4px 8px 6px; text-align:right; color:var(--text-muted); font-weight:600; font-size:10.5px; letter-spacing:0.04em; text-transform:uppercase;">Gross Profit</th>
+                      <th style="padding:4px 8px 6px; text-align:right; color:var(--text-muted); font-weight:600; font-size:10.5px; letter-spacing:0.04em; text-transform:uppercase;">Margin</th>
+                      <th style="padding:4px 8px 6px; text-align:left; color:var(--text-muted); font-weight:600; font-size:10.5px; letter-spacing:0.04em; text-transform:uppercase;">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${g.lines.map(l => {
+                      const m = parseFloat(l.margin_pct) || 0;
+                      return `<tr style="border-bottom:1px solid var(--bg-border);">
+                        <td style="padding:5px 8px; color:var(--text-muted);">${l.line_number || '—'}</td>
+                        <td style="padding:5px 8px; max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${l.description||''}">${l.description || '—'}</td>
+                        <td style="padding:5px 8px; color:var(--text-muted); white-space:nowrap;">${l.item_code || '—'}</td>
+                        <td style="padding:5px 8px; text-align:right;">${l.qty || '—'}</td>
+                        <td style="padding:5px 8px; text-align:right;">${Utils.formatCurrency(l.price_ex_tax || l.amount_ex_tax)}</td>
+                        <td style="padding:5px 8px; text-align:right;">${Utils.formatCurrency(l.customer_price)}</td>
+                        <td style="padding:5px 8px; text-align:right; color:var(--accent);">${Utils.formatCurrency(l.gross_profit)}</td>
+                        <td style="padding:5px 8px; text-align:right; color:${Utils.marginColor(m)};">${m > 0 ? m.toFixed(1)+'%' : '—'}</td>
+                        <td style="padding:5px 8px;">${Utils.statusBadge(l.delivery_status)}</td>
+                      </tr>`;
+                    }).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>`);
+      }
+    });
+
+    tbody.innerHTML = rows.join('');
+
+    // Wire expand/collapse
+    tbody.querySelectorAll('.sv-group-row').forEach(row => {
+      row.addEventListener('click', () => {
+        const po = row.dataset.po;
+        if (expandedPOs.has(po)) expandedPOs.delete(po);
+        else expandedPOs.add(po);
+        renderTable();
+      });
+    });
+  }
+
+  // ── Wire controls ─────────────────────────────────────────────────────────
+  function wire() {
+    ['sv-filter-supplier','sv-filter-status','sv-date-from','sv-date-to'].forEach(id => {
+      document.getElementById(id)?.addEventListener('change', applyFilters);
+    });
+    document.getElementById('sv-search')?.addEventListener('input', applyFilters);
+    document.getElementById('sv-clear')?.addEventListener('click', () => {
+      ['sv-filter-supplier','sv-filter-status','sv-date-from','sv-date-to'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      const s = document.getElementById('sv-search');
+      if (s) s.value = '';
+      applyFilters();
+    });
+  }
+
+  // ── Load ──────────────────────────────────────────────────────────────────
+  async function load() {
+    const raw = await window.API.get('supplier_view') || await window.API.get('po_line_items');
+    allRows = (raw || []).map(normalizeRow);
+    populateSuppliers(allRows);
+    applyFilters();
+  }
+
+  wire();
+  load();
+  window.registerPollCallback(load);
+
+})();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     VENDOR SPEND PAGE
+════════════════════════════════════════════════════════════ -->
+<script>
+(function initVendorSpend() {
+
+  let vendorChart = null;
+
+  // ── Sample data ────────────────────────────────────────────
+  const SAMPLE_LINES = [
+    { supplier_name:'TPS Machining & Welding', po_number:'PO-252926-001', amount_ex_tax:'89.95',  description:'Steel plate 10mm x 500mm' },
+    { supplier_name:'TPS Machining & Welding', po_number:'PO-252926-001', amount_ex_tax:'45.00',  description:'Weld consumables pack' },
+    { supplier_name:'TPS Machining & Welding', po_number:'PO-252926-001', amount_ex_tax:'32.00',  description:'Angle grinder disc x10' },
+    { supplier_name:'TPS Machining & Welding', po_number:'PO-252801-004', amount_ex_tax:'380.00', description:'Custom bracket fabrication' },
+    { supplier_name:'TPS Machining & Welding', po_number:'PO-252801-004', amount_ex_tax:'258.75', description:'Labour - welding 3hr' },
+    { supplier_name:'TPS Machining & Welding', po_number:'PO-252801-004', amount_ex_tax:'234.10', description:'Raw steel stock 50kg' },
+    { supplier_name:'Urban Trade Warehouse',   po_number:'PO-252845-002', amount_ex_tax:'84.00',  description:'Conduit 20mm x 3m' },
+    { supplier_name:'Urban Trade Warehouse',   po_number:'PO-252845-002', amount_ex_tax:'66.00',  description:'Junction box IP66' },
+    { supplier_name:'Urban Trade Warehouse',   po_number:'PO-252845-002', amount_ex_tax:'74.00',  description:'Cable gland assorted' },
+    { supplier_name:'West Supply Co',          po_number:'PO-252701-003', amount_ex_tax:'240.50', description:'Hydraulic hose 1/2" x 2m' },
+    { supplier_name:'West Supply Co',          po_number:'PO-252701-003', amount_ex_tax:'120.50', description:'Hydraulic fitting 1/2" BSP' },
+    { supplier_name:'West Supply Co',          po_number:'PO-252700-001', amount_ex_tax:'170.00', description:'Filter element x5' },
+    { supplier_name:'West Supply Co',          po_number:'PO-252700-001', amount_ex_tax:'45.00',  description:'O-ring kit assorted' },
+    { supplier_name:'West Supply Co',          po_number:'PO-252700-001', amount_ex_tax:'185.00', description:'Pressure relief valve' },
+    { supplier_name:'West Supply Co',          po_number:'PO-252700-001', amount_ex_tax:'239.30', description:'Hydraulic cylinder seal kit' },
+  ];
+
+  // ── Aggregate by supplier ──────────────────────────────────
+  function aggregate(lines) {
+    const map = {};
+    lines.forEach(r => {
+      const s = r.supplier_name;
+      if (!s) return;
+      if (!map[s]) map[s] = { name: s, pos: new Set(), lineCount: 0, spend: 0, topItem: '', topAmt: 0 };
+      map[s].pos.add(r.po_number);
+      map[s].lineCount++;
+      const amt = parseFloat(r.amount_ex_tax) || 0;
+      map[s].spend += amt;
+      if (amt > map[s].topAmt) { map[s].topAmt = amt; map[s].topItem = r.description || '—'; }
+    });
+    return Object.values(map).map(s => ({
+      ...s,
+      poCount: s.pos.size,
+      avgPerPO: s.pos.size > 0 ? s.spend / s.pos.size : 0,
+    })).sort((a, b) => b.spend - a.spend);
+  }
+
+  // ── Render supplier cards ──────────────────────────────────
+  const CARD_COLORS = ['rgba(163,230,53,0.12)', 'rgba(59,130,246,0.1)', 'rgba(139,92,246,0.1)', 'rgba(245,158,11,0.1)'];
+  const CARD_ACCENTS = ['#a3e635', '#3b82f6', '#8b5cf6', '#f59e0b'];
+
+  function renderCards(suppliers) {
+    const el = document.getElementById('vs-supplier-cards');
+    if (!el) return;
+    el.innerHTML = suppliers.map((s, i) => {
+      const color  = CARD_ACCENTS[i % CARD_ACCENTS.length];
+      const bg     = CARD_COLORS[i % CARD_COLORS.length];
+      const shortItem = s.topItem.length > 28 ? s.topItem.slice(0, 26) + '…' : s.topItem;
+      return `
+        <div class="card card-hover" style="border-color:rgba(255,255,255,0.06);">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+            <div style="font-size:11.5px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:140px;" title="${s.name}">${s.name}</div>
+            <div style="width:28px; height:28px; background:${bg}; border-radius:7px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+            </div>
+          </div>
+          <div style="font-family:'Inter',sans-serif; font-size:20px; font-weight:700; letter-spacing:-0.03em; font-variant-numeric:tabular-nums; color:${color}; margin-bottom:10px;">${Utils.formatCurrency(s.spend)}</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <div>
+              <div style="font-size:10px; color:var(--text-muted); letter-spacing:0.05em; text-transform:uppercase; margin-bottom:2px;">POs</div>
+              <div style="font-family:'Inter',sans-serif; font-size:13px; font-weight:600; font-variant-numeric:tabular-nums; color:var(--text-secondary);">${s.poCount}</div>
+            </div>
+            <div>
+              <div style="font-size:10px; color:var(--text-muted); letter-spacing:0.05em; text-transform:uppercase; margin-bottom:2px;">Avg / PO</div>
+              <div style="font-family:'Inter',sans-serif; font-size:13px; font-weight:600; font-variant-numeric:tabular-nums; color:var(--text-secondary);">${Utils.formatCurrency(s.avgPerPO)}</div>
+            </div>
+          </div>
+          <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--bg-border);">
+            <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:2px;">Top Item</div>
+            <div style="font-size:11.5px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${s.topItem}">${shortItem || '—'}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── Render bar chart ───────────────────────────────────────
+  function renderBarChart(suppliers) {
+    const wrap = document.getElementById('vs-chart-wrap');
+    const canvas = document.getElementById('chart-vendor-bar');
+    if (!canvas || !wrap) return;
+    if (vendorChart) { vendorChart.destroy(); vendorChart = null; }
+
+    const barHeight = 36;
+    const chartH    = Math.max(suppliers.length * barHeight + 60, 160);
+    wrap.style.height = chartH + 'px';
+
+    vendorChart = new Chart(canvas.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: suppliers.map(s => s.name.length > 24 ? s.name.slice(0,22)+'…' : s.name),
+        datasets: [{
+          data: suppliers.map(s => +s.spend.toFixed(2)),
+          backgroundColor: suppliers.map((_, i) => CARD_COLORS[i % CARD_COLORS.length].replace('0.1','0.6').replace('0.12','0.6')),
+          borderColor:     suppliers.map((_, i) => CARD_ACCENTS[i % CARD_ACCENTS.length]),
+          borderWidth: 1,
+          borderRadius: 4,
+          borderSkipped: false,
+        }],
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1c1c1c',
+            borderColor: '#2a2a2a',
+            borderWidth: 1,
+            titleColor: '#a1a1aa',
+            bodyColor: '#ffffff',
+            padding: 10,
+            callbacks: { label: ctx => ' ' + Utils.formatCurrency(ctx.parsed.x) },
+          },
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(42,42,42,0.6)', drawBorder: false },
+            ticks: { color: '#52525b', font: { size: 11 }, callback: v => '$' + v.toLocaleString() },
+            beginAtZero: true,
+          },
+          y: {
+            grid: { display: false },
+            ticks: { color: '#a1a1aa', font: { size: 12 } },
+          },
+        },
+      },
+    });
+  }
+
+  // ── Render breakdown table ─────────────────────────────────
+  function renderTable(suppliers) {
+    const tbody = document.getElementById('vs-tbody');
+    if (!tbody) return;
+    if (!suppliers.length) {
+      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state" style="padding:20px;"><p>No data</p></div></td></tr>`;
+      return;
+    }
+    const totalSpend = suppliers.reduce((a, s) => a + s.spend, 0);
+    tbody.innerHTML = suppliers.map(s => {
+      const pct = totalSpend > 0 ? (s.spend / totalSpend * 100).toFixed(1) : '0';
+      return `
+        <tr>
+          <td>
+            <div style="font-weight:500; color:var(--text-primary);">${s.name}</div>
+            <div style="margin-top:4px; height:3px; background:var(--bg-elevated); border-radius:2px; overflow:hidden;">
+              <div style="height:100%; width:${pct}%; background:var(--accent); border-radius:2px;"></div>
+            </div>
+          </td>
+          <td style="text-align:right; padding-right:16px; font-family:'Inter',sans-serif; font-variant-numeric:tabular-nums; color:var(--text-secondary);">${s.poCount}</td>
+          <td style="text-align:right; padding-right:16px; font-family:'Inter',sans-serif; font-variant-numeric:tabular-nums; color:var(--text-secondary);">${s.lineCount}</td>
+          <td style="text-align:right; padding-right:16px; font-family:'Inter',sans-serif; font-variant-numeric:tabular-nums; font-weight:600; color:var(--accent);">${Utils.formatCurrency(s.spend)}</td>
+          <td style="text-align:right; padding-right:16px; font-family:'Inter',sans-serif; font-variant-numeric:tabular-nums; color:var(--text-secondary);">${Utils.formatCurrency(s.avgPerPO)}</td>
+        </tr>`;
+    }).join('');
+  }
+
+  // ── Main ───────────────────────────────────────────────────
+  async function renderVendorSpend() {
+    let suppliers;
+
+    const [vsRaw, headersRaw] = await Promise.all([
+      window.API.get('vendor_spend'),
+      window.API.get('po_headers'),
+    ]);
+
+    // Build set of Not Shipped PO numbers from po_headers
+    const notShippedPOs = new Set(
+      (headersRaw || []).filter(r => r.delivery_status === 'Not Shipped').map(r => r.po_number)
+    );
+
+    if (vsRaw && vsRaw.length > 0 && (vsRaw[0].hasOwnProperty('po_count') || Object.keys(vsRaw[0]).some(k => k.includes('spend')))) {
+      // Pre-aggregated Vendor Spend tab — map rows directly
+      // Cross-reference: exclude suppliers whose only POs are Not Shipped
+      const notShippedSuppliers = new Set(
+        (headersRaw || []).filter(r => r.delivery_status === 'Not Shipped').map(r => r.supplier_name)
+      );
+      const activeSuppliers = new Set(
+        (headersRaw || []).filter(r => r.delivery_status !== 'Not Shipped').map(r => r.supplier_name)
+      );
+      suppliers = vsRaw.map(r => {
+        const spendKey = Object.keys(r).find(k => k.startsWith('total_spend')) || '';
+        const spend    = parseFloat(String(r[spendKey] || '').replace(/[^0-9.-]/g, '')) || 0;
+        const poCount  = parseInt(r.po_count  || '0') || 0;
+        const lines    = parseInt(r.line_items || '0') || 0;
+        return {
+          name:     r.supplier_name || '',
+          poCount,
+          lineCount: lines,
+          spend,
+          avgPerPO: poCount > 0 ? spend / poCount : 0,
+          topItem:  '',
+        };
+      }).filter(s => s.name && activeSuppliers.has(s.name)).sort((a, b) => b.spend - a.spend);
+    } else {
+      // Fall back to aggregating from po_line_items, filtered by status
+      const linesRaw = (vsRaw && vsRaw.length > 0 ? vsRaw : await window.API.get('po_line_items')) || [];
+      const filtered = linesRaw.filter(r => !notShippedPOs.has(r.po_number));
+      suppliers = aggregate(filtered.length ? filtered : (!headersRaw ? SAMPLE_LINES : []));
+    }
+
+    renderCards(suppliers);
+    renderBarChart(suppliers);
+    renderTable(suppliers);
+  }
+
+  renderVendorSpend();
+  window.registerPollCallback(renderVendorSpend);
+
+})();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PO REGISTER PAGE
+════════════════════════════════════════════════════════════ -->
+<script>
+(function initPORegister() {
+
+  const PAGE_SIZE = 20;
+  let allRows     = [];
+  let filtered    = [];
+  let sortCol     = '';
+  let sortDir     = 1;
+  let currentPage = 1;
+  let selectedPOs = new Set();
+
+  // Normalise sheet date strings to ISO YYYY-MM-DD for comparison
+  const MO = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
+  function toISO(val) {
+    if (!val) return '';
+    if (/^\d{4}-\d{2}-\d{2}/.test(val)) return val.slice(0,10);
+    const m = val.match(/^(\d{1,2})[-\/]([A-Za-z]+)[-\/](\d{4})/);
+    if (m) return `${m[3]}-${MO[m[2].slice(0,3).toLowerCase()]||'01'}-${m[1].padStart(2,'0')}`;
+    const p = val.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (p) return `${p[3]}-${p[2].padStart(2,'0')}-${p[1].padStart(2,'0')}`;
+    return val;
+  }
+
+
+  // ── Populate supplier filter ───────────────────────────────
+  function populateSupplierFilter(rows) {
+    const sel = document.getElementById('por-filter-supplier');
+    if (!sel) return;
+    const suppliers = [...new Set(rows.map(r => r.supplier_name).filter(Boolean))].sort();
+    const current = sel.value;
+    sel.innerHTML = '<option value="">All Suppliers</option>' +
+      suppliers.map(s => `<option${s === current ? ' selected' : ''}>${s}</option>`).join('');
+  }
+
+  // ── Filter + sort rows ─────────────────────────────────────
+  function applyFilters() {
+    const q         = (document.getElementById('por-search')?.value   || '').toLowerCase();
+    const supplier  = document.getElementById('por-filter-supplier')?.value || '';
+    const status    = document.getElementById('por-filter-status')?.value   || '';
+    const dateFrom  = document.getElementById('por-date-from')?.value  || '';
+    const dateTo    = document.getElementById('por-date-to')?.value    || '';
+
+    filtered = allRows.filter(r => {
+      if (supplier && r.supplier_name !== supplier) return false;
+      if (status   && r.delivery_status !== status)  return false;
+      if (dateFrom && r.date_required_by && toISO(r.date_required_by) < dateFrom) return false;
+      if (dateTo   && r.date_required_by && toISO(r.date_required_by) > dateTo)   return false;
+      if (q) {
+        // Search across all string fields — covers po_number, supplier_name,
+        // item_code, job_number, description regardless of field-name drift
+        const haystack = Object.values(r)
+          .filter(v => typeof v === 'string')
+          .join(' ')
+          .toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      return true;
+    });
+
+    if (sortCol) {
+      filtered.sort((a, b) => {
+        let av = a[sortCol] ?? '';
+        let bv = b[sortCol] ?? '';
+        const an = parseFloat(String(av).replace(/[^0-9.-]/g, ''));
+        const bn = parseFloat(String(bv).replace(/[^0-9.-]/g, ''));
+        if (!isNaN(an) && !isNaN(bn)) return (an - bn) * sortDir;
+        return String(av).localeCompare(String(bv)) * sortDir;
+      });
+    }
+
+    currentPage = 1;
+    renderTable();
+  }
+
+  // ── Group line items by PO number ─────────────────────────
+  function groupByPO(rows) {
+    const map = new Map();
+    rows.forEach(r => {
+      const key = r.po_number || '—';
+      if (!map.has(key)) {
+        map.set(key, {
+          po_number:       r.po_number,
+          supplier_name:   r.supplier_name,
+          job_number:      r.job_number,
+          date_required_by:r.date_required_by,
+          delivery_status: r.delivery_status,
+          lines: [],
+          // aggregate accumulators
+          price_ex_tax:   0,
+          customer_price: 0,
+          gross_profit:   0,
+        });
+      }
+      const g = map.get(key);
+      g.lines.push(r);
+      g.price_ex_tax   += parseFloat(String(r.price_ex_tax  ).replace(/[^0-9.-]/g,'')) || 0;
+      g.customer_price += parseFloat(String(r.customer_price).replace(/[^0-9.-]/g,'')) || 0;
+      g.gross_profit   += parseFloat(String(r.gross_profit  ).replace(/[^0-9.-]/g,'')) || 0;
+    });
+    return [...map.values()].map(g => ({
+      ...g,
+      margin_pct: g.customer_price > 0 ? (g.gross_profit / g.customer_price * 100) : 0,
+    }));
+  }
+
+  // ── Render table (one row per PO, expandable) ──────────────
+  function renderTable() {
+    const tbody   = document.getElementById('por-tbody');
+    const countEl = document.getElementById('por-count');
+    if (!tbody) return;
+
+    const groups = groupByPO(filtered);
+    const total  = groups.length;
+    const start  = (currentPage - 1) * PAGE_SIZE;
+    const page   = groups.slice(start, Math.min(start + PAGE_SIZE, total));
+
+    if (countEl) countEl.textContent = `${total.toLocaleString()} purchase order${total !== 1 ? 's' : ''}`;
+
+    if (!page.length) {
+      tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state" style="padding:30px;"><p>No results match your filters</p></div></td></tr>`;
+      renderPagination(total);
+      return;
+    }
+
+    tbody.innerHTML = page.map(g => {
+      const margin      = g.margin_pct || 0;
+      const marginColor = Utils.marginColor(margin);
+      const poKey       = CSS.escape(g.po_number || '—');
+
+      // Sub-table rows for expanded view
+      const detailRows = g.lines.map(r => {
+        const lm = parseFloat(String(r.margin_pct).replace(/[^0-9.-]/g,'')) || 0;
+        return `
+          <tr style="background:var(--bg-base);">
+            <td style="font-size:11px; color:var(--text-muted); padding:7px 12px; width:36px; text-align:right;">${r.line_number || ''}</td>
+            <td style="font-size:12px; max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:7px 12px;" title="${r.description||''}">${r.description || '—'}</td>
+            <td style="font-size:11px; color:var(--text-muted); padding:7px 12px;">${r.item_code || '—'}</td>
+            <td style="text-align:right; padding:7px 12px;">${r.qty || '—'}</td>
+            <td style="text-align:right; padding:7px 12px;">${Utils.formatCurrency(r.price_ex_tax)}</td>
+            <td style="text-align:right; padding:7px 12px;">${Utils.formatCurrency(r.customer_price)}</td>
+            <td style="text-align:right; padding:7px 12px; color:var(--accent);">${Utils.formatCurrency(r.gross_profit)}</td>
+            <td style="text-align:right; padding:7px 12px; color:${Utils.marginColor(lm)};">${Utils.formatPct(r.margin_pct)}</td>
+            <td style="padding:7px 12px;">${Utils.statusBadge(r.delivery_status)}</td>
+          </tr>`;
+      }).join('');
+
+      const isChecked = selectedPOs.has(g.po_number || '—');
+      return `
+        <tr class="por-group-row" data-po="${g.po_number || ''}" style="cursor:pointer;">
+          <td style="text-align:center; padding:0 8px;" class="por-cb-cell"><input type="checkbox" class="por-cb" data-po="${g.po_number || ''}" ${isChecked ? 'checked' : ''} style="cursor:pointer; accent-color:var(--accent);"></td>
+          <td style="white-space:nowrap; max-width:160px; overflow:hidden; text-overflow:ellipsis;">${g.supplier_name || '—'}</td>
+          <td style="font-size:12px; color:var(--text-muted);">${g.job_number || '—'}</td>
+          <td style="font-family:monospace; font-size:12px; color:var(--accent); white-space:nowrap;">${g.po_number || '—'}</td>
+          <td style="white-space:nowrap; font-size:12px;">${Utils.formatDate(g.date_required_by)}</td>
+          <td style="font-size:12px; color:var(--text-muted);">
+            <span class="por-chevron" style="display:inline-block; transition:transform 0.2s; margin-right:5px; font-size:10px;">▶</span>${g.lines.length} item${g.lines.length !== 1 ? 's' : ''}
+          </td>
+          <td style="text-align:right; padding-right:20px; font-weight:500;">${Utils.formatCurrency(g.price_ex_tax)}</td>
+          <td style="text-align:right; padding-right:20px;">${Utils.formatCurrency(g.customer_price)}</td>
+          <td style="text-align:right; padding-right:20px; font-weight:500; color:var(--accent);">${Utils.formatCurrency(g.gross_profit)}</td>
+          <td style="text-align:right; padding-right:20px; font-weight:600; color:${marginColor};">${margin.toFixed(1)}%</td>
+          <td>${Utils.statusBadge(g.delivery_status)}</td>
+        </tr>
+        <tr class="por-detail-row" data-po="${g.po_number || ''}" style="display:none;">
+          <td colspan="11" style="padding:0; background:var(--bg-base);">
+            <table style="width:100%; border-collapse:collapse; border-top:1px solid var(--bg-border);">
+              <thead>
+                <tr style="background:rgba(255,255,255,0.03);">
+                  <th style="padding:6px 12px; font-size:10px; color:var(--text-muted); text-align:right; width:36px;">#</th>
+                  <th style="padding:6px 12px; font-size:10px; color:var(--text-muted); text-align:left;">Description</th>
+                  <th style="padding:6px 12px; font-size:10px; color:var(--text-muted); text-align:left;">Item Code</th>
+                  <th style="padding:6px 12px; font-size:10px; color:var(--text-muted); text-align:right;">Qty</th>
+                  <th style="padding:6px 12px; font-size:10px; color:var(--text-muted); text-align:right;">Supplier Cost</th>
+                  <th style="padding:6px 12px; font-size:10px; color:var(--text-muted); text-align:right;">Cust. Price</th>
+                  <th style="padding:6px 12px; font-size:10px; color:var(--text-muted); text-align:right;">Profit</th>
+                  <th style="padding:6px 12px; font-size:10px; color:var(--text-muted); text-align:right;">Margin</th>
+                  <th style="padding:6px 12px; font-size:10px; color:var(--text-muted);">Status</th>
+                </tr>
+              </thead>
+              <tbody>${detailRows}</tbody>
+            </table>
+          </td>
+        </tr>`;
+    }).join('');
+
+    // Toggle expand on group row click (skip if clicking checkbox)
+    tbody.querySelectorAll('.por-group-row').forEach(row => {
+      row.addEventListener('click', e => {
+        if (e.target.closest('.por-cb-cell')) return; // let checkbox handle itself
+        const po      = row.dataset.po;
+        const detail  = tbody.querySelector(`.por-detail-row[data-po="${po}"]`);
+        const chevron = row.querySelector('.por-chevron');
+        if (!detail) return;
+        const open = detail.style.display !== 'none';
+        detail.style.display = open ? 'none' : '';
+        if (chevron) chevron.style.transform = open ? '' : 'rotate(90deg)';
+      });
+    });
+
+    // Checkbox selection tracking
+    tbody.querySelectorAll('.por-cb').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const po = cb.dataset.po;
+        if (cb.checked) selectedPOs.add(po); else selectedPOs.delete(po);
+        updateSelectAllState();
+        updateExportButton();
+      });
+    });
+
+    // Sync select-all state after render
+    updateSelectAllState();
+    updateExportButton();
+
+    renderPagination(total);
+    updateSortIcons();
+  }
+
+  // ── Pagination ─────────────────────────────────────────────
+  function renderPagination(total) {
+    const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    const pageInfoEl = document.getElementById('por-page-info');
+    const pagesEl    = document.getElementById('por-pagination-pages');
+    const prevBtn    = document.getElementById('por-prev');
+    const nextBtn    = document.getElementById('por-next');
+
+    if (pageInfoEl) pageInfoEl.textContent = `Page ${currentPage} of ${totalPages}`;
+    if (prevBtn)    prevBtn.disabled = currentPage <= 1;
+    if (nextBtn)    nextBtn.disabled = currentPage >= totalPages;
+
+    if (!pagesEl) return;
+    const start = Math.max(1, currentPage - 2);
+    const end   = Math.min(totalPages, currentPage + 2);
+    let html = '';
+    if (start > 1) html += `<button class="btn btn-ghost" style="padding:4px 10px; font-size:12px;" data-p="1">1</button>`;
+    if (start > 2) html += `<span style="color:var(--text-muted); font-size:12px; padding:0 4px;">…</span>`;
+    for (let p = start; p <= end; p++) {
+      const active = p === currentPage;
+      html += `<button class="btn ${active ? 'btn-primary' : 'btn-ghost'}" style="padding:4px 10px; font-size:12px; min-width:32px;" data-p="${p}">${p}</button>`;
+    }
+    if (end < totalPages - 1) html += `<span style="color:var(--text-muted); font-size:12px; padding:0 4px;">…</span>`;
+    if (end < totalPages)     html += `<button class="btn btn-ghost" style="padding:4px 10px; font-size:12px;" data-p="${totalPages}">${totalPages}</button>`;
+    pagesEl.innerHTML = html;
+
+    pagesEl.querySelectorAll('[data-p]').forEach(btn => {
+      btn.addEventListener('click', () => { currentPage = +btn.dataset.p; renderTable(); });
+    });
+  }
+
+  // ── Sort icons ─────────────────────────────────────────────
+  function updateSortIcons() {
+    document.querySelectorAll('#por-table th.sortable').forEach(th => {
+      const icon = th.querySelector('.sort-icon');
+      if (!icon) return;
+      if (th.dataset.col === sortCol) {
+        icon.textContent = sortDir === 1 ? '↑' : '↓';
+        icon.style.color = 'var(--accent)';
+      } else {
+        icon.textContent = '↕';
+        icon.style.color = 'var(--text-muted)';
+      }
+    });
+  }
+
+  // ── Checkbox helpers ───────────────────────────────────────
+  function updateSelectAllState() {
+    const selectAll = document.getElementById('por-select-all');
+    if (!selectAll) return;
+    const groups = groupByPO(filtered);
+    const pageStart = (currentPage - 1) * PAGE_SIZE;
+    const pagePOs = groups.slice(pageStart, pageStart + PAGE_SIZE).map(g => g.po_number || '—');
+    const checkedOnPage = pagePOs.filter(po => selectedPOs.has(po)).length;
+    selectAll.indeterminate = checkedOnPage > 0 && checkedOnPage < pagePOs.length;
+    selectAll.checked = pagePOs.length > 0 && checkedOnPage === pagePOs.length;
+  }
+
+  function updateExportButton() {
+    const btn = document.getElementById('por-export');
+    if (!btn) return;
+    const count = selectedPOs.size;
+    btn.innerHTML = count > 0
+      ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export PDF (${count})`
+      : `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export PDF`;
+  }
+
+  // ── PDF Export ─────────────────────────────────────────────
+  function exportPDF() {
+    if (selectedPOs.size === 0) {
+      alert('Please select at least one PO to export.');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc    = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    const groups = groupByPO(filtered).filter(g => selectedPOs.has(g.po_number || '—'));
+    const today  = new Date().toLocaleDateString('en-AU', { day:'2-digit', month:'short', year:'numeric' });
+    const W      = doc.internal.pageSize.getWidth();
+
+    // ── Colours ───────────────────────────────────────────────
+    const BLACK  = [20,  20,  20];
+    const GREY   = [80,  80,  80];
+    const LIGHT  = [200, 200, 200];
+    const ACCENT = [163, 230, 53];   // lime
+
+    let pageNum = 1;
+
+    function addPageHeader() {
+      // Dark top bar
+      doc.setFillColor(20, 20, 20);
+      doc.rect(0, 0, W, 18, 'F');
+      doc.setTextColor(...ACCENT);
+      doc.setFontSize(13);
+      doc.setFont('helvetica', 'bold');
+      doc.text('PO Register Report', 10, 12);
+      doc.setTextColor(...LIGHT);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Generated: ${today}   |   ${groups.length} PO${groups.length !== 1 ? 's' : ''}`, W - 10, 12, { align: 'right' });
+    }
+
+    function addPageFooter() {
+      doc.setTextColor(...GREY);
+      doc.setFontSize(7);
+      doc.text(`Page ${pageNum}`, W / 2, doc.internal.pageSize.getHeight() - 5, { align: 'center' });
+    }
+
+    addPageHeader();
+    let y = 24;
+
+    groups.forEach((g, idx) => {
+      // ── PO header block ──────────────────────────────────
+      if (y > 170) {
+        addPageFooter();
+        doc.addPage();
+        pageNum++;
+        addPageHeader();
+        y = 24;
+      }
+
+      doc.setFillColor(30, 30, 30);
+      doc.roundedRect(10, y, W - 20, 14, 2, 2, 'F');
+
+      doc.setTextColor(...ACCENT);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text(g.po_number || '—', 14, y + 9);
+
+      doc.setTextColor(...LIGHT);
+      doc.setFontSize(8.5);
+      doc.setFont('helvetica', 'normal');
+      const meta = [
+        g.supplier_name,
+        g.job_number ? `Job #${g.job_number}` : null,
+        g.date_required_by ? `Required: ${g.date_required_by}` : null,
+        g.delivery_status,
+      ].filter(Boolean).join('   |   ');
+      doc.text(meta, 14 + doc.getTextWidth(g.po_number || '—') + 6, y + 9);
+
+      y += 18;
+
+      // ── Line items table ─────────────────────────────────
+      doc.autoTable({
+        startY: y,
+        margin: { left: 10, right: 10 },
+        head: [['#', 'Description', 'Item Code', 'Qty', 'Supplier Cost', 'Cust. Price', 'Profit', 'Margin', 'Status']],
+        body: g.lines.map(r => [
+          r.line_number || '',
+          r.description || '',
+          r.item_code   || '',
+          r.qty         || '',
+          Utils.formatCurrency(r.price_ex_tax),
+          Utils.formatCurrency(r.customer_price),
+          Utils.formatCurrency(r.gross_profit),
+          Utils.formatPct(r.margin_pct),
+          r.delivery_status || '',
+        ]),
+        foot: [['', 'TOTAL', '', '',
+          Utils.formatCurrency(g.price_ex_tax),
+          Utils.formatCurrency(g.customer_price),
+          Utils.formatCurrency(g.gross_profit),
+          g.margin_pct.toFixed(1) + '%', '',
+        ]],
+        theme: 'plain',
+        styles: {
+          fontSize: 8,
+          textColor: [200, 200, 200],
+          cellPadding: { top: 3, bottom: 3, left: 4, right: 4 },
+          lineColor: [50, 50, 50],
+          lineWidth: 0.2,
+        },
+        headStyles: {
+          fillColor: [40, 40, 40],
+          textColor: [150, 150, 150],
+          fontStyle: 'bold',
+          fontSize: 7.5,
+        },
+        footStyles: {
+          fillColor: [30, 30, 30],
+          textColor: [163, 230, 53],
+          fontStyle: 'bold',
+        },
+        alternateRowStyles: { fillColor: [26, 26, 26] },
+        bodyStyles:         { fillColor: [22, 22, 22] },
+        columnStyles: {
+          0: { halign: 'right', cellWidth: 8 },
+          1: { cellWidth: 'auto' },
+          3: { halign: 'right', cellWidth: 12 },
+          4: { halign: 'right', cellWidth: 26 },
+          5: { halign: 'right', cellWidth: 26 },
+          6: { halign: 'right', cellWidth: 24 },
+          7: { halign: 'right', cellWidth: 18 },
+          8: { cellWidth: 24 },
+        },
+        didDrawPage: () => {
+          addPageHeader();
+        },
+      });
+
+      y = doc.lastAutoTable.finalY + 8;
+
+      // separator between POs
+      if (idx < groups.length - 1) {
+        doc.setDrawColor(...GREY);
+        doc.setLineWidth(0.1);
+        doc.line(10, y - 3, W - 10, y - 3);
+      }
+    });
+
+    addPageFooter();
+    doc.save(`po-register-${new Date().toISOString().slice(0,10)}.pdf`);
+  }
+
+  // ── Wire up controls ───────────────────────────────────────
+  function wireControls() {
+    document.getElementById('por-search')         ?.addEventListener('input',  applyFilters);
+    document.getElementById('por-filter-supplier')?.addEventListener('change', applyFilters);
+    document.getElementById('por-filter-status')  ?.addEventListener('change', applyFilters);
+    document.getElementById('por-date-from')      ?.addEventListener('change', applyFilters);
+    document.getElementById('por-date-to')        ?.addEventListener('change', applyFilters);
+    document.getElementById('por-export')         ?.addEventListener('click',  exportPDF);
+    document.getElementById('por-prev')           ?.addEventListener('click',  () => { if (currentPage > 1) { currentPage--; renderTable(); }});
+
+    // Select-all checkbox
+    document.getElementById('por-select-all')?.addEventListener('change', function() {
+      const groups = groupByPO(filtered);
+      const pageStart = (currentPage - 1) * PAGE_SIZE;
+      const pagePOs = groups.slice(pageStart, pageStart + PAGE_SIZE).map(g => g.po_number || '—');
+      if (this.checked) pagePOs.forEach(po => selectedPOs.add(po));
+      else pagePOs.forEach(po => selectedPOs.delete(po));
+      renderTable();
+    });
+    document.getElementById('por-next')           ?.addEventListener('click',  () => { const total = Math.ceil(groupByPO(filtered).length / PAGE_SIZE); if (currentPage < total) { currentPage++; renderTable(); }});
+
+    // Sort on header click
+    document.getElementById('por-table')?.addEventListener('click', e => {
+      const th = e.target.closest('th.sortable');
+      if (!th) return;
+      const col = th.dataset.col;
+      if (sortCol === col) {
+        sortDir = -sortDir;
+      } else {
+        sortCol = col;
+        sortDir = 1;
+      }
+      applyFilters();
+    });
+  }
+
+  // ── Load data ──────────────────────────────────────────────
+  async function loadData() {
+    const raw = await window.API.get('supplier_view');
+    // Normalise keys from parseGeneric output to what the render expects
+    allRows = (raw || []).map(r => ({
+      supplier_name:    r.supplier_name    || '',
+      job_number:       r.job_number       || '',
+      po_number:        r.po_number        || '',
+      date_required_by: r.date_required_by || '',
+      description:      r.description      || '',
+      item_code:        r.item_number      || r.item_code  || r.item_ || r.item || '',
+      line_number:      r.line_number      || r.line_      || '',
+      qty:              r.qty              || '',
+      price_ex_tax:     r.price_ex_tax     || '',
+      customer_price:   r.customer_price   || '',
+      gross_profit:     r.gross_profit     || '',
+      margin_pct:       r.margin_ !== undefined ? r.margin_ : (r.margin_pct || ''),
+      delivery_status:  r.delivery_status  || '',
+    }));
+    populateSupplierFilter(allRows);
+    applyFilters();
+  }
+
+  // ── Init ───────────────────────────────────────────────────
+  wireControls();
+  loadData();
+  window.registerPollCallback(loadData);
+
+})();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     OVERVIEW PAGE
+════════════════════════════════════════════════════════════ -->
+<script>
+(function initOverview() {
+
+  // ── Chart.js global defaults ──────────────────────────────
+  Chart.defaults.font.family = "'DM Sans', sans-serif";
+  Chart.defaults.color = '#52525b';
+
+  // ── Chart instances (kept for destroy/rebuild on refresh) ─
+  let profitChart = null;
+  let supplierChart = null;
+
+
+  // ── Date normaliser — handles ISO, "08-Apr-2026", "08/04/2026" ──
+  const MONTH_NAMES = { jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11 };
+  function normalizeDate(val) {
+    if (!val) return null;
+    if (/^\d{4}-\d{2}-\d{2}/.test(val)) return val;
+    const m = val.match(/^(\d{1,2})[-\/]([A-Za-z]+)[-\/](\d{4})/);
+    if (m) {
+      const mo = String((MONTH_NAMES[m[2].slice(0,3).toLowerCase()] ?? 0) + 1).padStart(2,'0');
+      return `${m[3]}-${mo}-${m[1].padStart(2,'0')}`;
+    }
+    const p = val.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (p) return `${p[3]}-${p[2].padStart(2,'0')}-${p[1].padStart(2,'0')}`;
+    return val;
+  }
+
+  // ── Data processing ────────────────────────────────────────
+  function processHeaders(headers) {
+    const now = new Date();
+    const thisMonth = now.getMonth();
+    const thisYear  = now.getFullYear();
+
+    // KPIs — filter to this calendar month
+    const monthPOs = headers.filter(r => {
+      const d = new Date(normalizeDate(r.date));
+      return !isNaN(d) && d.getMonth() === thisMonth && d.getFullYear() === thisYear;
+    });
+
+    const activePOs  = (monthPOs.length ? monthPOs : headers).filter(r => r.delivery_status !== 'Not Shipped');
+    const totalPOs   = activePOs.length;
+
+    // Flexible field lookup — tries each key in order, returns first non-empty match
+    const pick = (r, ...keys) => { for (const k of keys) { const v = r[k]; if (v !== undefined && v !== '') return v; } return 0; };
+    // Strip currency symbols/commas before parsing (sheet stores "$2,698.51")
+    const parseMoney = v => parseFloat(String(v).replace(/[^0-9.-]/g, '')) || 0;
+
+    const costArr   = activePOs.map(r => parseMoney(pick(r, 'total_supplier_cost',  'supplier_cost',  'total_cost',   'cost')));
+    const revArr    = activePOs.map(r => parseMoney(pick(r, 'total_customer_price', 'customer_price', 'total_revenue','revenue')));
+    const profitArr = activePOs.map(r => parseMoney(pick(r, 'total_gross_profit',   'gross_profit',   'profit',       'gp')));
+
+    const totalCost    = costArr.reduce((a,b) => a+b, 0);
+    const totalRev     = revArr.reduce((a,b) => a+b, 0);
+    const totalProfit  = profitArr.reduce((a,b) => a+b, 0);
+    const avgMargin    = totalRev > 0 ? (totalProfit / totalRev * 100) : 0;
+
+    // Profit over time — group by date
+    const profitByDate = {};
+    headers.forEach(r => {
+      const d = new Date(normalizeDate(r.date));
+      if (isNaN(d)) return;
+      const key = d.toISOString().slice(0,10);
+      profitByDate[key] = (profitByDate[key] || 0) + parseMoney(pick(r, 'total_gross_profit', 'gross_profit', 'profit', 'gp'));
+    });
+    const sortedDates = Object.keys(profitByDate).sort();
+    const timeLabels  = sortedDates.map(d => {
+      const dt = new Date(d + 'T00:00:00');
+      return dt.toLocaleDateString('en-AU', { day:'2-digit', month:'short' });
+    });
+    const timeValues = sortedDates.map(d => +profitByDate[d].toFixed(2));
+
+    // Spend by supplier
+    const spendMap = {};
+    headers.forEach(r => {
+      if (!r.supplier_name) return;
+      spendMap[r.supplier_name] = (spendMap[r.supplier_name] || 0) + parseMoney(pick(r, 'total_supplier_cost', 'supplier_cost', 'total_cost', 'cost'));
+    });
+    const supplierNames  = Object.keys(spendMap);
+    const supplierSpends = supplierNames.map(s => +spendMap[s].toFixed(2));
+
+    // Recent POs — sort by date desc, take 5
+    const recent = [...headers]
+      .sort((a,b) => new Date(normalizeDate(b.date)) - new Date(normalizeDate(a.date)))
+      .slice(0, 5);
+
+    // Status breakdown
+    const statusMap = {};
+    headers.forEach(r => {
+      const s = r.delivery_status || 'Unknown';
+      statusMap[s] = (statusMap[s] || 0) + 1;
+    });
+
+    return { totalPOs, totalCost, totalRev, totalProfit, avgMargin, timeLabels, timeValues, supplierNames, supplierSpends, recent, statusMap };
+  }
+
+  // ── Render KPI cards ───────────────────────────────────────
+  function renderKPIs({ totalPOs, totalCost, totalRev, totalProfit, avgMargin }) {
+    document.getElementById('kpi-total-pos').textContent   = totalPOs;
+    document.getElementById('kpi-supplier-cost').textContent = Utils.formatCurrency(totalCost);
+    document.getElementById('kpi-revenue').textContent       = Utils.formatCurrency(totalRev);
+    document.getElementById('kpi-profit').textContent        = Utils.formatCurrency(totalProfit);
+    const marginEl = document.getElementById('kpi-margin-badge');
+    marginEl.textContent = avgMargin.toFixed(1) + '%';
+    marginEl.style.color = Utils.marginColor(avgMargin);
+    marginEl.style.background = avgMargin >= 30 ? 'rgba(163,230,53,0.12)' : avgMargin >= 15 ? 'rgba(245,158,11,0.12)' : 'rgba(239,68,68,0.12)';
+  }
+
+  // ── Render profit-over-time line chart ─────────────────────
+  function renderProfitChart({ timeLabels, timeValues }) {
+    const canvas = document.getElementById('chart-profit-time');
+    if (!canvas) return;
+
+    if (profitChart) { profitChart.destroy(); profitChart = null; }
+
+    const ctx = canvas.getContext('2d');
+
+    // Green gradient fill
+    const grad = ctx.createLinearGradient(0, 0, 0, 220);
+    grad.addColorStop(0,   'rgba(163,230,53,0.18)');
+    grad.addColorStop(1,   'rgba(163,230,53,0)');
+
+    profitChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: timeLabels,
+        datasets: [{
+          data: timeValues,
+          borderColor: '#a3e635',
+          backgroundColor: grad,
+          borderWidth: 2,
+          pointRadius: timeLabels.length === 1 ? 8 : 4,
+          pointBackgroundColor: '#a3e635',
+          pointBorderColor: '#141414',
+          pointBorderWidth: 2,
+          pointHoverRadius: 6,
+          tension: timeLabels.length === 1 ? 0 : 0.4,
+          fill: true,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1c1c1c',
+            borderColor: '#2a2a2a',
+            borderWidth: 1,
+            titleColor: '#a1a1aa',
+            bodyColor: '#ffffff',
+            padding: 10,
+            callbacks: {
+              label: ctx => ' ' + Utils.formatCurrency(ctx.parsed.y),
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(42,42,42,0.6)', drawBorder: false },
+            ticks: { color: '#52525b', font: { size: 11 } },
+          },
+          y: {
+            grid: { color: 'rgba(42,42,42,0.6)', drawBorder: false },
+            ticks: {
+              color: '#52525b',
+              font: { size: 11 },
+              callback: v => '$' + v.toLocaleString(),
+            },
+            beginAtZero: true,
+          },
+        },
+      },
+    });
+  }
+
+  // ── Render spend-by-supplier donut ─────────────────────────
+  // Generate a consistent, visually distinct color per supplier name
+  function supplierColor(name) {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+    // Spread hue evenly using golden angle, keep saturation/lightness in a readable range
+    const hue = (hash * 137.508) % 360;
+    const sat = 55 + (hash % 25);       // 55–80%
+    const lit = 45 + ((hash >> 8) % 20); // 45–65%
+    return `hsl(${hue.toFixed(0)},${sat}%,${lit}%)`;
+  }
+
+  function renderSupplierChart({ supplierNames, supplierSpends }) {
+    const canvas = document.getElementById('chart-spend-supplier');
+    if (!canvas) return;
+
+    if (supplierChart) { supplierChart.destroy(); supplierChart = null; }
+
+    supplierChart = new Chart(canvas.getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: supplierNames,
+        datasets: [{
+          data: supplierSpends,
+          backgroundColor: supplierNames.map(supplierColor),
+          borderColor: '#141414',
+          borderWidth: 3,
+          hoverBorderColor: '#1c1c1c',
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '68%',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1c1c1c',
+            borderColor: '#2a2a2a',
+            borderWidth: 1,
+            titleColor: '#a1a1aa',
+            bodyColor: '#ffffff',
+            padding: 10,
+            callbacks: {
+              label: ctx => ' ' + Utils.formatCurrency(ctx.parsed),
+            },
+          },
+        },
+      },
+    });
+
+    // Custom legend
+    const legend = document.getElementById('donut-legend');
+    if (!legend) return;
+    const total = supplierSpends.reduce((a,b)=>a+b,0);
+    legend.innerHTML = supplierNames.map((name, i) => {
+      const pct = total > 0 ? (supplierSpends[i]/total*100).toFixed(0) : '0';
+      const shortName = name.length > 22 ? name.slice(0,20)+'…' : name;
+      return `
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div style="width:8px; height:8px; border-radius:50%; background:${supplierColor(name)}; flex-shrink:0;"></div>
+          <div style="flex:1; font-size:11.5px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${shortName}</div>
+          <div style="font-size:11.5px; font-weight:500; color:var(--text-muted);">${pct}%</div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── Render recent POs table ────────────────────────────────
+  function renderRecentPOs({ recent }) {
+    const tbody = document.getElementById('recent-pos-body');
+    if (!tbody) return;
+
+    if (!recent.length) {
+      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state" style="padding:20px;"><p>No POs found</p></div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = recent.map(r => `
+      <tr>
+        <td style="font-family:monospace; font-size:12px; color:var(--accent);">${r.po_number || '—'}</td>
+        <td style="max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${r.supplier_name || '—'}</td>
+        <td style="white-space:nowrap;">${Utils.formatDate(r.date)}</td>
+        <td style="font-weight:500; color:#fff;">${Utils.formatCurrency(r.total_supplier_cost)}</td>
+        <td>${Utils.statusBadge(r.delivery_status)}</td>
+      </tr>
+    `).join('');
+  }
+
+  // ── Render delivery status breakdown ──────────────────────
+  const STATUS_COLORS = {
+    'Shipped':           '#a3e635',
+    'Received':          '#67e8f9',
+    'Not Shipped':       '#ef4444',
+    'Quote Received':    '#93c5fd',
+    'Request For Quote': '#d8b4fe',
+    'Pending':           '#f59e0b',
+    'Unknown':           '#52525b',
+  };
+
+  function renderStatusBreakdown({ statusMap, totalPOs }) {
+    const el = document.getElementById('status-breakdown');
+    if (!el) return;
+
+    const entries = Object.entries(statusMap).sort((a,b) => b[1]-a[1]);
+    const total   = Object.values(statusMap).reduce((a,b)=>a+b,0) || 1;
+
+    el.innerHTML = entries.map(([status, count]) => {
+      const pct   = Math.round(count / total * 100);
+      const color = STATUS_COLORS[status] || '#52525b';
+      return `
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+            <span style="font-size:12px; color:var(--text-secondary);">${status}</span>
+            <span style="font-size:12px; font-weight:600; color:${color};">${count}</span>
+          </div>
+          <div style="height:4px; background:var(--bg-elevated); border-radius:2px; overflow:hidden;">
+            <div style="height:100%; width:${pct}%; background:${color}; border-radius:2px; transition:width 0.6s ease;"></div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── Main render orchestrator ───────────────────────────────
+  async function renderOverview() {
+    const raw = await window.API.get('po_headers');
+    const headers = raw || [];
+
+    if (!headers.length) {
+      document.getElementById('kpi-total-pos').textContent = '0';
+      document.getElementById('kpi-supplier-cost').textContent = '$0.00';
+      document.getElementById('kpi-revenue').textContent = '$0.00';
+      document.getElementById('kpi-profit').textContent = '$0.00';
+      const marginEl = document.getElementById('kpi-margin-badge');
+      if (marginEl) { marginEl.textContent = '0.0%'; }
+      return;
+    }
+
+    const data = processHeaders(headers);
+    renderKPIs(data);
+    renderProfitChart(data);
+    renderSupplierChart(data);
+    renderRecentPOs(data);
+    renderStatusBreakdown(data);
+  }
+
+  // ── Init on DOM ready ──────────────────────────────────────
+  renderOverview();
+
+  // ── Register for 30s polling ───────────────────────────────
+  window.registerPollCallback(renderOverview);
+
+})();
+</script>
+
+</body>
+</html>
