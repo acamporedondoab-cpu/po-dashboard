@@ -11,6 +11,7 @@ function getAuth() {
   } else if (process.env.GOOGLE_CLIENT_EMAIL && process.env.GOOGLE_PRIVATE_KEY) {
     // Vercel: individual vars (private key has literal \n that must be unescaped)
     credentials = {
+      type:         'service_account',
       client_email: process.env.GOOGLE_CLIENT_EMAIL,
       private_key:  process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
     };
