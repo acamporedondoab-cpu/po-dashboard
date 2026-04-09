@@ -379,7 +379,7 @@
     #right-panel {
       width: 260px;
       flex-shrink: 0;
-      background: #1A1A1A;
+      background: var(--bg-secondary);
       border-left: 1px solid var(--border-color);
       display: flex;
       flex-direction: column;
@@ -3463,9 +3463,10 @@ setInterval(async () => {
         datasets: [{
           data: supplierSpends,
           backgroundColor: supplierNames.map(supplierColor),
-          borderColor: bgSecondary,
-          borderWidth: 3,
-          hoverBorderColor: bgTertiary,
+          borderColor: bgCard,
+          borderWidth: 2,
+          hoverBorderWidth: 2,
+          hoverBorderColor: bgCard,
         }],
       },
       options: {
@@ -3487,17 +3488,7 @@ setInterval(async () => {
           },
         },
       },
-      plugins: [{
-        id: 'chartBackground',
-        beforeDraw(chart) {
-          const ctx = chart.ctx;
-          ctx.save();
-          ctx.globalCompositeOperation = 'destination-over';
-          ctx.fillStyle = bgTertiary;
-          ctx.fillRect(0, 0, chart.width, chart.height);
-          ctx.restore();
-        },
-      }],
+      plugins: [],
     });
 
     // Custom legend
