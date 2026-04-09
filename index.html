@@ -1439,6 +1439,8 @@ navItems.forEach(item => {
   btn.addEventListener('click', () => {
     const current = html.getAttribute('data-theme') || 'dark';
     applyTheme(current === 'dark' ? 'light' : 'dark');
+    // Re-render charts so they pick up new theme CSS variable values
+    if (window._rerenderSupplierChart) window._rerenderSupplierChart();
   });
 })();
 
@@ -3492,9 +3494,10 @@ setInterval(async () => {
         id: 'chartBackground',
         beforeDraw(chart) {
           const ctx = chart.ctx;
+          const currentBgCard = getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim() || '#1E1E1E';
           ctx.save();
           ctx.globalCompositeOperation = 'destination-over';
-          ctx.fillStyle = bgCard;
+          ctx.fillStyle = currentBgCard;
           ctx.fillRect(0, 0, chart.width, chart.height);
           ctx.restore();
         },
@@ -3591,6 +3594,7 @@ setInterval(async () => {
     renderKPIs(data);
     renderProfitChart(data);
     renderSupplierChart(data);
+    window._rerenderSupplierChart = () => renderSupplierChart(data);
     renderRecentPOs(data);
     renderStatusBreakdown(data);
   }
