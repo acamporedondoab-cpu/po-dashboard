@@ -439,8 +439,8 @@
     }
 
     .activity-type.new-po   { color: var(--green-primary); }
-    .activity-type.status   { color: var(--status-received); }
-    .activity-type.supplier { color: var(--status-rfq); }
+    .activity-type.status   { color: var(--green-dark); }
+    .activity-type.supplier { color: var(--green-deeper); }
 
     .activity-desc {
       font-size: 12px;
@@ -3449,6 +3449,13 @@ setInterval(async () => {
 
     if (supplierChart) { supplierChart.destroy(); supplierChart = null; }
 
+    const cs = getComputedStyle(document.documentElement);
+    const bgCard      = cs.getPropertyValue('--bg-card').trim()      || '#1E1E1E';
+    const bgTertiary  = cs.getPropertyValue('--bg-tertiary').trim()  || '#242424';
+    const bgSecondary = cs.getPropertyValue('--bg-secondary').trim() || '#1A1A1A';
+    const textMuted   = cs.getPropertyValue('--text-muted').trim()   || '#666666';
+    const textPrimary = cs.getPropertyValue('--text-primary').trim() || '#FFFFFF';
+
     supplierChart = new Chart(canvas.getContext('2d'), {
       type: 'doughnut',
       data: {
@@ -3456,9 +3463,9 @@ setInterval(async () => {
         datasets: [{
           data: supplierSpends,
           backgroundColor: supplierNames.map(supplierColor),
-          borderColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-surface').trim() || '#1A1A1A',
+          borderColor: bgSecondary,
           borderWidth: 3,
-          hoverBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-elevated').trim() || '#242424',
+          hoverBorderColor: bgTertiary,
         }],
       },
       options: {
@@ -3468,11 +3475,11 @@ setInterval(async () => {
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: '#242424',
-            borderColor: '#2A2A2A',
+            backgroundColor: bgSecondary,
+            borderColor: bgTertiary,
             borderWidth: 1,
-            titleColor: '#a1a1aa',
-            bodyColor: '#ffffff',
+            titleColor: textMuted,
+            bodyColor: textPrimary,
             padding: 10,
             callbacks: {
               label: ctx => ' ' + Utils.formatCurrency(ctx.parsed),
@@ -3480,6 +3487,17 @@ setInterval(async () => {
           },
         },
       },
+      plugins: [{
+        id: 'chartBackground',
+        beforeDraw(chart) {
+          const ctx = chart.ctx;
+          ctx.save();
+          ctx.globalCompositeOperation = 'destination-over';
+          ctx.fillStyle = bgTertiary;
+          ctx.fillRect(0, 0, chart.width, chart.height);
+          ctx.restore();
+        },
+      }],
     });
 
     // Custom legend
