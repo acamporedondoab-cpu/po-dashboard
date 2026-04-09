@@ -25,15 +25,18 @@
       theme: {
         extend: {
           colors: {
-            base:     '#0c0c0c',
-            surface:  '#141414',
-            elevated: '#1c1c1c',
-            border:   '#2a2a2a',
-            accent:   '#a3e635',
-            'accent-dim': '#65a30d',
-            'text-primary':   '#ffffff',
-            'text-secondary': '#a1a1aa',
-            'text-muted':     '#52525b',
+            'bg-primary':    '#0F0F0F',
+            'bg-secondary':  '#1A1A1A',
+            'bg-tertiary':   '#242424',
+            'bg-card':       '#1E1E1E',
+            'green-primary': '#4CAF50',
+            'green-dark':    '#3D9B35',
+            'green-deeper':  '#2E7A28',
+            'green-light':   '#C8E6C9',
+            'green-neon':    '#6BCB6B',
+            'text-primary':  '#FFFFFF',
+            'text-secondary':'#A0A0A0',
+            'text-muted':    '#666666',
           },
           fontFamily: {
             display: ['Syne', 'sans-serif'],
@@ -48,45 +51,87 @@
     /* ── Base reset ─────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    :root {
-      --bg-base:      #0c0c0c;
-      --bg-surface:   #141414;
-      --bg-elevated:  #1c1c1c;
-      --bg-border:    #2a2a2a;
-      --accent:       #a3e635;
-      --accent-dim:   #65a30d;
-      --accent-glow:  rgba(163, 230, 53, 0.12);
-      --text-primary: #ffffff;
-      --text-secondary: #a1a1aa;
-      --text-muted:   #52525b;
+    /* ── Dark mode (default) ───────────────────────────────── */
+    :root, html[data-theme="dark"] {
+      --bg-primary:    #0F0F0F;
+      --bg-secondary:  #1A1A1A;
+      --bg-tertiary:   #242424;
+      --bg-card:       #1E1E1E;
+      --border-color:  #2A2A2A;
+
+      --green-primary: #4CAF50;
+      --green-dark:    #3D9B35;
+      --green-deeper:  #2E7A28;
+      --green-light:   #C8E6C9;
+      --green-neon:    #6BCB6B;
+
+      --text-primary:   #FFFFFF;
+      --text-secondary: #A0A0A0;
+      --text-muted:     #666666;
 
       /* Status */
-      --status-shipped:    #a3e635;
-      --status-pending:    #f59e0b;
-      --status-received:   #67e8f9;
-      --status-not-shipped:#ef4444;
-      --status-rfq:        #d8b4fe;
-      --status-quote:      #93c5fd;
+      --status-shipped:     #4CAF50;
+      --status-pending:     #f59e0b;
+      --status-received:    #67e8f9;
+      --status-not-shipped: #ef4444;
+      --status-rfq:         #d8b4fe;
+      --status-quote:       #93c5fd;
     }
 
+    /* ── Light mode ─────────────────────────────────────────── */
+    html[data-theme="light"] {
+      --bg-primary:    #F5F6FA;
+      --bg-secondary:  #FFFFFF;
+      --bg-tertiary:   #F0F0F0;
+      --bg-card:       #FFFFFF;
+      --border-color:  #E0E0E0;
+
+      --green-primary: #4CAF50;
+      --green-dark:    #3D9B35;
+      --green-deeper:  #2E7A28;
+      --green-light:   #C8E6C9;
+      --green-neon:    #6BCB6B;
+
+      --text-primary:   #1A1A1A;
+      --text-secondary: #555555;
+      --text-muted:     #999999;
+
+      /* Status */
+      --status-shipped:     #2E7A28;
+      --status-pending:     #d97706;
+      --status-received:    #0e7490;
+      --status-not-shipped: #dc2626;
+      --status-rfq:         #7c3aed;
+      --status-quote:       #1d4ed8;
+    }
+
+    html[data-theme="light"] .badge-shipped      { background: #C8E6C9; color: #2E7A28; }
+    html[data-theme="light"] .badge-received     { background: #cce9f2; color: #0e7490; }
+    html[data-theme="light"] .badge-not-shipped  { background: #fee2e2; color: #dc2626; }
+    html[data-theme="light"] .badge-quote        { background: #dbeafe; color: #1d4ed8; }
+    html[data-theme="light"] .badge-rfq          { background: #ede9fe; color: #7c3aed; }
+    html[data-theme="light"] .badge-pending      { background: #fef3c7; color: #d97706; }
+    html[data-theme="light"] .skeleton           { background: linear-gradient(90deg, #E0E0E0 25%, #D0D0D0 50%, #E0E0E0 75%); background-size: 200% 100%; }
+    html[data-theme="light"] body::after         { opacity: 0.01; }
+
     html {
-      zoom: 0.75;
+      zoom: 1;
     }
     html, body {
       height: 100%;
-      background: var(--bg-base);
+      background: var(--bg-primary);
       color: var(--text-primary);
       font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
+      font-size: 15px;
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
     }
 
     /* ── Scrollbar ───────────────────────────────────────────── */
     ::-webkit-scrollbar { width: 4px; height: 4px; }
-    ::-webkit-scrollbar-track { background: var(--bg-base); }
-    ::-webkit-scrollbar-thumb { background: var(--bg-border); border-radius: 2px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+    ::-webkit-scrollbar-track { background: var(--bg-primary); }
+    ::-webkit-scrollbar-thumb { background: #3A3A3A; border-radius: 2px; }
+    ::-webkit-scrollbar-thumb:hover { background: #4A4A4A; }
 
     /* ── Layout shell ────────────────────────────────────────── */
     #app {
@@ -99,8 +144,8 @@
     #sidebar {
       width: 240px;
       flex-shrink: 0;
-      background: var(--bg-surface);
-      border-right: 1px solid var(--bg-border);
+      background: #1A1A1A;
+      border-right: 1px solid var(--border-color);
       display: flex;
       flex-direction: column;
       padding: 0;
@@ -108,15 +153,16 @@
     }
 
     .sidebar-logo {
-      padding: 24px 20px 20px;
-      border-bottom: 1px solid var(--bg-border);
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(0,0,0,0.15);
+      background: #3D9B35;
     }
 
     .sidebar-logo-mark {
-      width: 32px;
-      height: 32px;
-      background: var(--accent);
-      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -124,9 +170,25 @@
     }
 
     .sidebar-logo-mark svg {
-      width: 18px;
-      height: 18px;
-      color: #000;
+      width: 20px;
+      height: 20px;
+      color: #ffffff;
+    }
+
+    .sidebar-logo-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #ffffff !important;
+      line-height: 1.15;
+    }
+
+    .sidebar-logo-sub {
+      font-size: 13px;
+      color: rgba(255,255,255,0.75) !important;
+      margin-top: 3px;
+      letter-spacing: 0.01em;
     }
 
     .sidebar-nav {
@@ -140,11 +202,11 @@
 
     .nav-section-label {
       font-family: 'DM Sans', sans-serif;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 600;
-      letter-spacing: 0.1em;
+      letter-spacing: 1px;
       text-transform: uppercase;
-      color: var(--text-muted);
+      color: #666666;
       padding: 12px 8px 6px;
     }
 
@@ -165,29 +227,30 @@
     }
 
     .nav-item:hover {
-      background: var(--bg-elevated);
+      background: var(--bg-tertiary);
       color: var(--text-primary);
     }
 
     .nav-item:active {
-      background: rgba(163, 230, 53, 0.08);
+      background: rgba(76,175,80,0.15);
     }
 
     .nav-item.active {
-      background: rgba(163, 230, 53, 0.12);
-      color: var(--accent);
-      font-weight: 500;
+      background: var(--green-primary);
+      color: #ffffff;
+      font-weight: 600;
     }
 
     .nav-item.active .nav-icon {
-      color: var(--accent);
+      color: #ffffff;
+      opacity: 1;
     }
 
     .nav-icon {
       width: 16px;
       height: 16px;
       flex-shrink: 0;
-      opacity: 0.7;
+      opacity: 0.65;
     }
 
     .nav-item.active .nav-icon {
@@ -198,15 +261,9 @@
       opacity: 0.9;
     }
 
-    /* Active indicator dot */
+    /* Active indicator — removed in favour of solid bg */
     .nav-item.active::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      width: 3px;
-      height: 20px;
-      background: var(--accent);
-      border-radius: 0 2px 2px 0;
+      display: none;
     }
 
     .nav-item { position: relative; }
@@ -214,7 +271,7 @@
     /* Sidebar bottom */
     .sidebar-footer {
       padding: 16px 12px;
-      border-top: 1px solid var(--bg-border);
+      border-top: 1px solid var(--border-color);
     }
 
     .sidebar-user {
@@ -227,20 +284,20 @@
       transition: background 0.15s ease;
     }
 
-    .sidebar-user:hover { background: var(--bg-elevated); }
+    .sidebar-user:hover { background: var(--bg-tertiary); }
 
     .user-avatar {
       width: 28px;
       height: 28px;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent-dim), var(--accent));
+      background: linear-gradient(135deg, #2E7A28, #4CAF50);
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: 'Syne', sans-serif;
       font-size: 11px;
       font-weight: 700;
-      color: #000;
+      color: #ffffff;
       flex-shrink: 0;
     }
 
@@ -261,8 +318,8 @@
       align-items: center;
       justify-content: space-between;
       padding: 0 28px;
-      border-bottom: 1px solid var(--bg-border);
-      background: var(--bg-base);
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-secondary);
       gap: 16px;
     }
 
@@ -294,10 +351,10 @@
     }
 
     .pulse-dot {
-      width: 6px;
-      height: 6px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
-      background: var(--accent);
+      background: #4CAF50;
       animation: pulse 2s ease-in-out infinite;
     }
 
@@ -311,6 +368,7 @@
       flex: 1;
       overflow-y: auto;
       padding: 28px;
+      background: var(--bg-primary);
     }
 
     /* Page sections — only one visible at a time */
@@ -321,8 +379,8 @@
     #right-panel {
       width: 280px;
       flex-shrink: 0;
-      background: var(--bg-surface);
-      border-left: 1px solid var(--bg-border);
+      background: #1A1A1A;
+      border-left: 1px solid var(--border-color);
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -330,7 +388,7 @@
 
     .panel-header {
       padding: 18px 20px 14px;
-      border-bottom: 1px solid var(--bg-border);
+      border-bottom: 1px solid var(--border-color);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -346,13 +404,13 @@
     }
 
     .panel-badge {
-      background: var(--accent-glow);
-      color: var(--accent);
+      background: rgba(76,175,80,0.15);
+      color: var(--green-primary);
       font-size: 10px;
       font-weight: 600;
       padding: 2px 7px;
       border-radius: 20px;
-      border: 1px solid rgba(163, 230, 53, 0.2);
+      border: 1px solid rgba(76,175,80,0.3);
     }
 
     .panel-body {
@@ -364,12 +422,12 @@
     /* Activity items */
     .activity-item {
       padding: 12px 20px;
-      border-bottom: 1px solid rgba(42, 42, 42, 0.5);
+      border-bottom: 1px solid var(--border-color);
       transition: background 0.15s ease;
       cursor: default;
     }
 
-    .activity-item:hover { background: var(--bg-elevated); }
+    .activity-item:hover { background: var(--bg-tertiary); }
     .activity-item:last-child { border-bottom: none; }
 
     .activity-type {
@@ -380,7 +438,7 @@
       margin-bottom: 3px;
     }
 
-    .activity-type.new-po   { color: var(--accent); }
+    .activity-type.new-po   { color: var(--green-primary); }
     .activity-type.status   { color: var(--status-received); }
     .activity-type.supplier { color: var(--status-rfq); }
 
@@ -399,13 +457,13 @@
     /* Panel footer */
     .panel-footer {
       padding: 14px 20px;
-      border-top: 1px solid var(--bg-border);
+      border-top: 1px solid var(--border-color);
     }
 
     /* ── Shared card ─────────────────────────────────────────── */
     .card {
-      background: var(--bg-surface);
-      border: 1px solid var(--bg-border);
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
       border-radius: 12px;
       padding: 20px;
     }
@@ -415,8 +473,8 @@
     }
 
     .card-hover:hover {
-      border-color: rgba(163, 230, 53, 0.2);
-      box-shadow: 0 0 0 1px rgba(163, 230, 53, 0.06),
+      border-color: rgba(76,175,80,0.35);
+      box-shadow: 0 0 0 1px rgba(76,175,80,0.1),
                   0 8px 24px rgba(0,0,0,0.4);
     }
 
@@ -435,19 +493,22 @@
       letter-spacing: 0.07em;
       text-transform: uppercase;
       color: var(--text-muted);
-      border-bottom: 1px solid var(--bg-border);
+      border-bottom: 1px solid var(--border-color);
       white-space: nowrap;
     }
 
     .data-table td {
       padding: 11px 14px;
       color: var(--text-secondary);
-      border-bottom: 1px solid rgba(42,42,42,0.6);
+      border-bottom: 1px solid var(--border-color);
       vertical-align: middle;
     }
 
+    .data-table tbody tr:nth-child(odd) td { background: var(--bg-card); }
+    .data-table tbody tr:nth-child(even) td { background: var(--bg-primary); }
+
     .data-table tbody tr:hover td {
-      background: var(--bg-elevated);
+      background: var(--bg-tertiary);
       color: var(--text-primary);
     }
 
@@ -466,16 +527,16 @@
       white-space: nowrap;
     }
 
-    .badge-shipped      { background: #14532d; color: #a3e635; }
-    .badge-received     { background: #164e63; color: #67e8f9; }
-    .badge-not-shipped  { background: #7f1d1d; color: #fca5a5; }
-    .badge-quote        { background: #1e3a5f; color: #93c5fd; }
-    .badge-rfq          { background: #3b0764; color: #d8b4fe; }
-    .badge-pending      { background: #78350f; color: #fcd34d; }
+    .badge-shipped      { background: rgba(76,175,80,0.18); color: #6BCB6B; }
+    .badge-received     { background: rgba(103,232,249,0.12); color: #67e8f9; }
+    .badge-not-shipped  { background: rgba(239,68,68,0.15); color: #fca5a5; }
+    .badge-quote        { background: rgba(147,197,253,0.12); color: #93c5fd; }
+    .badge-rfq          { background: rgba(216,180,254,0.12); color: #d8b4fe; }
+    .badge-pending      { background: rgba(252,211,77,0.12); color: #fcd34d; }
 
     /* ── Shared loading state ────────────────────────────────── */
     .skeleton {
-      background: linear-gradient(90deg, var(--bg-elevated) 25%, var(--bg-border) 50%, var(--bg-elevated) 75%);
+      background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--border-color) 50%, var(--bg-tertiary) 75%);
       background-size: 200% 100%;
       animation: skeleton-shimmer 1.4s ease-in-out infinite;
       border-radius: 6px;
@@ -526,26 +587,26 @@
     .btn:active { transform: scale(0.97); }
 
     .btn-primary {
-      background: var(--accent);
-      color: #000;
+      background: var(--green-primary);
+      color: #ffffff;
     }
 
-    .btn-primary:hover { opacity: 0.88; }
-    .btn-primary:focus-visible { box-shadow: 0 0 0 2px var(--bg-base), 0 0 0 4px var(--accent); }
+    .btn-primary:hover { background: var(--green-deeper); }
+    .btn-primary:focus-visible { box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--green-primary); }
 
     .btn-ghost {
-      background: var(--bg-elevated);
+      background: var(--bg-tertiary);
       color: var(--text-secondary);
-      border: 1px solid var(--bg-border);
+      border: 1px solid var(--border-color);
     }
 
-    .btn-ghost:hover { color: var(--text-primary); border-color: #3d3d3d; }
-    .btn-ghost:focus-visible { box-shadow: 0 0 0 2px var(--bg-base), 0 0 0 4px var(--bg-border); }
+    .btn-ghost:hover { color: var(--text-primary); border-color: #4A4A4A; }
+    .btn-ghost:focus-visible { box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--border-color); }
 
     /* ── Inputs ──────────────────────────────────────────────── */
     .input {
-      background: var(--bg-elevated);
-      border: 1px solid var(--bg-border);
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
       border-radius: 8px;
       padding: 8px 12px;
       color: var(--text-primary);
@@ -557,11 +618,11 @@
 
     .input::placeholder { color: var(--text-muted); }
 
-    .input:hover { border-color: #3d3d3d; }
+    .input:hover { border-color: #4A4A4A; }
 
     .input:focus {
-      border-color: rgba(163, 230, 53, 0.4);
-      box-shadow: 0 0 0 3px rgba(163, 230, 53, 0.08);
+      border-color: var(--green-primary);
+      box-shadow: 0 0 0 3px rgba(76,175,80,0.12);
     }
 
     /* ── Select ──────────────────────────────────────────────── */
@@ -606,7 +667,7 @@
   <nav id="sidebar">
     <!-- Logo -->
     <div class="sidebar-logo">
-      <div style="display:flex; align-items:center; gap:10px;">
+      <div style="display:flex; align-items:center; gap:12px;">
         <div class="sidebar-logo-mark">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -617,8 +678,8 @@
           </svg>
         </div>
         <div>
-          <div style="font-family:'Inter',sans-serif; font-size:16px; font-weight:800; letter-spacing:-0.03em; color:#fff; line-height:1.1;">PO Dashboard</div>
-          <div style="font-size:11px; color:var(--text-muted); margin-top:2px; letter-spacing:0.01em;">Field Service</div>
+          <div class="sidebar-logo-title">PO Dashboard</div>
+          <div class="sidebar-logo-sub">Field Service</div>
         </div>
       </div>
     </div>
@@ -684,7 +745,7 @@
           <line x1="12" y1="16" x2="12.01" y2="16"/>
         </svg>
         Not Shipped
-        <span id="not-shipped-badge" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:#ef4444; color:#fff; font-size:10px; font-weight:700; min-width:18px; height:18px; border-radius:9px; align-items:center; justify-content:center; padding:0 4px; display:none;"></span>
+        <span id="not-shipped-badge" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:#ef4444; color:#ffffff; font-size:10px; font-weight:700; min-width:18px; height:18px; border-radius:9px; align-items:center; justify-content:center; padding:0 4px; display:none;"></span>
       </div>
 
       <div class="nav-item" data-page="delivery-tracker" tabindex="0" role="button">
@@ -732,6 +793,21 @@
           <div class="pulse-dot"></div>
           <span id="last-updated-text">Connecting…</span>
         </div>
+        <!-- Theme toggle -->
+        <button id="theme-toggle" title="Toggle dark/light mode"
+          style="width:34px; height:34px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-tertiary); color:var(--text-secondary); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.15s, border-color 0.15s;"
+          onmouseenter="this.style.borderColor='var(--green-primary)'; this.style.color='var(--green-primary)';"
+          onmouseleave="this.style.borderColor='var(--border-color)'; this.style.color='var(--text-secondary)';">
+          <svg id="theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          <svg id="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
       </div>
     </div>
 
@@ -747,13 +823,13 @@
           <div class="card card-hover" style="position:relative; overflow:hidden;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
               <span style="font-size:11px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-muted);">POs This Month</span>
-              <div style="width:32px; height:32px; background:rgba(163,230,53,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+              <div style="width:32px; height:32px; background:rgba(76,175,80,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
               </div>
             </div>
-            <div id="kpi-total-pos" style="font-family:'Inter',sans-serif; font-size:32px; font-weight:700; letter-spacing:-0.03em; font-variant-numeric:tabular-nums; color:#fff; line-height:1; margin-bottom:8px;">—</div>
+            <div id="kpi-total-pos" style="font-family:'Inter',sans-serif; font-size:32px; font-weight:700; letter-spacing:-0.03em; font-variant-numeric:tabular-nums; color:var(--text-primary); line-height:1; margin-bottom:8px;">—</div>
             <div style="font-size:12px; color:var(--text-muted);">Purchase orders</div>
-            <div style="position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(90deg, rgba(163,230,53,0.4), transparent);"></div>
+            <div style="position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(90deg, rgba(76,175,80,0.4), transparent);"></div>
           </div>
 
           <div class="card card-hover" style="position:relative; overflow:hidden;">
@@ -763,7 +839,7 @@
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
               </div>
             </div>
-            <div id="kpi-supplier-cost" style="font-family:'Inter',sans-serif; font-size:22px; font-weight:700; letter-spacing:-0.03em; font-variant-numeric:tabular-nums; color:#fff; line-height:1; margin-bottom:8px; white-space:nowrap;">—</div>
+            <div id="kpi-supplier-cost" style="font-family:'Inter',sans-serif; font-size:22px; font-weight:700; letter-spacing:-0.03em; font-variant-numeric:tabular-nums; color:var(--text-primary); line-height:1; margin-bottom:8px; white-space:nowrap;">—</div>
             <div style="font-size:12px; color:var(--text-muted);">Total supplier spend</div>
             <div style="position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(90deg, rgba(239,68,68,0.3), transparent);"></div>
           </div>
@@ -775,7 +851,7 @@
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
               </div>
             </div>
-            <div id="kpi-revenue" style="font-family:'Inter',sans-serif; font-size:22px; font-weight:700; letter-spacing:-0.03em; font-variant-numeric:tabular-nums; color:#fff; line-height:1; margin-bottom:8px; white-space:nowrap;">—</div>
+            <div id="kpi-revenue" style="font-family:'Inter',sans-serif; font-size:22px; font-weight:700; letter-spacing:-0.03em; font-variant-numeric:tabular-nums; color:var(--text-primary); line-height:1; margin-bottom:8px; white-space:nowrap;">—</div>
             <div style="font-size:12px; color:var(--text-muted);">Customer billing</div>
             <div style="position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(90deg, rgba(59,130,246,0.3), transparent);"></div>
           </div>
@@ -783,16 +859,16 @@
           <div class="card card-hover" style="position:relative; overflow:hidden;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
               <span style="font-size:11px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-muted);">Gross Profit</span>
-              <div style="width:32px; height:32px; background:rgba(163,230,53,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              <div style="width:32px; height:32px; background:rgba(76,175,80,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
               </div>
             </div>
-            <div id="kpi-profit" style="font-family:'Inter',sans-serif; font-size:22px; font-weight:700; letter-spacing:-0.03em; font-variant-numeric:tabular-nums; color:var(--accent); line-height:1; margin-bottom:4px; white-space:nowrap;">—</div>
+            <div id="kpi-profit" style="font-family:'Inter',sans-serif; font-size:22px; font-weight:700; letter-spacing:-0.03em; font-variant-numeric:tabular-nums; color:var(--green-primary); line-height:1; margin-bottom:4px; white-space:nowrap;">—</div>
             <div style="display:flex; align-items:center; gap:8px;">
-              <div id="kpi-margin-badge" style="font-size:11px; font-weight:600; padding:2px 7px; border-radius:20px; background:rgba(163,230,53,0.12); color:var(--accent);">—%</div>
+              <div id="kpi-margin-badge" style="font-size:11px; font-weight:600; padding:2px 7px; border-radius:20px; background:rgba(76,175,80,0.12); color:var(--green-primary);">—%</div>
               <div style="font-size:12px; color:var(--text-muted);">margin</div>
             </div>
-            <div style="position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(90deg, rgba(163,230,53,0.6), transparent);"></div>
+            <div style="position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(90deg, rgba(76,175,80,0.6), transparent);"></div>
           </div>
 
         </div><!-- /kpi grid -->
@@ -807,7 +883,7 @@
                 <div style="font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--text-primary);">Profit Over Time</div>
                 <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Gross profit per day</div>
               </div>
-              <div style="font-size:11px; color:var(--accent); background:rgba(163,230,53,0.08); padding:3px 10px; border-radius:20px; border:1px solid rgba(163,230,53,0.15);">This month</div>
+              <div style="font-size:11px; color:var(--green-primary); background:rgba(76,175,80,0.08); padding:3px 10px; border-radius:20px; border:1px solid rgba(76,175,80,0.15);">This month</div>
             </div>
             <div style="height:220px; position:relative;">
               <canvas id="chart-profit-time"></canvas>
@@ -833,7 +909,7 @@
 
           <!-- Recent POs table -->
           <div class="card" style="padding:0; overflow:hidden;">
-            <div style="padding:16px 20px 14px; border-bottom:1px solid var(--bg-border); display:flex; align-items:center; justify-content:space-between;">
+            <div style="padding:16px 20px 14px; border-bottom:1px solid var(--border-color); display:flex; align-items:center; justify-content:space-between;">
               <div style="font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--text-primary);">Recent Purchase Orders</div>
               <span style="font-size:11px; color:var(--text-muted);">Last 5</span>
             </div>
@@ -921,7 +997,7 @@
             <table class="data-table" id="por-table">
               <thead>
                 <tr>
-                  <th style="width:36px; text-align:center; padding:0 8px;"><input type="checkbox" id="por-select-all" title="Select all" style="cursor:pointer; accent-color:var(--accent);"></th>
+                  <th style="width:36px; text-align:center; padding:0 8px;"><input type="checkbox" id="por-select-all" title="Select all" style="cursor:pointer; accent-color:var(--green-primary);"></th>
                   <th class="sortable" data-col="supplier_name"  style="cursor:pointer; user-select:none;">Supplier <span class="sort-icon">↕</span></th>
                   <th class="sortable" data-col="job_number"     style="cursor:pointer; user-select:none;">Job # <span class="sort-icon">↕</span></th>
                   <th class="sortable" data-col="po_number"      style="cursor:pointer; user-select:none;">PO Number <span class="sort-icon">↕</span></th>
@@ -945,7 +1021,7 @@
           </div>
 
           <!-- Pagination -->
-          <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-top:1px solid var(--bg-border);">
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-top:1px solid var(--border-color);">
             <button id="por-prev" class="btn btn-ghost" style="padding:6px 14px; font-size:12px;">← Prev</button>
             <div id="por-pagination-pages" style="display:flex; gap:4px; align-items:center;"></div>
             <button id="por-next" class="btn btn-ghost" style="padding:6px 14px; font-size:12px;">Next →</button>
@@ -980,7 +1056,7 @@
 
           <!-- Summary table -->
           <div class="card" style="padding:0; overflow:hidden;">
-            <div style="padding:16px 20px 14px; border-bottom:1px solid var(--bg-border);">
+            <div style="padding:16px 20px 14px; border-bottom:1px solid var(--border-color);">
               <div style="font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--text-primary);">Supplier Breakdown</div>
             </div>
             <div style="overflow-x:auto;">
@@ -1092,7 +1168,7 @@
 
           <!-- Breakdown table -->
           <div class="card" style="padding:0; overflow:hidden;">
-            <div style="padding:16px 20px 14px; border-bottom:1px solid var(--bg-border);">
+            <div style="padding:16px 20px 14px; border-bottom:1px solid var(--border-color);">
               <div style="font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--text-primary);">Job Breakdown</div>
             </div>
             <div style="overflow-x:auto;">
@@ -1146,7 +1222,7 @@
 
         <!-- Table -->
         <div class="card" style="padding:0; overflow:hidden;">
-          <div style="padding:16px 20px 14px; border-bottom:1px solid var(--bg-border);">
+          <div style="padding:16px 20px 14px; border-bottom:1px solid var(--border-color);">
             <div style="font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--text-primary);">Not Shipped Purchase Orders</div>
           </div>
           <div style="overflow-x:auto;">
@@ -1186,9 +1262,9 @@
             <div style="font-size:11px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:#f59e0b; margin-bottom:6px;">Due Soon</div>
             <div id="dt-count-soon" style="font-family:'Inter',sans-serif; font-size:28px; font-weight:700; font-variant-numeric:tabular-nums; color:#f59e0b;">—</div>
           </div>
-          <div class="card" style="padding:16px; text-align:center; border-color:rgba(163,230,53,0.2);">
-            <div style="font-size:11px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:var(--accent); margin-bottom:6px;">On Track</div>
-            <div id="dt-count-ontrack" style="font-family:'Inter',sans-serif; font-size:28px; font-weight:700; font-variant-numeric:tabular-nums; color:var(--accent);">—</div>
+          <div class="card" style="padding:16px; text-align:center; border-color:rgba(76,175,80,0.2);">
+            <div style="font-size:11px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:var(--green-primary); margin-bottom:6px;">On Track</div>
+            <div id="dt-count-ontrack" style="font-family:'Inter',sans-serif; font-size:28px; font-weight:700; font-variant-numeric:tabular-nums; color:var(--green-primary);">—</div>
           </div>
           <div class="card" style="padding:16px; text-align:center; border-color:rgba(103,232,249,0.2);">
             <div style="font-size:11px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:#67e8f9; margin-bottom:6px;">Received</div>
@@ -1198,7 +1274,7 @@
 
         <!-- Table -->
         <div class="card" style="padding:0; overflow:hidden;">
-          <div style="padding:14px 20px 12px; border-bottom:1px solid var(--bg-border); display:flex; align-items:center; justify-content:space-between;">
+          <div style="padding:14px 20px 12px; border-bottom:1px solid var(--border-color); display:flex; align-items:center; justify-content:space-between;">
             <div style="font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--text-primary);">All Deliveries — Sorted by Urgency</div>
             <div style="font-size:11px; color:var(--text-muted);">Today: <span id="dt-today"></span></div>
           </div>
@@ -1236,7 +1312,7 @@
 
         <!-- Editable table -->
         <div class="card" style="padding:0; overflow:hidden;">
-          <div style="padding:14px 20px 12px; border-bottom:1px solid var(--bg-border); display:flex; align-items:center; justify-content:space-between;">
+          <div style="padding:14px 20px 12px; border-bottom:1px solid var(--border-color); display:flex; align-items:center; justify-content:space-between;">
             <div style="font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--text-primary);">Threshold Settings</div>
             <div style="font-size:11px; color:var(--text-muted);">Click a threshold amount to edit</div>
           </div>
@@ -1255,7 +1331,7 @@
         </div>
 
         <!-- Save toast -->
-        <div id="dt2-toast" style="position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--bg-elevated); border:1px solid var(--bg-border); border-radius:10px; padding:10px 20px; font-size:13px; color:var(--text-primary); opacity:0; pointer-events:none; transition:opacity 0.2s ease, transform 0.2s ease; z-index:100;"></div>
+        <div id="dt2-toast" style="position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:10px; padding:10px 20px; font-size:13px; color:var(--text-primary); opacity:0; pointer-events:none; transition:opacity 0.2s ease, transform 0.2s ease; z-index:100;"></div>
 
       </section>
 
@@ -1336,6 +1412,35 @@ navItems.forEach(item => {
     }
   });
 });
+
+// ── Theme toggle ───────────────────────────────────────────
+(function() {
+  const html = document.documentElement;
+  const btn = document.getElementById('theme-toggle');
+  const iconSun = document.getElementById('theme-icon-sun');
+  const iconMoon = document.getElementById('theme-icon-moon');
+
+  function applyTheme(theme) {
+    html.setAttribute('data-theme', theme);
+    localStorage.setItem('po-theme', theme);
+    if (theme === 'light') {
+      iconSun.style.display = 'block';
+      iconMoon.style.display = 'none';
+    } else {
+      iconSun.style.display = 'none';
+      iconMoon.style.display = 'block';
+    }
+  }
+
+  // Load saved preference
+  const saved = localStorage.getItem('po-theme') || 'dark';
+  applyTheme(saved);
+
+  btn.addEventListener('click', () => {
+    const current = html.getAttribute('data-theme') || 'dark';
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  });
+})();
 
 // ── Sample data (fallback when API not available) ──────────
 window.SAMPLE_DATA = {
@@ -1418,7 +1523,7 @@ window.Utils = {
   marginColor(pct) {
     const n = parseFloat(pct);
     if (isNaN(n)) return 'var(--text-muted)';
-    if (n >= 30) return 'var(--accent)';
+    if (n >= 30) return 'var(--green-primary)';
     if (n >= 15) return '#f59e0b';
     return '#ef4444';
   },
@@ -1448,7 +1553,7 @@ function setConnectionState(ok) {
   if (!dot || !text) return;
 
   if (ok) {
-    dot.style.background  = 'var(--accent)';
+    dot.style.background  = 'var(--green-primary)';
     dot.style.animation   = 'pulse 2s ease-in-out infinite';
     hideStaleWarning();
   } else {
@@ -1620,13 +1725,13 @@ setInterval(async () => {
 
   // ── Status logic ───────────────────────────────────────────
   function getStatus(pct) {
-    if (pct >= 100) return { label: 'THRESHOLD MET', color: '#a3e635', bg: 'rgba(163,230,53,0.12)' };
+    if (pct >= 100) return { label: 'THRESHOLD MET', color: '#4CAF50', bg: 'rgba(76,175,80,0.12)' };
     if (pct >= 80)  return { label: 'CLOSE',         color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' };
     return               { label: 'BELOW',           color: '#ef4444', bg: 'rgba(239,68,68,0.10)'  };
   }
 
   function barColor(pct) {
-    if (pct >= 100) return '#a3e635';
+    if (pct >= 100) return '#4CAF50';
     if (pct >= 80)  return '#f59e0b';
     if (pct >= 50)  return '#fb923c';
     return '#ef4444';
@@ -1637,7 +1742,7 @@ setInterval(async () => {
     const el = document.getElementById('dt2-toast');
     if (!el) return;
     el.textContent = msg;
-    el.style.borderColor = isError ? 'rgba(239,68,68,0.4)' : 'rgba(163,230,53,0.3)';
+    el.style.borderColor = isError ? 'rgba(239,68,68,0.4)' : 'rgba(76,175,80,0.3)';
     el.style.opacity = '1';
     el.style.transform = 'translateX(-50%) translateY(0)';
     clearTimeout(el._timer);
@@ -1667,7 +1772,7 @@ setInterval(async () => {
             <div style="font-family:'Inter',sans-serif; font-size:22px; font-weight:700; color:${fill}; letter-spacing:-0.03em; font-variant-numeric:tabular-nums;">${rawPct.toFixed(0)}%</div>
             <div style="font-size:11px; color:var(--text-muted);">of ${Utils.formatCurrency(r.threshold)}</div>
           </div>
-          <div style="height:6px; background:var(--bg-elevated); border-radius:3px; overflow:hidden; margin-bottom:8px;">
+          <div style="height:6px; background:var(--bg-tertiary); border-radius:3px; overflow:hidden; margin-bottom:8px;">
             <div style="height:100%; width:${pct}%; background:${fill}; border-radius:3px; transition:width 0.6s ease;"></div>
           </div>
           <div style="font-size:11.5px; color:var(--text-muted);">${Utils.formatCurrency(r.actual_spend)} spent · ${Utils.formatCurrency(Math.max(0, r.threshold - r.actual_spend))} remaining</div>
@@ -1696,7 +1801,7 @@ setInterval(async () => {
           <td style="text-align:right; padding-right:20px; color:var(--text-secondary);">${Utils.formatCurrency(r.actual_spend)}</td>
           <td style="text-align:right; padding-right:20px;">
             <div style="display:flex; align-items:center; justify-content:flex-end; gap:10px;">
-              <div style="width:80px; height:4px; background:var(--bg-elevated); border-radius:2px; overflow:hidden;">
+              <div style="width:80px; height:4px; background:var(--bg-tertiary); border-radius:2px; overflow:hidden;">
                 <div style="height:100%; width:${barW}%; background:${fill}; border-radius:2px;"></div>
               </div>
               <span style="font-weight:600; color:${fill}; min-width:42px; text-align:right;">${rawPct.toFixed(1)}%</span>
@@ -1710,7 +1815,7 @@ setInterval(async () => {
 
     // Wire edit clicks
     tbody.querySelectorAll('.threshold-cell').forEach(cell => {
-      cell.addEventListener('mouseenter', () => { cell.style.background = 'var(--bg-elevated)'; });
+      cell.addEventListener('mouseenter', () => { cell.style.background = 'var(--bg-tertiary)'; });
       cell.addEventListener('mouseleave', () => { cell.style.background = ''; });
       cell.addEventListener('click', () => openEditor(cell, +cell.dataset.idx));
     });
@@ -1725,9 +1830,9 @@ setInterval(async () => {
 
     cell.innerHTML = `
       <input type="number" value="${cur}" min="0" step="50"
-        style="width:100px; background:var(--bg-base); border:1px solid var(--accent); border-radius:6px; padding:4px 8px; color:#fff; font-size:13px; font-weight:600; outline:none;" />
-      <button data-action="save" style="padding:4px 10px; background:var(--accent); color:#000; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Save</button>
-      <button data-action="cancel" style="padding:4px 8px; background:var(--bg-elevated); color:var(--text-secondary); border:1px solid var(--bg-border); border-radius:6px; font-size:12px; cursor:pointer;">✕</button>`;
+        style="width:100px; background:var(--bg-primary); border:1px solid var(--green-primary); border-radius:6px; padding:4px 8px; color:var(--text-primary); font-size:13px; font-weight:600; outline:none;" />
+      <button data-action="save" style="padding:4px 10px; background:var(--green-primary); color:#000; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Save</button>
+      <button data-action="cancel" style="padding:4px 8px; background:var(--bg-tertiary); color:var(--text-secondary); border:1px solid var(--border-color); border-radius:6px; font-size:12px; cursor:pointer;">✕</button>`;
 
     const input = cell.querySelector('input');
     input.focus();
@@ -1844,7 +1949,7 @@ setInterval(async () => {
   }
 
   // ── Cards ──────────────────────────────────────────────────
-  const CARD_COLORS = ['#a3e635','#818cf8','#fb923c','#34d399','#f472b6','#38bdf8'];
+  const CARD_COLORS = ['#4CAF50','#818cf8','#fb923c','#34d399','#f472b6','#38bdf8'];
   function renderCards(jobs) {
     const wrap = document.getElementById('cp-job-cards');
     if (!wrap) return;
@@ -1900,8 +2005,8 @@ setInterval(async () => {
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: '#1c1c1c',
-            borderColor: '#2a2a2a',
+            backgroundColor: '#242424',
+            borderColor: '#2A2A2A',
             borderWidth: 1,
             titleColor: '#a1a1aa',
             bodyColor: '#ffffff',
@@ -1936,12 +2041,12 @@ setInterval(async () => {
         <tr>
           <td>
             <div style="font-weight:500; color:var(--text-primary);">${j.customer}</div>
-            <div style="margin-top:4px; height:3px; background:var(--bg-elevated); border-radius:2px; overflow:hidden;">
-              <div style="height:100%; width:${pct}%; background:var(--accent); border-radius:2px;"></div>
+            <div style="margin-top:4px; height:3px; background:var(--bg-tertiary); border-radius:2px; overflow:hidden;">
+              <div style="height:100%; width:${pct}%; background:var(--green-primary); border-radius:2px;"></div>
             </div>
           </td>
           <td style="text-align:right; padding-right:16px; font-family:'Inter',sans-serif; font-variant-numeric:tabular-nums; color:var(--text-secondary);">${j.lines}</td>
-          <td style="text-align:right; padding-right:16px; font-family:'Inter',sans-serif; font-variant-numeric:tabular-nums; font-weight:600; color:var(--accent);">${Utils.formatCurrency(j.revenue)}</td>
+          <td style="text-align:right; padding-right:16px; font-family:'Inter',sans-serif; font-variant-numeric:tabular-nums; font-weight:600; color:var(--green-primary);">${Utils.formatCurrency(j.revenue)}</td>
           <td style="text-align:right; padding-right:16px; font-family:'Inter',sans-serif; font-variant-numeric:tabular-nums; color:var(--status-received);">${Utils.formatCurrency(j.profit)}</td>
           <td style="text-align:right; padding-right:16px; font-family:'Inter',sans-serif; font-variant-numeric:tabular-nums; color:var(--text-secondary);">${j.margin.toFixed(1)}%</td>
         </tr>`;
@@ -2022,7 +2127,7 @@ setInterval(async () => {
 
     tbody.innerHTML = rows.map(r => `
       <tr>
-        <td style="font-family:monospace; font-size:12px; color:var(--accent); white-space:nowrap;">${r.po_number || '—'}</td>
+        <td style="font-family:monospace; font-size:12px; color:var(--green-primary); white-space:nowrap;">${r.po_number || '—'}</td>
         <td style="white-space:nowrap;">${r.supplier_name || '—'}</td>
         <td style="white-space:nowrap;">${r.client_name || '—'}</td>
         <td style="font-size:12px; color:var(--text-muted);">${r.job_number || '—'}</td>
@@ -2076,7 +2181,7 @@ setInterval(async () => {
   const URGENCY_STYLE = {
     'OVERDUE':  { color: '#ef4444', bg: 'rgba(239,68,68,0.08)',   badge: 'background:rgba(239,68,68,0.15); color:#ef4444;',   rowBg: 'rgba(239,68,68,0.04)'  },
     'DUE SOON': { color: '#f59e0b', bg: 'rgba(245,158,11,0.08)',  badge: 'background:rgba(245,158,11,0.15); color:#f59e0b;',  rowBg: 'rgba(245,158,11,0.04)' },
-    'ON TRACK': { color: '#a3e635', bg: 'rgba(163,230,53,0.06)',  badge: 'background:rgba(163,230,53,0.12); color:#a3e635;',  rowBg: ''                      },
+    'ON TRACK': { color: '#4CAF50', bg: 'rgba(76,175,80,0.06)',  badge: 'background:rgba(76,175,80,0.12); color:#4CAF50;',  rowBg: ''                      },
     'RECEIVED': { color: '#67e8f9', bg: 'rgba(103,232,249,0.06)', badge: 'background:rgba(103,232,249,0.12); color:#67e8f9;', rowBg: ''                      },
   };
 
@@ -2147,7 +2252,7 @@ setInterval(async () => {
             <span class="badge" style="${s.badge} font-size:10.5px; font-weight:700; letter-spacing:0.05em; padding:3px 9px;">${r.urgency}</span>
           </td>
           <td style="white-space:nowrap;">${r.supplier_name || '—'}</td>
-          <td style="font-family:monospace; font-size:12px; color:var(--accent); white-space:nowrap;">${r.po_number || '—'}</td>
+          <td style="font-family:monospace; font-size:12px; color:var(--green-primary); white-space:nowrap;">${r.po_number || '—'}</td>
           <td style="font-size:12px; color:var(--text-muted);">${r.job_number || '—'}</td>
           <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${r.description||''}">${r.description || '—'}</td>
           <td style="text-align:right; padding-right:16px;">${r.qty || '—'}</td>
@@ -2331,11 +2436,11 @@ setInterval(async () => {
           </td>
           <td style="white-space:nowrap; font-size:12px;">${Utils.formatDate(g.date_required_by)}</td>
           <td style="font-size:12px; color:var(--text-muted);">${g.job_number || '—'}</td>
-          <td style="font-family:monospace; font-size:12px; color:var(--accent); white-space:nowrap;">${poKey}</td>
+          <td style="font-family:monospace; font-size:12px; color:var(--green-primary); white-space:nowrap;">${poKey}</td>
           <td style="text-align:right; padding-right:16px; color:var(--text-muted); font-size:12px;">${g.lines.length}</td>
           <td style="text-align:right; padding-right:16px; font-weight:500;">${Utils.formatCurrency(g.supplier_cost)}</td>
           <td style="text-align:right; padding-right:16px;">${Utils.formatCurrency(g.customer_price)}</td>
-          <td style="text-align:right; padding-right:16px; color:var(--accent); font-weight:500;">${Utils.formatCurrency(g.gross_profit)}</td>
+          <td style="text-align:right; padding-right:16px; color:var(--green-primary); font-weight:500;">${Utils.formatCurrency(g.gross_profit)}</td>
           <td style="text-align:right; padding-right:16px; font-weight:600; color:${Utils.marginColor(margin)};">${margin > 0 ? margin.toFixed(1)+'%' : '—'}</td>
           <td>${Utils.statusBadge(g.delivery_status)}</td>
         </tr>`);
@@ -2344,11 +2449,11 @@ setInterval(async () => {
       if (open) {
         rows.push(`
           <tr class="sv-detail-row" data-po="${poKey}">
-            <td colspan="10" style="padding:0; background:var(--bg-base);">
+            <td colspan="10" style="padding:0; background:var(--bg-primary);">
               <div style="padding:10px 20px 14px 36px;">
                 <table style="width:100%; border-collapse:collapse; font-size:12px;">
                   <thead>
-                    <tr style="border-bottom:1px solid var(--bg-border);">
+                    <tr style="border-bottom:1px solid var(--border-color);">
                       <th style="padding:4px 8px 6px; text-align:left; color:var(--text-muted); font-weight:600; font-size:10.5px; letter-spacing:0.04em; text-transform:uppercase;">Line #</th>
                       <th style="padding:4px 8px 6px; text-align:left; color:var(--text-muted); font-weight:600; font-size:10.5px; letter-spacing:0.04em; text-transform:uppercase;">Description</th>
                       <th style="padding:4px 8px 6px; text-align:left; color:var(--text-muted); font-weight:600; font-size:10.5px; letter-spacing:0.04em; text-transform:uppercase;">Item Code</th>
@@ -2363,14 +2468,14 @@ setInterval(async () => {
                   <tbody>
                     ${g.lines.map(l => {
                       const m = parseFloat(l.margin_pct) || 0;
-                      return `<tr style="border-bottom:1px solid var(--bg-border);">
+                      return `<tr style="border-bottom:1px solid var(--border-color);">
                         <td style="padding:5px 8px; color:var(--text-muted);">${l.line_number || '—'}</td>
                         <td style="padding:5px 8px; max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${l.description||''}">${l.description || '—'}</td>
                         <td style="padding:5px 8px; color:var(--text-muted); white-space:nowrap;">${l.item_code || '—'}</td>
                         <td style="padding:5px 8px; text-align:right;">${l.qty || '—'}</td>
                         <td style="padding:5px 8px; text-align:right;">${Utils.formatCurrency(l.price_ex_tax || l.amount_ex_tax)}</td>
                         <td style="padding:5px 8px; text-align:right;">${Utils.formatCurrency(l.customer_price)}</td>
-                        <td style="padding:5px 8px; text-align:right; color:var(--accent);">${Utils.formatCurrency(l.gross_profit)}</td>
+                        <td style="padding:5px 8px; text-align:right; color:var(--green-primary);">${Utils.formatCurrency(l.gross_profit)}</td>
                         <td style="padding:5px 8px; text-align:right; color:${Utils.marginColor(m)};">${m > 0 ? m.toFixed(1)+'%' : '—'}</td>
                         <td style="padding:5px 8px;">${Utils.statusBadge(l.delivery_status)}</td>
                       </tr>`;
@@ -2476,8 +2581,8 @@ setInterval(async () => {
   }
 
   // ── Render supplier cards ──────────────────────────────────
-  const CARD_COLORS = ['rgba(163,230,53,0.12)', 'rgba(59,130,246,0.1)', 'rgba(139,92,246,0.1)', 'rgba(245,158,11,0.1)'];
-  const CARD_ACCENTS = ['#a3e635', '#3b82f6', '#8b5cf6', '#f59e0b'];
+  const CARD_COLORS = ['rgba(76,175,80,0.12)', 'rgba(59,130,246,0.1)', 'rgba(139,92,246,0.1)', 'rgba(245,158,11,0.1)'];
+  const CARD_ACCENTS = ['#4CAF50', '#3b82f6', '#8b5cf6', '#f59e0b'];
 
   function renderCards(suppliers) {
     const el = document.getElementById('vs-supplier-cards');
@@ -2505,7 +2610,7 @@ setInterval(async () => {
               <div style="font-family:'Inter',sans-serif; font-size:13px; font-weight:600; font-variant-numeric:tabular-nums; color:var(--text-secondary);">${Utils.formatCurrency(s.avgPerPO)}</div>
             </div>
           </div>
-          <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--bg-border);">
+          <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--border-color);">
             <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:2px;">Top Item</div>
             <div style="font-size:11.5px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${s.topItem}">${shortItem || '—'}</div>
           </div>
@@ -2544,8 +2649,8 @@ setInterval(async () => {
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: '#1c1c1c',
-            borderColor: '#2a2a2a',
+            backgroundColor: '#242424',
+            borderColor: '#2A2A2A',
             borderWidth: 1,
             titleColor: '#a1a1aa',
             bodyColor: '#ffffff',
@@ -2583,13 +2688,13 @@ setInterval(async () => {
         <tr>
           <td>
             <div style="font-weight:500; color:var(--text-primary);">${s.name}</div>
-            <div style="margin-top:4px; height:3px; background:var(--bg-elevated); border-radius:2px; overflow:hidden;">
-              <div style="height:100%; width:${pct}%; background:var(--accent); border-radius:2px;"></div>
+            <div style="margin-top:4px; height:3px; background:var(--bg-tertiary); border-radius:2px; overflow:hidden;">
+              <div style="height:100%; width:${pct}%; background:var(--green-primary); border-radius:2px;"></div>
             </div>
           </td>
           <td style="text-align:right; padding-right:16px; font-family:'Inter',sans-serif; font-variant-numeric:tabular-nums; color:var(--text-secondary);">${s.poCount}</td>
           <td style="text-align:right; padding-right:16px; font-family:'Inter',sans-serif; font-variant-numeric:tabular-nums; color:var(--text-secondary);">${s.lineCount}</td>
-          <td style="text-align:right; padding-right:16px; font-family:'Inter',sans-serif; font-variant-numeric:tabular-nums; font-weight:600; color:var(--accent);">${Utils.formatCurrency(s.spend)}</td>
+          <td style="text-align:right; padding-right:16px; font-family:'Inter',sans-serif; font-variant-numeric:tabular-nums; font-weight:600; color:var(--green-primary);">${Utils.formatCurrency(s.spend)}</td>
           <td style="text-align:right; padding-right:16px; font-family:'Inter',sans-serif; font-variant-numeric:tabular-nums; color:var(--text-secondary);">${Utils.formatCurrency(s.avgPerPO)}</td>
         </tr>`;
     }).join('');
@@ -2786,14 +2891,14 @@ setInterval(async () => {
       const detailRows = g.lines.map(r => {
         const lm = parseFloat(String(r.margin_pct).replace(/[^0-9.-]/g,'')) || 0;
         return `
-          <tr style="background:var(--bg-base);">
+          <tr style="background:var(--bg-primary);">
             <td style="font-size:11px; color:var(--text-muted); padding:7px 12px; width:36px; text-align:right;">${r.line_number || ''}</td>
             <td style="font-size:12px; max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:7px 12px;" title="${r.description||''}">${r.description || '—'}</td>
             <td style="font-size:11px; color:var(--text-muted); padding:7px 12px;">${r.item_code || '—'}</td>
             <td style="text-align:right; padding:7px 12px;">${r.qty || '—'}</td>
             <td style="text-align:right; padding:7px 12px;">${Utils.formatCurrency(r.price_ex_tax)}</td>
             <td style="text-align:right; padding:7px 12px;">${Utils.formatCurrency(r.customer_price)}</td>
-            <td style="text-align:right; padding:7px 12px; color:var(--accent);">${Utils.formatCurrency(r.gross_profit)}</td>
+            <td style="text-align:right; padding:7px 12px; color:var(--green-primary);">${Utils.formatCurrency(r.gross_profit)}</td>
             <td style="text-align:right; padding:7px 12px; color:${Utils.marginColor(lm)};">${Utils.formatPct(r.margin_pct)}</td>
             <td style="padding:7px 12px;">${Utils.statusBadge(r.delivery_status)}</td>
           </tr>`;
@@ -2802,23 +2907,23 @@ setInterval(async () => {
       const isChecked = selectedPOs.has(g.po_number || '—');
       return `
         <tr class="por-group-row" data-po="${g.po_number || ''}" style="cursor:pointer;">
-          <td style="text-align:center; padding:0 8px;" class="por-cb-cell"><input type="checkbox" class="por-cb" data-po="${g.po_number || ''}" ${isChecked ? 'checked' : ''} style="cursor:pointer; accent-color:var(--accent);"></td>
+          <td style="text-align:center; padding:0 8px;" class="por-cb-cell"><input type="checkbox" class="por-cb" data-po="${g.po_number || ''}" ${isChecked ? 'checked' : ''} style="cursor:pointer; accent-color:var(--green-primary);"></td>
           <td style="white-space:nowrap; max-width:160px; overflow:hidden; text-overflow:ellipsis;">${g.supplier_name || '—'}</td>
           <td style="font-size:12px; color:var(--text-muted);">${g.job_number || '—'}</td>
-          <td style="font-family:monospace; font-size:12px; color:var(--accent); white-space:nowrap;">${g.po_number || '—'}</td>
+          <td style="font-family:monospace; font-size:12px; color:var(--green-primary); white-space:nowrap;">${g.po_number || '—'}</td>
           <td style="white-space:nowrap; font-size:12px;">${Utils.formatDate(g.date_required_by)}</td>
           <td style="font-size:12px; color:var(--text-muted);">
             <span class="por-chevron" style="display:inline-block; transition:transform 0.2s; margin-right:5px; font-size:10px;">▶</span>${g.lines.length} item${g.lines.length !== 1 ? 's' : ''}
           </td>
           <td style="text-align:right; padding-right:20px; font-weight:500;">${Utils.formatCurrency(g.price_ex_tax)}</td>
           <td style="text-align:right; padding-right:20px;">${Utils.formatCurrency(g.customer_price)}</td>
-          <td style="text-align:right; padding-right:20px; font-weight:500; color:var(--accent);">${Utils.formatCurrency(g.gross_profit)}</td>
+          <td style="text-align:right; padding-right:20px; font-weight:500; color:var(--green-primary);">${Utils.formatCurrency(g.gross_profit)}</td>
           <td style="text-align:right; padding-right:20px; font-weight:600; color:${marginColor};">${margin.toFixed(1)}%</td>
           <td>${Utils.statusBadge(g.delivery_status)}</td>
         </tr>
         <tr class="por-detail-row" data-po="${g.po_number || ''}" style="display:none;">
-          <td colspan="11" style="padding:0; background:var(--bg-base);">
-            <table style="width:100%; border-collapse:collapse; border-top:1px solid var(--bg-border);">
+          <td colspan="11" style="padding:0; background:var(--bg-primary);">
+            <table style="width:100%; border-collapse:collapse; border-top:1px solid var(--border-color);">
               <thead>
                 <tr style="background:rgba(255,255,255,0.03);">
                   <th style="padding:6px 12px; font-size:10px; color:var(--text-muted); text-align:right; width:36px;">#</th>
@@ -2908,7 +3013,7 @@ setInterval(async () => {
       if (!icon) return;
       if (th.dataset.col === sortCol) {
         icon.textContent = sortDir === 1 ? '↑' : '↓';
-        icon.style.color = 'var(--accent)';
+        icon.style.color = 'var(--green-primary)';
       } else {
         icon.textContent = '↕';
         icon.style.color = 'var(--text-muted)';
@@ -2953,7 +3058,7 @@ setInterval(async () => {
     const BLACK  = [20,  20,  20];
     const GREY   = [80,  80,  80];
     const LIGHT  = [200, 200, 200];
-    const ACCENT = [163, 230, 53];   // lime
+    const ACCENT = [76, 175, 80];   // green-primary
 
     let pageNum = 1;
 
@@ -3049,7 +3154,7 @@ setInterval(async () => {
         },
         footStyles: {
           fillColor: [30, 30, 30],
-          textColor: [163, 230, 53],
+          textColor: [76, 175, 80],
           fontStyle: 'bold',
         },
         alternateRowStyles: { fillColor: [26, 26, 26] },
@@ -3257,7 +3362,7 @@ setInterval(async () => {
     const marginEl = document.getElementById('kpi-margin-badge');
     marginEl.textContent = avgMargin.toFixed(1) + '%';
     marginEl.style.color = Utils.marginColor(avgMargin);
-    marginEl.style.background = avgMargin >= 30 ? 'rgba(163,230,53,0.12)' : avgMargin >= 15 ? 'rgba(245,158,11,0.12)' : 'rgba(239,68,68,0.12)';
+    marginEl.style.background = avgMargin >= 30 ? 'rgba(76,175,80,0.12)' : avgMargin >= 15 ? 'rgba(245,158,11,0.12)' : 'rgba(239,68,68,0.12)';
   }
 
   // ── Render profit-over-time line chart ─────────────────────
@@ -3271,8 +3376,8 @@ setInterval(async () => {
 
     // Green gradient fill
     const grad = ctx.createLinearGradient(0, 0, 0, 220);
-    grad.addColorStop(0,   'rgba(163,230,53,0.18)');
-    grad.addColorStop(1,   'rgba(163,230,53,0)');
+    grad.addColorStop(0,   'rgba(76,175,80,0.18)');
+    grad.addColorStop(1,   'rgba(76,175,80,0)');
 
     profitChart = new Chart(ctx, {
       type: 'line',
@@ -3280,12 +3385,12 @@ setInterval(async () => {
         labels: timeLabels,
         datasets: [{
           data: timeValues,
-          borderColor: '#a3e635',
+          borderColor: '#4CAF50',
           backgroundColor: grad,
           borderWidth: 2,
           pointRadius: timeLabels.length === 1 ? 8 : 4,
-          pointBackgroundColor: '#a3e635',
-          pointBorderColor: '#141414',
+          pointBackgroundColor: '#4CAF50',
+          pointBorderColor: '#1A1A1A',
           pointBorderWidth: 2,
           pointHoverRadius: 6,
           tension: timeLabels.length === 1 ? 0 : 0.4,
@@ -3298,8 +3403,8 @@ setInterval(async () => {
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: '#1c1c1c',
-            borderColor: '#2a2a2a',
+            backgroundColor: '#242424',
+            borderColor: '#2A2A2A',
             borderWidth: 1,
             titleColor: '#a1a1aa',
             bodyColor: '#ffffff',
@@ -3330,14 +3435,12 @@ setInterval(async () => {
 
   // ── Render spend-by-supplier donut ─────────────────────────
   // Generate a consistent, visually distinct color per supplier name
+  // ServiceM8 green palette — cycles through 4 shades per slice
+  const DONUT_COLORS = ['#4CAF50', '#3D9B35', '#6BCB6B', '#2E7A28'];
   function supplierColor(name) {
     let hash = 0;
     for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
-    // Spread hue evenly using golden angle, keep saturation/lightness in a readable range
-    const hue = (hash * 137.508) % 360;
-    const sat = 55 + (hash % 25);       // 55–80%
-    const lit = 45 + ((hash >> 8) % 20); // 45–65%
-    return `hsl(${hue.toFixed(0)},${sat}%,${lit}%)`;
+    return DONUT_COLORS[hash % DONUT_COLORS.length];
   }
 
   function renderSupplierChart({ supplierNames, supplierSpends }) {
@@ -3353,9 +3456,9 @@ setInterval(async () => {
         datasets: [{
           data: supplierSpends,
           backgroundColor: supplierNames.map(supplierColor),
-          borderColor: '#141414',
+          borderColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-surface').trim() || '#1A1A1A',
           borderWidth: 3,
-          hoverBorderColor: '#1c1c1c',
+          hoverBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-elevated').trim() || '#242424',
         }],
       },
       options: {
@@ -3365,8 +3468,8 @@ setInterval(async () => {
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: '#1c1c1c',
-            borderColor: '#2a2a2a',
+            backgroundColor: '#242424',
+            borderColor: '#2A2A2A',
             borderWidth: 1,
             titleColor: '#a1a1aa',
             bodyColor: '#ffffff',
@@ -3407,10 +3510,10 @@ setInterval(async () => {
 
     tbody.innerHTML = recent.map(r => `
       <tr>
-        <td style="font-family:monospace; font-size:12px; color:var(--accent);">${r.po_number || '—'}</td>
+        <td style="font-family:monospace; font-size:12px; color:var(--green-primary);">${r.po_number || '—'}</td>
         <td style="max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${r.supplier_name || '—'}</td>
         <td style="white-space:nowrap;">${Utils.formatDate(r.date)}</td>
-        <td style="font-weight:500; color:#fff;">${Utils.formatCurrency(r.total_supplier_cost)}</td>
+        <td style="font-weight:500; color:var(--text-primary);">${Utils.formatCurrency(r.total_supplier_cost)}</td>
         <td>${Utils.statusBadge(r.delivery_status)}</td>
       </tr>
     `).join('');
@@ -3418,7 +3521,7 @@ setInterval(async () => {
 
   // ── Render delivery status breakdown ──────────────────────
   const STATUS_COLORS = {
-    'Shipped':           '#a3e635',
+    'Shipped':           '#4CAF50',
     'Received':          '#67e8f9',
     'Not Shipped':       '#ef4444',
     'Quote Received':    '#93c5fd',
@@ -3443,7 +3546,7 @@ setInterval(async () => {
             <span style="font-size:12px; color:var(--text-secondary);">${status}</span>
             <span style="font-size:12px; font-weight:600; color:${color};">${count}</span>
           </div>
-          <div style="height:4px; background:var(--bg-elevated); border-radius:2px; overflow:hidden;">
+          <div style="height:4px; background:var(--bg-tertiary); border-radius:2px; overflow:hidden;">
             <div style="height:100%; width:${pct}%; background:${color}; border-radius:2px; transition:width 0.6s ease;"></div>
           </div>
         </div>`;
