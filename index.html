@@ -3488,7 +3488,17 @@ setInterval(async () => {
           },
         },
       },
-      plugins: [],
+      plugins: [{
+        id: 'chartBackground',
+        beforeDraw(chart) {
+          const ctx = chart.ctx;
+          ctx.save();
+          ctx.globalCompositeOperation = 'destination-over';
+          ctx.fillStyle = bgCard;
+          ctx.fillRect(0, 0, chart.width, chart.height);
+          ctx.restore();
+        },
+      }],
     });
 
     // Custom legend
