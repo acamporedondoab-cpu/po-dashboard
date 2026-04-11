@@ -764,6 +764,16 @@
         </svg>
         Discount Threshold
       </div>
+
+      <div class="nav-section-label" style="margin-top:6px;">Tools</div>
+
+      <div class="nav-item" data-page="item-search" tabindex="0" role="button">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        Item Search
+      </div>
     </div>
 
     <!-- Footer -->
@@ -1335,6 +1345,113 @@
 
       </section>
 
+      <!-- ── Page: Item Search ────────────────────────────────── -->
+      <section class="page-section" id="page-item-search">
+
+        <!-- Search bar + date filter -->
+        <div class="card" style="padding:20px;">
+          <div style="font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:14px;">Search items across all jobs</div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <div style="position:relative; flex:1; min-width:220px;">
+              <svg style="position:absolute; left:12px; top:50%; transform:translateY(-50%); width:15px; height:15px; color:var(--text-muted); pointer-events:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input id="is-search" class="input" type="text" placeholder="Type item description, item number or supplier…" style="padding-left:36px; width:100%; font-size:13px;" />
+            </div>
+            <select id="is-date-range" class="input" style="min-width:160px;">
+              <option value="3">Last 3 months</option>
+              <option value="6" selected>Last 6 months</option>
+              <option value="12">Last 12 months</option>
+              <option value="0">All time</option>
+            </select>
+            <button id="is-clear" class="btn btn-ghost" style="white-space:nowrap;">Clear</button>
+          </div>
+        </div>
+
+        <!-- Summary stats -->
+        <div id="is-summary" style="display:none; gap:12px; flex-wrap:wrap;">
+          <div class="card" style="padding:14px 20px; display:flex; align-items:center; gap:10px; flex:1; min-width:140px;">
+            <div style="width:32px; height:32px; border-radius:8px; background:var(--green-deeper); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </div>
+            <div>
+              <div id="is-stat-results" style="font-family:'Syne',sans-serif; font-size:22px; font-weight:700; color:var(--text-primary); line-height:1;">0</div>
+              <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Line Items</div>
+            </div>
+          </div>
+          <div class="card" style="padding:14px 20px; display:flex; align-items:center; gap:10px; flex:1; min-width:140px;">
+            <div style="width:32px; height:32px; border-radius:8px; background:var(--green-deeper); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+            </div>
+            <div>
+              <div id="is-stat-jobs" style="font-family:'Syne',sans-serif; font-size:22px; font-weight:700; color:var(--text-primary); line-height:1;">0</div>
+              <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Jobs</div>
+            </div>
+          </div>
+          <div class="card" style="padding:14px 20px; display:flex; align-items:center; gap:10px; flex:1; min-width:140px;">
+            <div style="width:32px; height:32px; border-radius:8px; background:var(--green-deeper); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div>
+              <div id="is-stat-customers" style="font-family:'Syne',sans-serif; font-size:22px; font-weight:700; color:var(--text-primary); line-height:1;">0</div>
+              <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Customers</div>
+            </div>
+          </div>
+          <div class="card" style="padding:14px 20px; display:flex; align-items:center; gap:10px; flex:1; min-width:160px;">
+            <div style="width:32px; height:32px; border-radius:8px; background:var(--green-deeper); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div>
+              <div id="is-stat-total-cost" style="font-family:'Syne',sans-serif; font-size:22px; font-weight:700; color:var(--text-primary); line-height:1;">$0</div>
+              <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Total Cost of Goods</div>
+            </div>
+          </div>
+          <div class="card" style="padding:14px 20px; display:flex; align-items:center; gap:10px; flex:1; min-width:160px;">
+            <div style="width:32px; height:32px; border-radius:8px; background:var(--green-deeper); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            </div>
+            <div>
+              <div id="is-stat-total-rev" style="font-family:'Syne',sans-serif; font-size:22px; font-weight:700; color:var(--text-primary); line-height:1;">$0</div>
+              <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Total Selling Price</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty state -->
+        <div id="is-empty" class="card" style="padding:60px 20px; text-align:center;">
+          <svg style="width:40px; height:40px; color:var(--text-muted); margin:0 auto 14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <div style="font-family:'Syne',sans-serif; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">Search for any item</div>
+          <div style="font-size:12px; color:var(--text-muted);">Type a description like "belt", "shaft", or "galvanizing" to find all matching line items across every job</div>
+        </div>
+
+        <!-- No results state -->
+        <div id="is-no-results" style="display:none;" class="card">
+          <div style="padding:40px 20px; text-align:center; font-size:13px; color:var(--text-muted);">No items matched your search.</div>
+        </div>
+
+        <!-- Results table -->
+        <div id="is-results-wrap" class="card" style="display:none; padding:0; overflow:hidden;">
+          <div style="overflow-x:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Job #</th>
+                  <th>Item #</th>
+                  <th>Description</th>
+                  <th>Customer</th>
+                  <th>Supplier</th>
+                  <th style="text-align:right; padding-right:16px;">Cost of Goods</th>
+                  <th style="text-align:right; padding-right:16px;">Selling Price</th>
+                  <th style="text-align:right; padding-right:16px;">Gross Profit</th>
+                  <th style="text-align:right; padding-right:16px;">Margin</th>
+                  <th style="white-space:nowrap;">Date Req. By</th>
+                </tr>
+              </thead>
+              <tbody id="is-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
     </div><!-- /#content -->
   </div><!-- /#main -->
 
@@ -1375,6 +1492,7 @@ const PAGE_TITLES = {
   'not-shipped':        'Not Shipped',
   'delivery-tracker':   'Delivery Tracker',
   'discount-threshold': 'Discount Threshold',
+  'item-search':        'Item Search',
 };
 
 // ── Navigation ─────────────────────────────────────────────
@@ -3604,6 +3722,171 @@ setInterval(async () => {
 
   // ── Register for 30s polling ───────────────────────────────
   window.registerPollCallback(renderOverview);
+
+})();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     ITEM SEARCH PAGE
+════════════════════════════════════════════════════════════ -->
+<script>
+(function initItemSearch() {
+
+  const parseMoney = v => parseFloat(String(v || '').replace(/[^0-9.-]/g, '')) || 0;
+  const fmtCurrency = v => {
+    const n = parseMoney(v);
+    return n === 0 ? '—' : '$' + n.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+
+  const _MO = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
+  function toISO(val) {
+    if (!val) return '';
+    if (/^\d{4}-\d{2}-\d{2}/.test(val)) return val.slice(0,10);
+    const m = val.match(/^(\d{1,2})[-\/]([A-Za-z]+)[-\/](\d{4})/);
+    if (m) return `${m[3]}-${_MO[m[2].slice(0,3).toLowerCase()]||'01'}-${m[1].padStart(2,'0')}`;
+    const p = val.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (p) return `${p[3]}-${p[2].padStart(2,'0')}-${p[1].padStart(2,'0')}`;
+    return val;
+  }
+
+  let _allRows = [];
+
+  const elSearch      = document.getElementById('is-search');
+  const elDateRange   = document.getElementById('is-date-range');
+  const elClear       = document.getElementById('is-clear');
+  const elSummary     = document.getElementById('is-summary');
+  const elEmpty       = document.getElementById('is-empty');
+  const elNoResults   = document.getElementById('is-no-results');
+  const elResultsWrap = document.getElementById('is-results-wrap');
+  const elTbody       = document.getElementById('is-tbody');
+  const elStatResults = document.getElementById('is-stat-results');
+  const elStatJobs    = document.getElementById('is-stat-jobs');
+  const elStatCust    = document.getElementById('is-stat-customers');
+  const elStatCost    = document.getElementById('is-stat-total-cost');
+  const elStatRev     = document.getElementById('is-stat-total-rev');
+
+  function STATUS_BADGE(status) {
+    const map = {
+      'Shipped':           { bg:'#14532d', color:'#4CAF50' },
+      'Received':          { bg:'#164e63', color:'#67e8f9' },
+      'Not Shipped':       { bg:'#7f1d1d', color:'#fca5a5' },
+      'Quote Received':    { bg:'#1e3a5f', color:'#93c5fd' },
+      'Request For Quote': { bg:'#3b0764', color:'#d8b4fe' },
+      'Pending':           { bg:'#78350f', color:'#fcd34d' },
+    };
+    const s = map[status] || { bg:'var(--bg-tertiary)', color:'var(--text-secondary)' };
+    return `<span style="display:inline-block; padding:2px 8px; border-radius:5px; font-size:10.5px; font-weight:600; background:${s.bg}; color:${s.color}; white-space:nowrap;">${status || '—'}</span>`;
+  }
+
+  function runSearch() {
+    const query = (elSearch.value || '').trim().toLowerCase();
+    const months = parseInt(elDateRange.value, 10);
+
+    // Show empty state if no query
+    if (!query) {
+      elSummary.style.display = 'none';
+      elEmpty.style.display = '';
+      elNoResults.style.display = 'none';
+      elResultsWrap.style.display = 'none';
+      return;
+    }
+
+    // Date cutoff
+    const cutoff = months > 0
+      ? new Date(Date.now() - months * 30.44 * 24 * 3600 * 1000)
+      : null;
+
+    // Filter rows
+    const results = _allRows.filter(r => {
+      // Date filter
+      if (cutoff) {
+        const iso = toISO(r.date_required_by);
+        if (iso && new Date(iso) < cutoff) return false;
+      }
+      // Text search across description, item_number, supplier_name
+      const haystack = [
+        r.description, r.item_number, r.supplier_name, r.customer_name, r.job_number
+      ].join(' ').toLowerCase();
+      return haystack.includes(query);
+    });
+
+    if (!results.length) {
+      elSummary.style.display = 'none';
+      elEmpty.style.display = 'none';
+      elNoResults.style.display = '';
+      elResultsWrap.style.display = 'none';
+      return;
+    }
+
+    // Compute stats
+    const uniqueJobs      = new Set(results.map(r => r.job_number)).size;
+    const uniqueCustomers = new Set(results.map(r => r.customer_name)).size;
+    const totalCost       = results.reduce((a, r) => a + parseMoney(r.price_ex_tax), 0);
+    const totalRev        = results.reduce((a, r) => a + parseMoney(r.customer_price), 0);
+
+    elStatResults.textContent = results.length;
+    elStatJobs.textContent    = uniqueJobs;
+    elStatCust.textContent    = uniqueCustomers;
+    elStatCost.textContent    = '$' + totalCost.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    elStatRev.textContent     = '$' + totalRev.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    elSummary.style.display     = 'flex';
+    elEmpty.style.display       = 'none';
+    elNoResults.style.display   = 'none';
+    elResultsWrap.style.display = '';
+
+    // Render rows — sort by date descending
+    results.sort((a, b) => {
+      const da = toISO(a.date_required_by), db = toISO(b.date_required_by);
+      return db.localeCompare(da);
+    });
+
+    const margin = r => {
+      const m = parseMoney(r.margin_);
+      if (!m) return '—';
+      const color = m >= 30 ? 'var(--green-primary)' : m >= 15 ? '#f59e0b' : '#ef4444';
+      return `<span style="color:${color}; font-weight:600;">${m.toFixed(1)}%</span>`;
+    };
+
+    elTbody.innerHTML = results.map(r => `
+      <tr>
+        <td style="font-weight:600; color:var(--green-primary); white-space:nowrap;">${r.job_number || '—'}</td>
+        <td style="font-family:monospace; font-size:11.5px; color:var(--text-secondary);">${r.item_number || '—'}</td>
+        <td style="max-width:260px;">${r.description || '—'}</td>
+        <td style="white-space:nowrap;">${r.customer_name || '—'}</td>
+        <td style="white-space:nowrap; color:var(--text-secondary);">${r.supplier_name || '—'}</td>
+        <td style="text-align:right; padding-right:16px; font-variant-numeric:tabular-nums;">${fmtCurrency(r.price_ex_tax)}</td>
+        <td style="text-align:right; padding-right:16px; font-variant-numeric:tabular-nums; color:var(--green-primary);">${fmtCurrency(r.customer_price)}</td>
+        <td style="text-align:right; padding-right:16px; font-variant-numeric:tabular-nums;">${fmtCurrency(r.gross_profit)}</td>
+        <td style="text-align:right; padding-right:16px;">${margin(r)}</td>
+        <td style="white-space:nowrap; color:var(--text-secondary);">${r.date_required_by || '—'}</td>
+      </tr>
+    `).join('');
+  }
+
+  async function load() {
+    const raw = await window.API.get('supplier_view');
+    if (!raw) return;
+    _allRows = raw;
+    // Re-run search in case user already typed something
+    if (elSearch.value.trim()) runSearch();
+  }
+
+  // Events
+  let _debounce;
+  elSearch.addEventListener('input', () => {
+    clearTimeout(_debounce);
+    _debounce = setTimeout(runSearch, 220);
+  });
+  elDateRange.addEventListener('change', runSearch);
+  elClear.addEventListener('click', () => {
+    elSearch.value = '';
+    elDateRange.value = '6';
+    runSearch();
+  });
+
+  load();
+  window.registerPollCallback(load);
 
 })();
 </script>
