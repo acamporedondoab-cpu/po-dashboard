@@ -76,6 +76,10 @@
       --status-not-shipped: #ef4444;
       --status-rfq:         #d8b4fe;
       --status-quote:       #93c5fd;
+
+      /* Skeleton */
+      --sk-base:  #252525;
+      --sk-shine: #383838;
     }
 
     /* ── Light mode ─────────────────────────────────────────── */
@@ -103,6 +107,10 @@
       --status-not-shipped: #dc2626;
       --status-rfq:         #7c3aed;
       --status-quote:       #1d4ed8;
+
+      /* Skeleton */
+      --sk-base:  #EBEBEB;
+      --sk-shine: #DCDCDC;
     }
 
     html[data-theme="light"] .badge-shipped      { background: #C8E6C9; color: #2E7A28; }
@@ -111,7 +119,6 @@
     html[data-theme="light"] .badge-quote        { background: #dbeafe; color: #1d4ed8; }
     html[data-theme="light"] .badge-rfq          { background: #ede9fe; color: #7c3aed; }
     html[data-theme="light"] .badge-pending      { background: #fef3c7; color: #d97706; }
-    html[data-theme="light"] .skeleton           { background: linear-gradient(90deg, #E0E0E0 25%, #D0D0D0 50%, #E0E0E0 75%); background-size: 200% 100%; }
     html[data-theme="light"] body::after         { opacity: 0.01; }
 
     html {
@@ -608,17 +615,72 @@
     .badge-rfq          { background: rgba(216,180,254,0.12); color: #d8b4fe; }
     .badge-pending      { background: rgba(252,211,77,0.12); color: #fcd34d; }
 
-    /* ── Shared loading state ────────────────────────────────── */
+    /* ── Skeleton system ─────────────────────────────────────── */
     .skeleton {
-      background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--border-color) 50%, var(--bg-tertiary) 75%);
+      background: linear-gradient(90deg,
+        var(--sk-base)  25%,
+        var(--sk-shine) 50%,
+        var(--sk-base)  75%
+      );
       background-size: 200% 100%;
-      animation: skeleton-shimmer 1.4s ease-in-out infinite;
+      animation: skeleton-shimmer 1.7s ease-in-out infinite;
       border-radius: 6px;
     }
 
     @keyframes skeleton-shimmer {
       0%   { background-position: 200% 0; }
       100% { background-position: -200% 0; }
+    }
+
+    /* Skeleton size helpers */
+    .sk-cell { height: 12px; border-radius: 3px; display: block; }
+    .sk-line  { height: 10px; border-radius: 3px; display: block; }
+
+    /* KPI card overlay — absolute cover that fades out on load */
+    .sk-cover {
+      position: absolute;
+      inset: 0;
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 2;
+      transition: opacity 0.4s ease;
+      pointer-events: none;
+    }
+    .sk-cover.sk-done {
+      opacity: 0;
+    }
+
+    /* Chart area skeleton — shimmer overlay, fades out on load */
+    .sk-chart-cover {
+      position: absolute;
+      inset: 0;
+      border-radius: 8px;
+      background: linear-gradient(90deg,
+        var(--sk-base)  25%,
+        var(--sk-shine) 50%,
+        var(--sk-base)  75%
+      );
+      background-size: 200% 100%;
+      animation: skeleton-shimmer 1.7s ease-in-out infinite;
+      z-index: 2;
+      transition: opacity 0.4s ease;
+    }
+    .sk-chart-cover.sk-done {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Activity feed skeleton rows */
+    .sk-activity-row {
+      display: flex;
+      gap: 10px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border-color);
+      align-items: flex-start;
     }
 
     /* ── Empty state ─────────────────────────────────────────── */
@@ -1141,6 +1203,14 @@
         <div style="display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:12px;">
 
           <div class="card card-hover" style="position:relative; overflow:hidden;">
+            <div class="sk-cover" aria-hidden="true">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div class="skeleton sk-line" style="width:86px;"></div>
+                <div class="skeleton" style="width:32px; height:32px; border-radius:8px; flex-shrink:0;"></div>
+              </div>
+              <div class="skeleton" style="width:68px; height:22px; border-radius:4px;"></div>
+              <div class="skeleton sk-line" style="width:108px;"></div>
+            </div>
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
               <span style="font-size:11px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-muted);">POs This Month</span>
               <div style="width:32px; height:32px; background:rgba(76,175,80,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
@@ -1153,6 +1223,14 @@
           </div>
 
           <div class="card card-hover" style="position:relative; overflow:hidden;">
+            <div class="sk-cover" aria-hidden="true">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div class="skeleton sk-line" style="width:78px;"></div>
+                <div class="skeleton" style="width:32px; height:32px; border-radius:8px; flex-shrink:0;"></div>
+              </div>
+              <div class="skeleton" style="width:95px; height:22px; border-radius:4px;"></div>
+              <div class="skeleton sk-line" style="width:118px;"></div>
+            </div>
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
               <span style="font-size:11px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-muted);">Supplier Cost</span>
               <div style="width:32px; height:32px; background:rgba(239,68,68,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
@@ -1165,6 +1243,14 @@
           </div>
 
           <div class="card card-hover" style="position:relative; overflow:hidden;">
+            <div class="sk-cover" aria-hidden="true">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div class="skeleton sk-line" style="width:92px;"></div>
+                <div class="skeleton" style="width:32px; height:32px; border-radius:8px; flex-shrink:0;"></div>
+              </div>
+              <div class="skeleton" style="width:88px; height:22px; border-radius:4px;"></div>
+              <div class="skeleton sk-line" style="width:102px;"></div>
+            </div>
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
               <span style="font-size:11px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-muted);">Customer Price</span>
               <div style="width:32px; height:32px; background:rgba(59,130,246,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
@@ -1177,6 +1263,17 @@
           </div>
 
           <div class="card card-hover" style="position:relative; overflow:hidden;">
+            <div class="sk-cover" aria-hidden="true">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div class="skeleton sk-line" style="width:74px;"></div>
+                <div class="skeleton" style="width:32px; height:32px; border-radius:8px; flex-shrink:0;"></div>
+              </div>
+              <div class="skeleton" style="width:82px; height:22px; border-radius:4px;"></div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div class="skeleton" style="width:42px; height:20px; border-radius:20px;"></div>
+                <div class="skeleton sk-line" style="width:42px;"></div>
+              </div>
+            </div>
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
               <span style="font-size:11px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-muted);">Gross Profit</span>
               <div style="width:32px; height:32px; background:rgba(76,175,80,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
@@ -1206,6 +1303,7 @@
               <div style="font-size:11px; color:var(--green-primary); background:rgba(76,175,80,0.08); padding:3px 10px; border-radius:20px; border:1px solid rgba(76,175,80,0.15);">This month</div>
             </div>
             <div style="height:180px; position:relative;">
+              <div id="sk-chart-profit" class="sk-chart-cover" aria-hidden="true"></div>
               <canvas id="chart-profit-time"></canvas>
             </div>
           </div>
@@ -1217,6 +1315,7 @@
               <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Total supplier cost</div>
             </div>
             <div style="height:130px; position:relative; margin-bottom:12px;">
+              <div id="sk-chart-donut" class="sk-chart-cover" style="border-radius:50%; width:110px; height:110px; margin:auto; top:50%; transform:translateY(-50%); left:0; right:0;" aria-hidden="true"></div>
               <canvas id="chart-spend-supplier"></canvas>
             </div>
             <div id="donut-legend" style="display:flex; flex-direction:column; gap:7px;"></div>
@@ -1245,9 +1344,27 @@
                 </tr>
               </thead>
               <tbody id="recent-pos-body">
-                <tr><td colspan="5"><div class="skeleton" style="height:14px; margin:4px 0;"></div></td></tr>
-                <tr><td colspan="5"><div class="skeleton" style="height:14px; margin:4px 0;"></div></td></tr>
-                <tr><td colspan="5"><div class="skeleton" style="height:14px; margin:4px 0;"></div></td></tr>
+                <tr>
+                  <td><div class="skeleton sk-cell" style="width:72px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:115px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:72px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:58px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:70px; border-radius:20px;"></div></td>
+                </tr>
+                <tr>
+                  <td><div class="skeleton sk-cell" style="width:65px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:140px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:72px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:62px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:82px; border-radius:20px;"></div></td>
+                </tr>
+                <tr>
+                  <td><div class="skeleton sk-cell" style="width:78px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:98px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:72px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:55px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:76px; border-radius:20px;"></div></td>
+                </tr>
               </tbody>
             </table>
             </div>
@@ -1331,11 +1448,71 @@
                 </tr>
               </thead>
               <tbody id="por-tbody">
-                <tr><td colspan="10"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
-                <tr><td colspan="10"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
-                <tr><td colspan="10"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
-                <tr><td colspan="10"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
-                <tr><td colspan="10"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+                <tr>
+                  <td style="text-align:center;"><div class="skeleton" style="width:14px; height:14px; border-radius:3px; margin:auto;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:125px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:55px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:78px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:72px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:22px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:62px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:62px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:52px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:38px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:70px; border-radius:20px;"></div></td>
+                </tr>
+                <tr>
+                  <td style="text-align:center;"><div class="skeleton" style="width:14px; height:14px; border-radius:3px; margin:auto;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:148px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:48px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:72px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:72px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:22px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:68px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:68px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:52px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:42px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:84px; border-radius:20px;"></div></td>
+                </tr>
+                <tr>
+                  <td style="text-align:center;"><div class="skeleton" style="width:14px; height:14px; border-radius:3px; margin:auto;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:110px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:62px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:80px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:72px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:22px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:58px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:60px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:48px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:36px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:76px; border-radius:20px;"></div></td>
+                </tr>
+                <tr>
+                  <td style="text-align:center;"><div class="skeleton" style="width:14px; height:14px; border-radius:3px; margin:auto;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:135px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:52px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:74px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:72px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:22px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:64px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:64px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:50px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:40px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:72px; border-radius:20px;"></div></td>
+                </tr>
+                <tr>
+                  <td style="text-align:center;"><div class="skeleton" style="width:14px; height:14px; border-radius:3px; margin:auto;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:120px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:58px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:76px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:72px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:22px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:66px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:66px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:54px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:38px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:80px; border-radius:20px;"></div></td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -1355,9 +1532,21 @@
 
         <!-- Supplier summary cards -->
         <div id="vs-supplier-cards" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:16px;">
-          <div class="card skeleton" style="height:110px;"></div>
-          <div class="card skeleton" style="height:110px;"></div>
-          <div class="card skeleton" style="height:110px;"></div>
+          <div class="card" style="height:110px; display:flex; flex-direction:column; gap:10px; justify-content:center;">
+            <div class="skeleton sk-line" style="width:85px;"></div>
+            <div class="skeleton" style="width:90px; height:20px; border-radius:4px;"></div>
+            <div class="skeleton sk-line" style="width:120px;"></div>
+          </div>
+          <div class="card" style="height:110px; display:flex; flex-direction:column; gap:10px; justify-content:center;">
+            <div class="skeleton sk-line" style="width:72px;"></div>
+            <div class="skeleton" style="width:105px; height:20px; border-radius:4px;"></div>
+            <div class="skeleton sk-line" style="width:100px;"></div>
+          </div>
+          <div class="card" style="height:110px; display:flex; flex-direction:column; gap:10px; justify-content:center;">
+            <div class="skeleton sk-line" style="width:95px;"></div>
+            <div class="skeleton" style="width:82px; height:20px; border-radius:4px;"></div>
+            <div class="skeleton sk-line" style="width:112px;"></div>
+          </div>
         </div>
 
         <!-- Chart + table row -->
@@ -1369,7 +1558,8 @@
               <div style="font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--text-primary);">Spend by Supplier</div>
               <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Total supplier cost</div>
             </div>
-            <div style="position:relative;" id="vs-chart-wrap">
+            <div style="position:relative; min-height:160px;" id="vs-chart-wrap">
+              <div id="sk-chart-vendor" class="sk-chart-cover" aria-hidden="true"></div>
               <canvas id="chart-vendor-bar"></canvas>
             </div>
           </div>
@@ -1391,9 +1581,27 @@
                 </tr>
               </thead>
               <tbody id="vs-tbody">
-                <tr><td colspan="5"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
-                <tr><td colspan="5"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
-                <tr><td colspan="5"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+                <tr>
+                  <td><div class="skeleton sk-cell" style="width:130px;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:22px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:22px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:62px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:55px; margin-left:auto;"></div></td>
+                </tr>
+                <tr>
+                  <td><div class="skeleton sk-cell" style="width:105px;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:22px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:22px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:58px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:50px; margin-left:auto;"></div></td>
+                </tr>
+                <tr>
+                  <td><div class="skeleton sk-cell" style="width:148px;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:22px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:22px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:65px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:52px; margin-left:auto;"></div></td>
+                </tr>
               </tbody>
             </table>
             </div>
@@ -1451,10 +1659,54 @@
                 </tr>
               </thead>
               <tbody id="sv-tbody">
-                <tr><td colspan="10"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
-                <tr><td colspan="10"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
-                <tr><td colspan="10"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
-                <tr><td colspan="10"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+                <tr>
+                  <td><div class="skeleton sk-cell" style="width:128px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:72px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:55px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:78px;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:22px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:62px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:62px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:52px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:38px; margin-left:auto;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:72px; border-radius:20px;"></div></td>
+                </tr>
+                <tr>
+                  <td><div class="skeleton sk-cell" style="width:105px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:72px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:48px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:72px;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:22px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:58px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:58px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:48px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:36px; margin-left:auto;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:80px; border-radius:20px;"></div></td>
+                </tr>
+                <tr>
+                  <td><div class="skeleton sk-cell" style="width:145px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:72px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:60px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:76px;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:22px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:66px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:66px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:55px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:40px; margin-left:auto;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:76px; border-radius:20px;"></div></td>
+                </tr>
+                <tr>
+                  <td><div class="skeleton sk-cell" style="width:118px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:72px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:52px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:74px;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:22px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:60px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:60px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:50px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:36px; margin-left:auto;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:68px; border-radius:20px;"></div></td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -1467,9 +1719,21 @@
 
         <!-- Job summary cards -->
         <div id="cp-job-cards" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:16px;">
-          <div class="card skeleton" style="height:110px;"></div>
-          <div class="card skeleton" style="height:110px;"></div>
-          <div class="card skeleton" style="height:110px;"></div>
+          <div class="card" style="height:110px; display:flex; flex-direction:column; gap:10px; justify-content:center;">
+            <div class="skeleton sk-line" style="width:90px;"></div>
+            <div class="skeleton" style="width:95px; height:20px; border-radius:4px;"></div>
+            <div class="skeleton sk-line" style="width:115px;"></div>
+          </div>
+          <div class="card" style="height:110px; display:flex; flex-direction:column; gap:10px; justify-content:center;">
+            <div class="skeleton sk-line" style="width:78px;"></div>
+            <div class="skeleton" style="width:110px; height:20px; border-radius:4px;"></div>
+            <div class="skeleton sk-line" style="width:95px;"></div>
+          </div>
+          <div class="card" style="height:110px; display:flex; flex-direction:column; gap:10px; justify-content:center;">
+            <div class="skeleton sk-line" style="width:100px;"></div>
+            <div class="skeleton" style="width:88px; height:20px; border-radius:4px;"></div>
+            <div class="skeleton sk-line" style="width:108px;"></div>
+          </div>
         </div>
 
         <!-- Chart + table row -->
@@ -1481,7 +1745,8 @@
               <div style="font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--text-primary);">Revenue by Customer</div>
               <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Total customer price</div>
             </div>
-            <div style="position:relative;" id="cp-chart-wrap">
+            <div style="position:relative; min-height:160px;" id="cp-chart-wrap">
+              <div id="sk-chart-customer" class="sk-chart-cover" aria-hidden="true"></div>
               <canvas id="chart-customer-bar"></canvas>
             </div>
           </div>
@@ -1503,9 +1768,27 @@
                 </tr>
               </thead>
               <tbody id="cp-tbody">
-                <tr><td colspan="5"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
-                <tr><td colspan="5"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
-                <tr><td colspan="5"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+                <tr>
+                  <td><div class="skeleton sk-cell" style="width:118px;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:22px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:62px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:52px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:40px; margin-left:auto;"></div></td>
+                </tr>
+                <tr>
+                  <td><div class="skeleton sk-cell" style="width:138px;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:22px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:58px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:48px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:38px; margin-left:auto;"></div></td>
+                </tr>
+                <tr>
+                  <td><div class="skeleton sk-cell" style="width:105px;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:22px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:65px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:55px; margin-left:auto;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:42px; margin-left:auto;"></div></td>
+                </tr>
               </tbody>
             </table>
             </div>
@@ -1560,8 +1843,26 @@
               </tr>
             </thead>
             <tbody id="ns-tbody">
-              <tr><td colspan="8"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
-              <tr><td colspan="8"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+              <tr>
+                <td><div class="skeleton sk-cell" style="width:72px;"></div></td>
+                <td><div class="skeleton sk-cell" style="width:120px;"></div></td>
+                <td><div class="skeleton sk-cell" style="width:110px;"></div></td>
+                <td><div class="skeleton sk-cell" style="width:55px;"></div></td>
+                <td><div class="skeleton sk-cell" style="width:72px;"></div></td>
+                <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:62px; margin-left:auto;"></div></td>
+                <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:62px; margin-left:auto;"></div></td>
+                <td><div class="skeleton sk-cell" style="width:72px; border-radius:20px;"></div></td>
+              </tr>
+              <tr>
+                <td><div class="skeleton sk-cell" style="width:78px;"></div></td>
+                <td><div class="skeleton sk-cell" style="width:145px;"></div></td>
+                <td><div class="skeleton sk-cell" style="width:98px;"></div></td>
+                <td><div class="skeleton sk-cell" style="width:60px;"></div></td>
+                <td><div class="skeleton sk-cell" style="width:72px;"></div></td>
+                <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:58px; margin-left:auto;"></div></td>
+                <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:58px; margin-left:auto;"></div></td>
+                <td><div class="skeleton sk-cell" style="width:80px; border-radius:20px;"></div></td>
+              </tr>
             </tbody>
           </table>
           </div>
@@ -1613,10 +1914,46 @@
                 </tr>
               </thead>
               <tbody id="dt-tbody">
-                <tr><td colspan="8"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
-                <tr><td colspan="8"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
-                <tr><td colspan="8"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
-                <tr><td colspan="8"><div class="skeleton" style="height:14px; margin:4px 14px;"></div></td></tr>
+                <tr>
+                  <td><div class="skeleton sk-cell" style="width:70px; border-radius:20px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:120px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:78px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:55px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:160px;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:22px; margin-left:auto;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:78px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:76px; border-radius:20px;"></div></td>
+                </tr>
+                <tr>
+                  <td><div class="skeleton sk-cell" style="width:58px; border-radius:20px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:148px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:72px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:60px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:130px;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:22px; margin-left:auto;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:78px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:88px; border-radius:20px;"></div></td>
+                </tr>
+                <tr>
+                  <td><div class="skeleton sk-cell" style="width:62px; border-radius:20px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:105px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:80px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:52px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:148px;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:22px; margin-left:auto;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:78px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:72px; border-radius:20px;"></div></td>
+                </tr>
+                <tr>
+                  <td><div class="skeleton sk-cell" style="width:66px; border-radius:20px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:132px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:76px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:58px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:120px;"></div></td>
+                  <td style="text-align:right; padding-right:16px;"><div class="skeleton sk-cell" style="width:22px; margin-left:auto;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:78px;"></div></td>
+                  <td><div class="skeleton sk-cell" style="width:80px; border-radius:20px;"></div></td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -1773,7 +2110,46 @@
     </div>
 
     <div class="panel-body" id="activity-feed">
-      <!-- Populated by JS -->
+      <div class="sk-activity-row" aria-hidden="true">
+        <div class="skeleton" style="width:28px; height:28px; border-radius:8px; flex-shrink:0; margin-top:1px;"></div>
+        <div style="flex:1; display:flex; flex-direction:column; gap:6px; padding-top:2px;">
+          <div class="skeleton sk-line" style="width:48px;"></div>
+          <div class="skeleton sk-line" style="width:88%;"></div>
+          <div class="skeleton sk-line" style="width:44px;"></div>
+        </div>
+      </div>
+      <div class="sk-activity-row" aria-hidden="true">
+        <div class="skeleton" style="width:28px; height:28px; border-radius:8px; flex-shrink:0; margin-top:1px;"></div>
+        <div style="flex:1; display:flex; flex-direction:column; gap:6px; padding-top:2px;">
+          <div class="skeleton sk-line" style="width:60px;"></div>
+          <div class="skeleton sk-line" style="width:75%;"></div>
+          <div class="skeleton sk-line" style="width:38px;"></div>
+        </div>
+      </div>
+      <div class="sk-activity-row" aria-hidden="true">
+        <div class="skeleton" style="width:28px; height:28px; border-radius:8px; flex-shrink:0; margin-top:1px;"></div>
+        <div style="flex:1; display:flex; flex-direction:column; gap:6px; padding-top:2px;">
+          <div class="skeleton sk-line" style="width:52px;"></div>
+          <div class="skeleton sk-line" style="width:92%;"></div>
+          <div class="skeleton sk-line" style="width:50px;"></div>
+        </div>
+      </div>
+      <div class="sk-activity-row" aria-hidden="true">
+        <div class="skeleton" style="width:28px; height:28px; border-radius:8px; flex-shrink:0; margin-top:1px;"></div>
+        <div style="flex:1; display:flex; flex-direction:column; gap:6px; padding-top:2px;">
+          <div class="skeleton sk-line" style="width:48px;"></div>
+          <div class="skeleton sk-line" style="width:80%;"></div>
+          <div class="skeleton sk-line" style="width:42px;"></div>
+        </div>
+      </div>
+      <div class="sk-activity-row" aria-hidden="true">
+        <div class="skeleton" style="width:28px; height:28px; border-radius:8px; flex-shrink:0; margin-top:1px;"></div>
+        <div style="flex:1; display:flex; flex-direction:column; gap:6px; padding-top:2px;">
+          <div class="skeleton sk-line" style="width:56px;"></div>
+          <div class="skeleton sk-line" style="width:70%;"></div>
+          <div class="skeleton sk-line" style="width:46px;"></div>
+        </div>
+      </div>
     </div>
 
     <div class="panel-footer">
@@ -2474,6 +2850,8 @@ setInterval(async () => {
         },
       },
     });
+    const skCustomer = document.getElementById('sk-chart-customer');
+    if (skCustomer) skCustomer.classList.add('sk-done');
   }
 
   // ── Table ──────────────────────────────────────────────────
@@ -3121,6 +3499,8 @@ setInterval(async () => {
         },
       },
     });
+    const skVendor = document.getElementById('sk-chart-vendor');
+    if (skVendor) skVendor.classList.add('sk-done');
   }
 
   // ── Render breakdown table ─────────────────────────────────
@@ -3813,6 +4193,8 @@ setInterval(async () => {
     marginEl.textContent = avgMargin.toFixed(1) + '%';
     marginEl.style.color = Utils.marginColor(avgMargin);
     marginEl.style.background = avgMargin >= 30 ? 'rgba(76,175,80,0.12)' : avgMargin >= 15 ? 'rgba(245,158,11,0.12)' : 'rgba(239,68,68,0.12)';
+    // Dismiss KPI card skeleton covers
+    document.querySelectorAll('#page-overview .sk-cover').forEach(el => el.classList.add('sk-done'));
   }
 
   // ── Render profit-over-time line chart ─────────────────────
@@ -3881,6 +4263,8 @@ setInterval(async () => {
         },
       },
     });
+    const skProfit = document.getElementById('sk-chart-profit');
+    if (skProfit) skProfit.classList.add('sk-done');
   }
 
   // ── Render spend-by-supplier donut ─────────────────────────
@@ -3905,6 +4289,9 @@ setInterval(async () => {
     const bgSecondary = cs.getPropertyValue('--bg-secondary').trim() || '#1A1A1A';
     const textMuted   = cs.getPropertyValue('--text-muted').trim()   || '#666666';
     const textPrimary = cs.getPropertyValue('--text-primary').trim() || '#FFFFFF';
+
+    const skDonut = document.getElementById('sk-chart-donut');
+    if (skDonut) skDonut.classList.add('sk-done');
 
     supplierChart = new Chart(canvas.getContext('2d'), {
       type: 'doughnut',
@@ -4035,6 +4422,8 @@ setInterval(async () => {
       document.getElementById('kpi-profit').textContent = '$0.00';
       const marginEl = document.getElementById('kpi-margin-badge');
       if (marginEl) { marginEl.textContent = '0.0%'; }
+      // Clear all overview skeletons even when no data
+      document.querySelectorAll('#page-overview .sk-cover, #sk-chart-profit, #sk-chart-donut').forEach(el => el.classList.add('sk-done'));
       return;
     }
 
