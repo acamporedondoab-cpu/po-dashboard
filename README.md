@@ -45,7 +45,7 @@ PO Dashboard is the frontend visualization layer for the existing PO Parser pipe
 /api            Backend API routes
 /Assets         UI preview images / static assets
 /checkpoints    Project milestone snapshots
-/docs           Internal documentation / specifications
+/docs           Internal project documentation and specifications
 ```
 
 ---
