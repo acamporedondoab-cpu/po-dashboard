@@ -5,22 +5,23 @@
 </p>
 
 <p align="center">
-  <img src="./Assets/dashboard-preview.png" width="100%" />
+  <img src="./Assets/dashboard-preview.png" width="90%" />
 </p>
 
 ---
 
-## Live Demo
-**Production URL:** https://po-dashboard-two.vercel.app/
+## 🚀 Live Demo
+**Production URL:**  
+https://po-dashboard-two.vercel.app/
 
 ---
 
-## Overview
-PO Dashboard is the frontend visualization layer for the existing PO Parser pipeline. It consumes Google Sheets data generated from incoming Purchase Order PDFs and displays business analytics in a premium dashboard UI.
+## 📖 Overview
+PO Dashboard is the frontend visualization layer for the existing PO Parser pipeline. It consumes Google Sheets data generated from incoming Purchase Order PDFs and transforms it into actionable business analytics through a premium dashboard UI.
 
 ---
 
-## Features
+## ✨ Features
 - KPI Overview Cards  
 - Profit & Spend Analytics Charts  
 - Purchase Order Register  
@@ -31,7 +32,7 @@ PO Dashboard is the frontend visualization layer for the existing PO Parser pipe
 
 ---
 
-## Tech Stack
+## 🛠 Tech Stack
 - **Frontend:** HTML, TailwindCSS, Vanilla JavaScript, Chart.js  
 - **Backend:** Vercel Serverless Functions  
 - **Data Source:** Google Sheets API  
@@ -39,17 +40,17 @@ PO Dashboard is the frontend visualization layer for the existing PO Parser pipe
 
 ---
 
-## Project Structure
+## 📂 Project Structure
 ```plaintext
 /api            Backend API routes
-/assets         UI preview images / static assets
+/Assets         UI preview images / static assets
 /checkpoints    Project milestone snapshots
-/docs           Internal documentation/specs
+/docs           Internal documentation / specifications
 ```
 
 ---
 
-## Environment Variables
+## 🔐 Environment Variables
 ```env
 SPREADSHEET_ID=
 GOOGLE_CREDENTIALS=
@@ -57,7 +58,7 @@ GOOGLE_CREDENTIALS=
 
 ---
 
-## Local Development
+## 💻 Local Development
 ```bash
 npm install
 node serve.mjs
@@ -65,10 +66,10 @@ node serve.mjs
 
 ---
 
-## Deployment
+## 🚢 Deployment
 Deployed via Vercel with environment variables configured in the Vercel dashboard.
 
 ---
 
-## Status
-Currently in active development / production refinement.
+## 📌 Status
+Currently in active development and production refinement.
