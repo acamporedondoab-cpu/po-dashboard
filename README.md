@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img src="./Assets/dashboard-preview.png" width="90%" />
+  <img src="./assets/dashboard-preview.png" /> width="90%" />
 </p>
 
 ---
@@ -46,6 +46,7 @@ PO Dashboard is the frontend visualization layer for the existing PO Parser pipe
 /Assets         UI preview images / static assets
 /checkpoints    Project milestone snapshots
 /docs           Internal project documentation and specifications
+/scripts        Utility scripts for local development and automation
 ```
 
 ---
@@ -61,7 +62,7 @@ GOOGLE_CREDENTIALS=
 ## 💻 Local Development
 ```bash
 npm install
-node serve.mjs
+node scripts/serve.mjs
 ```
 
 ---
