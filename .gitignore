@@ -3,9 +3,11 @@
 
 # Env files
 .env
+.env.local
+.env*
 
 # Node
-node_modules
+node_modules/
 
 # Logs
 *.log
@@ -18,4 +20,3 @@ purchased-order-tracker-*.json
 *-credentials.json
 *-service-account.json
 
-.env*
