@@ -7,7 +7,7 @@ ServiceM8 / Field Service (internal tool)
 2026-04-13
 
 ## Last Deployed Commit
-pending — checkpoint-012 login polish
+86e5e79 — style: login UI premium polish — card depth, inputs, button, typography
 
 ## Current State
 Fully functional SPA dashboard with login wall, polished UI, and full empty state coverage. Auth protects both frontend and /api/sheets. All charts and tables have graceful no-data states.
