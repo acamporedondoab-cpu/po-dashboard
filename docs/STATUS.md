@@ -29,7 +29,6 @@ Fully functional SPA dashboard with login wall, polished UI, and full empty stat
 - Item Search — search items via ServiceM8 API
 
 ## Known Issues / Pending
-- `crop_activity.mjs` temporary file in project root — safe to delete
 - PO parser run is manual — could be scheduled via Windows Task Scheduler
 
 ## Checkpoints
