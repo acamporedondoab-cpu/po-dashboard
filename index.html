@@ -161,41 +161,37 @@
 
     .sidebar-logo {
       padding: 16px 20px;
-      border-bottom: 1px solid rgba(0,0,0,0.15);
-      background: #3D9B35;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: transparent;
     }
 
     .sidebar-logo-mark {
-      width: 40px;
-      height: 40px;
-      background: rgba(255,255,255,0.2);
-      border-radius: 10px;
+      width: 36px;
+      height: 36px;
+      background: #3D9B35;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-    }
-
-    .sidebar-logo-mark svg {
-      width: 20px;
-      height: 20px;
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
       color: #ffffff;
+      letter-spacing: 0.03em;
     }
 
     .sidebar-logo-title {
       font-family: 'Inter', sans-serif;
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
       color: #ffffff !important;
-      line-height: 1.15;
+      line-height: 1.2;
     }
 
     .sidebar-logo-sub {
-      font-size: 13px;
-      color: rgba(255,255,255,0.75) !important;
-      margin-top: 3px;
-      letter-spacing: 0.01em;
+      display: none;
     }
 
     .sidebar-nav {
@@ -355,12 +351,23 @@
       gap: 16px;
     }
 
-    .topbar-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 15px;
-      font-weight: 700;
+    #topbar-date-day {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      line-height: 1;
+    }
+    #topbar-date-full {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0;
       color: var(--text-primary);
-      letter-spacing: -0.02em;
+      margin-top: 3px;
+      line-height: 1;
     }
 
     .topbar-meta {
@@ -684,25 +691,65 @@
     }
 
     /* ── Empty state ─────────────────────────────────────────── */
+    @keyframes emptyFadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    /* Chart / widget empty overlay — fills the chart's position:relative container */
+    .chart-empty-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+    .chart-empty-overlay .empty-state { padding: 12px; }
+    /* Inline (non-chart) empty state — for status bars, legend areas */
+    .inline-empty .empty-state { padding: 24px 16px; }
     .empty-state {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 60px 20px;
-      color: var(--text-muted);
+      padding: 44px 24px;
       text-align: center;
-      gap: 8px;
+      animation: emptyFadeIn 0.4s ease both;
     }
-
-    .empty-state svg {
-      width: 36px;
-      height: 36px;
-      opacity: 0.3;
-      margin-bottom: 4px;
+    .empty-state-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: rgba(76,175,80,0.08);
+      border: 1px solid rgba(76,175,80,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
     }
-
-    .empty-state p { font-size: 13px; }
+    html[data-theme="light"] .empty-state-icon {
+      background: rgba(76,175,80,0.07);
+      border-color: rgba(76,175,80,0.15);
+    }
+    .empty-state-icon svg {
+      width: 22px;
+      height: 22px;
+      color: #4CAF50;
+      opacity: 0.75;
+    }
+    .empty-state-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 5px;
+      letter-spacing: -0.01em;
+    }
+    .empty-state-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      max-width: 220px;
+    }
 
     /* ── Buttons ─────────────────────────────────────────────── */
     .btn {
@@ -809,6 +856,18 @@
       background-repeat: no-repeat;
       background-position: right 10px center;
       padding-right: 30px;
+    }
+
+    /* Dark mode: style native option dropdown */
+    html[data-theme="dark"] select.input option {
+      background: #1E1E1E;
+      color: #FFFFFF;
+    }
+
+    html[data-theme="dark"] select.input option:checked,
+    html[data-theme="dark"] select.input option:hover {
+      background: #4CAF50;
+      color: #FFFFFF;
     }
 
     /* ── Page transitions ────────────────────────────────────── */
@@ -1031,6 +1090,107 @@
 </head>
 <body>
 
+<!-- ══════════════════════════════════════════════════════════
+     LOGIN SCREEN
+══════════════════════════════════════════════════════════ -->
+<style>
+@property --shine-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes shine-spin {
+  to { --shine-angle: 360deg; }
+}
+#login-card-wrapper {
+  position: relative;
+  border-radius: 14px;
+}
+#login-card-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  padding: 1.5px;
+  background: conic-gradient(from var(--shine-angle) at 50% 50%,
+    transparent 0%,
+    transparent 34%,
+    rgba(76,175,80,0.15) 41%,
+    #4CAF50 46%,
+    #86efac 50%,
+    #4CAF50 54%,
+    rgba(76,175,80,0.15) 59%,
+    transparent 66%,
+    transparent 100%
+  );
+  animation: shine-spin 4s linear infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 2;
+}
+#login-card {
+  position: relative;
+  z-index: 1;
+  border-radius: 13px;
+  padding: 28px;
+  background: rgba(255,255,255,0.45);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+html[data-theme="dark"] #login-card {
+  background: rgba(20,20,20,0.45);
+}
+</style>
+<div id="login-screen" style="position:fixed; inset:0; z-index:1000; background:var(--bg-primary); display:flex; align-items:center; justify-content:center;">
+  <div style="width:100%; max-width:360px; padding:0 24px;">
+
+    <!-- Header -->
+    <div style="margin-bottom:20px; text-align:center;">
+      <div style="font-family:'Syne',sans-serif; font-size:24px; font-weight:700; color:var(--text-primary); letter-spacing:-0.03em; line-height:1.2;">Welcome Back</div>
+      <div style="font-size:13px; color:var(--text-muted); margin-top:4px;">Sign in to continue</div>
+    </div>
+
+    <!-- Card with shine border -->
+    <div id="login-card-wrapper">
+      <!-- Card -->
+      <div id="login-card">
+
+        <form id="login-form" autocomplete="on">
+          <div style="margin-bottom:16px;">
+            <label for="login-username" style="display:block; font-size:11px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; letter-spacing:0.06em; text-transform:uppercase;">Username</label>
+            <input id="login-username" name="username" type="text" autocomplete="username"
+              style="width:100%; padding:10px 12px; background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary); font-size:14px; font-family:'DM Sans',sans-serif; outline:none; box-sizing:border-box;"
+              onfocus="this.style.borderColor='#4CAF50'; this.style.boxShadow='0 0 0 1px rgba(76,175,80,0.3)';"
+              onblur="this.style.borderColor='var(--border-color)'; this.style.boxShadow='none';" />
+          </div>
+
+          <div style="margin-bottom:20px;">
+            <label for="login-password" style="display:block; font-size:11px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; letter-spacing:0.06em; text-transform:uppercase;">Password</label>
+            <input id="login-password" name="password" type="password" autocomplete="current-password"
+              style="width:100%; padding:10px 12px; background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary); font-size:14px; font-family:'DM Sans',sans-serif; outline:none; box-sizing:border-box;"
+              onfocus="this.style.borderColor='#4CAF50'; this.style.boxShadow='0 0 0 1px rgba(76,175,80,0.3)';"
+              onblur="this.style.borderColor='var(--border-color)'; this.style.boxShadow='none';" />
+          </div>
+
+          <div id="login-error" style="display:none; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:8px; padding:10px 12px; font-size:13px; color:#ef4444; margin-bottom:16px;"></div>
+
+          <button type="submit" id="login-btn"
+            style="width:100%; padding:11px; background:#4CAF50; border:none; border-radius:8px; color:#ffffff; font-size:14px; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer; letter-spacing:0.01em;"
+            onmouseenter="if(!this.disabled) this.style.background='#3D9B35';"
+            onmouseleave="if(!this.disabled) this.style.background='#4CAF50';">
+            Sign in
+          </button>
+        </form>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <div id="app">
 
   <!-- ═══════════════════════════════════════════════════════════
@@ -1040,18 +1200,9 @@
     <!-- Logo -->
     <div class="sidebar-logo">
       <div style="display:flex; align-items:center; gap:12px;">
-        <div class="sidebar-logo-mark">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-            <line x1="16" y1="13" x2="8" y2="13"/>
-            <line x1="16" y1="17" x2="8" y2="17"/>
-            <polyline points="10 9 9 9 8 9"/>
-          </svg>
-        </div>
+        <div class="sidebar-logo-mark">AC</div>
         <div>
           <div class="sidebar-logo-title">PO Dashboard</div>
-          <div class="sidebar-logo-sub">Field Service</div>
         </div>
       </div>
     </div>
@@ -1154,7 +1305,7 @@
         <div class="user-avatar">S</div>
         <div>
           <div style="font-size:12.5px; font-weight:500; color:var(--text-primary); line-height:1.2;">Shiv</div>
-          <div style="font-size:11px; color:var(--text-muted);">Field Service</div>
+          <div style="font-size:11px; color:var(--text-muted);">Administrator</div>
         </div>
       </div>
     </div>
@@ -1167,8 +1318,9 @@
 
     <!-- Top bar -->
     <div id="topbar">
-      <div>
-        <div class="topbar-title" id="topbar-title">Overview</div>
+      <div id="topbar-date">
+        <div id="topbar-date-day"></div>
+        <div id="topbar-date-full"></div>
       </div>
       <div class="topbar-right">
         <div class="last-updated">
@@ -1188,6 +1340,17 @@
           </svg>
           <svg id="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+        <!-- Logout -->
+        <button id="logout-btn" title="Sign out"
+          style="width:34px; height:34px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-tertiary); color:var(--text-secondary); cursor:pointer; display:flex; align-items:center; justify-content:center;"
+          onmouseenter="this.style.borderColor='#ef4444'; this.style.color='#ef4444';"
+          onmouseleave="this.style.borderColor='var(--border-color)'; this.style.color='var(--text-secondary)';">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
           </svg>
         </button>
       </div>
@@ -1310,15 +1473,17 @@
 
           <!-- Donut chart: Spend by Supplier -->
           <div class="card card-hover">
-            <div style="margin-bottom:20px;">
+            <div style="margin-bottom:14px;">
               <div style="font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--text-primary);">Spend by Supplier</div>
               <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Total supplier cost</div>
             </div>
-            <div style="height:130px; position:relative; margin-bottom:12px;">
-              <div id="sk-chart-donut" class="sk-chart-cover" style="border-radius:50%; width:110px; height:110px; margin:auto; top:50%; transform:translateY(-50%); left:0; right:0;" aria-hidden="true"></div>
-              <canvas id="chart-spend-supplier"></canvas>
+            <div style="display:flex; align-items:center; gap:16px;">
+              <div style="flex-shrink:0; width:160px; height:160px; position:relative;">
+                <div id="sk-chart-donut" class="sk-chart-cover" style="border-radius:50%; width:140px; height:140px; margin:auto; top:50%; transform:translateY(-50%); left:0; right:0;" aria-hidden="true"></div>
+                <canvas id="chart-spend-supplier"></canvas>
+              </div>
+              <div id="donut-legend" style="display:flex; flex-direction:column; gap:9px; flex:1; min-width:0;"></div>
             </div>
-            <div id="donut-legend" style="display:flex; flex-direction:column; gap:7px;"></div>
           </div>
 
         </div><!-- /charts row -->
@@ -2069,7 +2234,7 @@
 
         <!-- No results state -->
         <div id="is-no-results" style="display:none;" class="card">
-          <div style="padding:40px 20px; text-align:center; font-size:13px; color:var(--text-muted);">No items matched your search.</div>
+          <div id="is-no-results-inner"></div>
         </div>
 
         <!-- Results table -->
@@ -2165,24 +2330,130 @@
 <!-- ═══════════════════════════════════════════════════════════
      JAVASCRIPT — Navigation + Data Layer
 ════════════════════════════════════════════════════════════ -->
+
+<!-- ── Auth ──────────────────────────────────────────────────── -->
 <script>
-// ── Page titles ────────────────────────────────────────────
-const PAGE_TITLES = {
-  'overview':           'Overview',
-  'po-register':        'PO Register',
-  'vendor-spend':       'Vendor Spend',
-  'supplier-view':      'Supplier View',
-  'customer-pricing':   'Customer Pricing',
-  'not-shipped':        'Not Shipped',
-  'delivery-tracker':   'Delivery Tracker',
-  'discount-threshold': 'Discount Threshold',
-  'item-search':        'Item Search',
-};
+(function() {
+  const LOGIN_SCREEN = document.getElementById('login-screen');
+  const APP          = document.getElementById('app');
+  const FORM         = document.getElementById('login-form');
+  const ERR          = document.getElementById('login-error');
+  const BTN          = document.getElementById('login-btn');
+  const LOGOUT_BTN   = document.getElementById('logout-btn');
+  const TOKEN_KEY    = 'po-auth-token';
+
+  // Hide app immediately — no flash of dashboard before auth check
+  APP.style.display = 'none';
+
+  function getStoredToken() {
+    const t = localStorage.getItem(TOKEN_KEY);
+    if (!t) return null;
+    try {
+      const parts = t.split('.');
+      if (parts.length !== 3) return null;
+      // Decode payload (base64url → base64 → JSON)
+      const padded = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const claims = JSON.parse(atob(padded + '=='.slice((padded.length % 4) || 4)));
+      if (Date.now() / 1000 > claims.exp) { localStorage.removeItem(TOKEN_KEY); return null; }
+      return t;
+    } catch { return null; }
+  }
+
+  function showApp(token) {
+    window.AUTH_TOKEN = token;
+    LOGIN_SCREEN.style.display = 'none';
+    APP.style.display = 'flex';
+  }
+
+  function showLogin() {
+    window.AUTH_TOKEN = null;
+    APP.style.display = 'none';
+    LOGIN_SCREEN.style.display = 'flex';
+  }
+
+  function logout() {
+    localStorage.removeItem(TOKEN_KEY);
+    showLogin();
+  }
+
+  // ── Init ────────────────────────────────────────────────────
+  const stored = getStoredToken();
+  if (stored) {
+    showApp(stored);
+  } else {
+    showLogin();
+  }
+
+  // ── Login form ──────────────────────────────────────────────
+  FORM.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value;
+    if (!username || !password) {
+      ERR.textContent = 'Please enter your username and password.';
+      ERR.style.display = 'block';
+      return;
+    }
+    BTN.disabled = true;
+    BTN.textContent = 'Signing in…';
+    BTN.style.opacity = '0.7';
+    ERR.style.display = 'none';
+    try {
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        ERR.textContent = json.error || 'Sign in failed. Please try again.';
+        ERR.style.display = 'block';
+        return;
+      }
+      localStorage.setItem(TOKEN_KEY, json.token);
+      showApp(json.token);
+    } catch {
+      ERR.textContent = 'Network error — please check your connection.';
+      ERR.style.display = 'block';
+    } finally {
+      BTN.disabled = false;
+      BTN.textContent = 'Sign in';
+      BTN.style.opacity = '1';
+    }
+  });
+
+  // ── Logout ──────────────────────────────────────────────────
+  LOGOUT_BTN.addEventListener('click', logout);
+
+  // Exposed for API layer to call on 401
+  window.authLogout = logout;
+})();
+</script>
+
+<script>
+// ── Empty state helper ─────────────────────────────────────
+function emptyState(svgInner, title, desc) {
+  return `<div class="empty-state">
+    <div class="empty-state-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${svgInner}</svg>
+    </div>
+    <div class="empty-state-title">${title}</div>
+    <div class="empty-state-desc">${desc}</div>
+  </div>`;
+}
+
+// ── Topbar date ────────────────────────────────────────────
+(function() {
+  const now = new Date();
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('topbar-date-day').textContent = days[now.getDay()];
+  document.getElementById('topbar-date-full').textContent = `${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
+})();
 
 // ── Navigation ─────────────────────────────────────────────
 const navItems = document.querySelectorAll('.nav-item');
 const pageSections = document.querySelectorAll('.page-section');
-const topbarTitle = document.getElementById('topbar-title');
 
 function navigateTo(pageId) {
   // Update nav items
@@ -2197,9 +2468,6 @@ function navigateTo(pageId) {
     const isActive = section.id === `page-${pageId}`;
     section.classList.toggle('active', isActive);
   });
-
-  // Update topbar title
-  topbarTitle.textContent = PAGE_TITLES[pageId] || pageId;
 
   // Scroll content area to top
   document.getElementById('content').scrollTop = 0;
@@ -2266,7 +2534,10 @@ window.SAMPLE_DATA = {
 window.API = {
   async get(tab) {
     try {
-      const res = await fetch(`/api/sheets?tab=${tab}`);
+      const res = await fetch(`/api/sheets?tab=${tab}`, {
+        headers: window.AUTH_TOKEN ? { 'Authorization': `Bearer ${window.AUTH_TOKEN}` } : {},
+      });
+      if (res.status === 401) { window.authLogout?.(); return null; }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       const data = json.data || [];
@@ -2281,9 +2552,13 @@ window.API = {
   async updateThreshold(supplier_name, threshold_amount) {
     const res = await fetch('/api/sheets', {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(window.AUTH_TOKEN ? { 'Authorization': `Bearer ${window.AUTH_TOKEN}` } : {}),
+      },
       body: JSON.stringify({ supplier_name, threshold_amount }),
     });
+    if (res.status === 401) { window.authLogout?.(); throw new Error('Session expired'); }
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();
   },
@@ -2492,7 +2767,11 @@ setInterval(async () => {
 
   function render(items) {
     if (!items || items.length === 0) {
-      feed.innerHTML = '<div style="padding:20px;color:var(--text-muted);font-size:12px;text-align:center;">No activity yet</div>';
+      feed.innerHTML = emptyState(
+        '<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>',
+        'No activity yet',
+        'New POs, enrichments, and status changes will appear here in real time.'
+      );
       badge.textContent = '0';
       return;
     }
@@ -2779,7 +3058,10 @@ setInterval(async () => {
   function renderCards(jobs) {
     const wrap = document.getElementById('cp-job-cards');
     if (!wrap) return;
-    if (!jobs.length) { wrap.innerHTML = ''; return; }
+    if (!jobs.length) {
+      wrap.innerHTML = `<div class="inline-empty" style="grid-column:1/-1;">${emptyState('<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>', 'No customers yet', 'Customer cards will appear once pricing data is loaded.')}</div>`;
+      return;
+    }
     wrap.innerHTML = jobs.slice(0, 6).map((j, i) => {
       const color = CARD_COLORS[i % CARD_COLORS.length];
       return `
@@ -2811,6 +3093,30 @@ setInterval(async () => {
   function renderBarChart(jobs) {
     const wrap = document.getElementById('cp-chart-wrap');
     if (!wrap) return;
+
+    if (!jobs || !jobs.length) {
+      if (_cpChart) { _cpChart.destroy(); _cpChart = null; }
+      const canvas = document.getElementById('chart-customer-bar');
+      if (canvas) canvas.style.display = 'none';
+      wrap.style.height = 'auto';
+      const prev = wrap.querySelector('.chart-empty-overlay');
+      if (prev) prev.remove();
+      const overlay = document.createElement('div');
+      overlay.className = 'chart-empty-overlay';
+      overlay.style.position = 'relative';
+      overlay.innerHTML = emptyState(
+        '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+        'No customer data',
+        'Revenue by customer will appear once pricing data is available.'
+      );
+      wrap.appendChild(overlay);
+      return;
+    }
+
+    const canvas = document.getElementById('chart-customer-bar');
+    if (canvas) canvas.style.display = '';
+    const prev = wrap.querySelector('.chart-empty-overlay');
+    if (prev) prev.remove();
     const labels  = jobs.map(j => j.customer);
     const data    = jobs.map(j => j.revenue);
     const colors  = jobs.map((_, i) => CARD_COLORS[i % CARD_COLORS.length]);
@@ -2859,7 +3165,7 @@ setInterval(async () => {
     const tbody = document.getElementById('cp-tbody');
     if (!tbody) return;
     if (!jobs.length) {
-      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state" style="padding:20px;"><p>No data</p></div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="5">${emptyState('<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>', 'No pricing data', 'Customer pricing will appear here once orders are synced.')}</td></tr>`;
       return;
     }
     const totalRev = jobs.reduce((a, j) => a + j.revenue, 0);
@@ -2949,7 +3255,7 @@ setInterval(async () => {
     if (!tbody) return;
 
     if (!rows.length) {
-      tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state" style="padding:30px; text-align:center;"><p style="color:var(--status-received);">All POs shipped</p></div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="8">${emptyState('<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>', 'All caught up', 'Every purchase order has been shipped. Nothing pending.')}</td></tr>`;
       return;
     }
 
@@ -3063,7 +3369,7 @@ setInterval(async () => {
     if (!tbody) return;
 
     if (!enriched.length) {
-      tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state" style="padding:30px;"><p>No delivery data</p></div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="8">${emptyState('<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 4v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>', 'No deliveries', 'Active deliveries will appear here once orders are in transit.')}</td></tr>`;
       return;
     }
 
@@ -3243,7 +3549,7 @@ setInterval(async () => {
     if (countEl) countEl.textContent = `${n.toLocaleString()} PO${n !== 1 ? 's' : ''} (${filtered.length} lines)`;
 
     if (!n) {
-      tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state" style="padding:30px;"><p>No results match your filters</p></div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="10">${emptyState('<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>', 'No matches found', 'Try adjusting your search or clearing some filters.')}</td></tr>`;
       return;
     }
 
@@ -3453,6 +3759,27 @@ setInterval(async () => {
     if (!canvas || !wrap) return;
     if (vendorChart) { vendorChart.destroy(); vendorChart = null; }
 
+    if (!suppliers || !suppliers.length) {
+      canvas.style.display = 'none';
+      wrap.style.height = 'auto';
+      const prev = wrap.querySelector('.chart-empty-overlay');
+      if (prev) prev.remove();
+      const overlay = document.createElement('div');
+      overlay.className = 'chart-empty-overlay';
+      overlay.style.position = 'relative';
+      overlay.innerHTML = emptyState(
+        '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+        'No vendor data',
+        'Supplier spend breakdown will appear here once orders are synced.'
+      );
+      wrap.appendChild(overlay);
+      return;
+    }
+
+    canvas.style.display = '';
+    const prev = wrap.querySelector('.chart-empty-overlay');
+    if (prev) prev.remove();
+
     const barHeight = 36;
     const chartH    = Math.max(suppliers.length * barHeight + 60, 160);
     wrap.style.height = chartH + 'px';
@@ -3508,7 +3835,7 @@ setInterval(async () => {
     const tbody = document.getElementById('vs-tbody');
     if (!tbody) return;
     if (!suppliers.length) {
-      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state" style="padding:20px;"><p>No data</p></div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="5">${emptyState('<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>', 'No spend data', 'Supplier spend will appear here once purchase orders are loaded.')}</td></tr>`;
       return;
     }
     const totalSpend = suppliers.reduce((a, s) => a + s.spend, 0);
@@ -3707,7 +4034,7 @@ setInterval(async () => {
     if (countEl) countEl.textContent = `${total.toLocaleString()} purchase order${total !== 1 ? 's' : ''}`;
 
     if (!page.length) {
-      tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state" style="padding:30px;"><p>No results match your filters</p></div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="11">${emptyState('<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>', 'No matches found', 'Try adjusting your search or clearing some filters.')}</td></tr>`;
       renderPagination(total);
       return;
     }
@@ -4204,6 +4531,28 @@ setInterval(async () => {
 
     if (profitChart) { profitChart.destroy(); profitChart = null; }
 
+    const skProfit = document.getElementById('sk-chart-profit');
+    const wrap = canvas.parentElement;
+
+    // Remove any previous overlay
+    const prev = wrap.querySelector('.chart-empty-overlay');
+    if (prev) prev.remove();
+
+    if (!timeLabels || !timeLabels.length) {
+      canvas.style.display = 'none';
+      const overlay = document.createElement('div');
+      overlay.className = 'chart-empty-overlay';
+      overlay.innerHTML = emptyState(
+        '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+        'No chart data',
+        'Profit trends will appear once purchase orders are recorded.'
+      );
+      wrap.appendChild(overlay);
+      if (skProfit) skProfit.classList.add('sk-done');
+      return;
+    }
+
+    canvas.style.display = '';
     const ctx = canvas.getContext('2d');
 
     // Green gradient fill
@@ -4263,14 +4612,11 @@ setInterval(async () => {
         },
       },
     });
-    const skProfit = document.getElementById('sk-chart-profit');
     if (skProfit) skProfit.classList.add('sk-done');
   }
 
   // ── Render spend-by-supplier donut ─────────────────────────
-  // Generate a consistent, visually distinct color per supplier name
-  // ServiceM8 green palette — cycles through 4 shades per slice
-  const DONUT_COLORS = ['#4CAF50', '#3D9B35', '#6BCB6B', '#2E7A28'];
+  const DONUT_COLORS = ['#4CAF50', '#a3e635', '#6BCB6B', '#86efac', '#3D9B35', '#c8f275'];
   function supplierColor(name) {
     let hash = 0;
     for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
@@ -4283,6 +4629,29 @@ setInterval(async () => {
 
     if (supplierChart) { supplierChart.destroy(); supplierChart = null; }
 
+    const wrap = canvas.parentElement;
+    const prev = wrap.querySelector('.chart-empty-overlay');
+    if (prev) prev.remove();
+
+    if (!supplierNames || !supplierNames.length) {
+      canvas.style.display = 'none';
+      const overlay = document.createElement('div');
+      overlay.className = 'chart-empty-overlay';
+      overlay.innerHTML = emptyState(
+        '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
+        'No supplier data',
+        'Spend distribution will render once orders are loaded.'
+      );
+      wrap.appendChild(overlay);
+      const legend = document.getElementById('donut-legend');
+      if (legend) legend.innerHTML = '';
+      const skDonut = document.getElementById('sk-chart-donut');
+      if (skDonut) skDonut.classList.add('sk-done');
+      return;
+    }
+
+    canvas.style.display = '';
+
     const cs = getComputedStyle(document.documentElement);
     const bgCard      = cs.getPropertyValue('--bg-card').trim()      || '#1E1E1E';
     const bgTertiary  = cs.getPropertyValue('--bg-tertiary').trim()  || '#242424';
@@ -4293,23 +4662,24 @@ setInterval(async () => {
     const skDonut = document.getElementById('sk-chart-donut');
     if (skDonut) skDonut.classList.add('sk-done');
 
+    const colors = supplierNames.map(supplierColor);
+
     supplierChart = new Chart(canvas.getContext('2d'), {
       type: 'doughnut',
       data: {
         labels: supplierNames,
         datasets: [{
           data: supplierSpends,
-          backgroundColor: supplierNames.map(supplierColor),
-          borderColor: bgCard,
-          borderWidth: 2,
-          hoverBorderWidth: 2,
-          hoverBorderColor: bgCard,
+          backgroundColor: colors,
+          borderWidth: 0,
+          hoverBorderWidth: 0,
+          hoverOffset: 5,
         }],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        cutout: '68%',
+        cutout: '60%',
         plugins: {
           legend: { display: false },
           tooltip: {
@@ -4325,18 +4695,53 @@ setInterval(async () => {
           },
         },
       },
-      plugins: [{
-        id: 'chartBackground',
-        beforeDraw(chart) {
-          const ctx = chart.ctx;
-          const currentBgCard = getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim() || '#1E1E1E';
-          ctx.save();
-          ctx.globalCompositeOperation = 'destination-over';
-          ctx.fillStyle = currentBgCard;
-          ctx.fillRect(0, 0, chart.width, chart.height);
-          ctx.restore();
+      plugins: [
+        {
+          id: 'chartBackground',
+          beforeDraw(chart) {
+            const ctx = chart.ctx;
+            const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim() || '#1E1E1E';
+            ctx.save();
+            ctx.globalCompositeOperation = 'destination-over';
+            ctx.fillStyle = bg;
+            ctx.fillRect(0, 0, chart.width, chart.height);
+            ctx.restore();
+          },
         },
-      }],
+        {
+          id: 'donutTrack',
+          beforeDatasetsDraw(chart) {
+            const { ctx, chartArea: { width, height, left, top } } = chart;
+            const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+            const cx = left + width / 2, cy = top + height / 2;
+            const meta = chart.getDatasetMeta(0);
+            const outerR = meta.data[0]?.outerRadius ?? (Math.min(width, height) / 2);
+            const innerR = meta.data[0]?.innerRadius ?? outerR * 0.60;
+            const trackR = (outerR + innerR) / 2;
+            const trackW = outerR - innerR;
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(cx, cy, trackR, 0, Math.PI * 2);
+            ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.06)';
+            ctx.lineWidth = trackW;
+            ctx.stroke();
+            ctx.restore();
+          },
+        },
+        {
+          id: 'arcGlow',
+          beforeDatasetsDraw(chart) {
+            chart.ctx.save();
+            chart.ctx.shadowBlur = 10;
+            chart.ctx.shadowColor = 'rgba(76,175,80,0.35)';
+          },
+          afterDatasetsDraw(chart) {
+            chart.ctx.shadowBlur = 0;
+            chart.ctx.shadowColor = 'transparent';
+            chart.ctx.restore();
+          },
+        },
+      ],
     });
 
     // Custom legend
@@ -4345,12 +4750,15 @@ setInterval(async () => {
     const total = supplierSpends.reduce((a,b)=>a+b,0);
     legend.innerHTML = supplierNames.map((name, i) => {
       const pct = total > 0 ? (supplierSpends[i]/total*100).toFixed(0) : '0';
-      const shortName = name.length > 22 ? name.slice(0,20)+'…' : name;
+      const shortName = name.length > 18 ? name.slice(0,17)+'…' : name;
+      const color = supplierColor(name);
       return `
-        <div style="display:flex; align-items:center; gap:8px;">
-          <div style="width:8px; height:8px; border-radius:50%; background:${supplierColor(name)}; flex-shrink:0;"></div>
-          <div style="flex:1; font-size:11.5px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${shortName}</div>
-          <div style="font-size:11.5px; font-weight:500; color:var(--text-muted);">${pct}%</div>
+        <div style="display:flex; align-items:center; gap:7px;">
+          <div style="width:7px; height:7px; border-radius:50%; background:${color}; flex-shrink:0;"></div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-size:11px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${shortName}</div>
+            <div style="font-size:12px; font-weight:600; color:var(--text-primary); margin-top:1px;">${pct}%</div>
+          </div>
         </div>`;
     }).join('');
   }
@@ -4361,7 +4769,7 @@ setInterval(async () => {
     if (!tbody) return;
 
     if (!recent.length) {
-      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state" style="padding:20px;"><p>No POs found</p></div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="5">${emptyState('<rect x="9" y="2" width="6" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/>', 'No purchase orders', 'Recent orders will appear here once data is synced.')}</td></tr>`;
       return;
     }
 
@@ -4392,7 +4800,19 @@ setInterval(async () => {
     if (!el) return;
 
     const entries = Object.entries(statusMap).sort((a,b) => b[1]-a[1]);
-    const total   = Object.values(statusMap).reduce((a,b)=>a+b,0) || 1;
+
+    if (!entries.length) {
+      el.className = 'inline-empty';
+      el.innerHTML = emptyState(
+        '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/>',
+        'No status data',
+        'Order status breakdown will appear here.'
+      );
+      return;
+    }
+
+    el.className = '';
+    const total = Object.values(statusMap).reduce((a,b)=>a+b,0) || 1;
 
     el.innerHTML = entries.map(([status, count]) => {
       const pct   = Math.round(count / total * 100);
@@ -4532,6 +4952,11 @@ setInterval(async () => {
     if (!results.length) {
       elSummary.style.display = 'none';
       elEmpty.style.display = 'none';
+      document.getElementById('is-no-results-inner').innerHTML = emptyState(
+        '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+        'No items found',
+        'No items matched your search. Try a different keyword or part number.'
+      );
       elNoResults.style.display = '';
       elResultsWrap.style.display = 'none';
       return;

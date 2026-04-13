@@ -4,19 +4,22 @@
 ServiceM8 / Field Service (internal tool)
 
 ## Last Updated
-2026-04-12
+2026-04-13
 
 ## Last Deployed Commit
-82551ea
+82551ea (pending — auth feature not yet deployed)
 
 ## Current State
-Fully functional SPA dashboard. PO parser running on-demand (manual trigger). Activity feed live with 30s polling. Toast notifications wired to activity feed.
+Fully functional SPA dashboard with login wall. Username/password auth protects both the frontend and /api/sheets endpoint. 24h token stored in localStorage.
 
 ## What Was Last Changed
-- Activity feed icon + color system (NEW PO/ENRICHED/UPDATED)
-- Toast notifications auto-fire on 30s poll when new activity entries detected
-- Premium toast system replacing old dt2-toast
-- UI interaction polish: card lift, nav hover fix, table row glow, button scale, input focus glow
+- Login screen with dark/light theme support
+- Logout button in topbar (red hover, sign-out icon)
+- HMAC-SHA256 token auth (no npm package — Node crypto built-in)
+- /api/auth.js — new login endpoint
+- /api/sheets.js — verifyToken guard on all requests
+- scripts/serve.mjs — dynamic API handler routing + ROOT path fix
+- Item Search dark mode dropdown fix (select option styling)
 
 ## Pages / Features
 - Overview — stats, profit chart, donut chart, recent POs, delivery status

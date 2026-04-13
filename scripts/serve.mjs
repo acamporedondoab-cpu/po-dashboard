@@ -1,15 +1,16 @@
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import { createRequire } from 'module';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.dirname(__dirname); // project root (one level up from scripts/)
 const PORT = 3000;
 
 // Load .env.local for local dev
 function loadEnv() {
-  const envPath = path.join(__dirname, '.env.local');
+  const envPath = path.join(ROOT, '.env.local');
   if (!fs.existsSync(envPath)) return;
   const lines = fs.readFileSync(envPath, 'utf8').split('\n');
   for (const line of lines) {
@@ -56,8 +57,11 @@ const server = http.createServer(async (req, res) => {
 
   // ── API routes — proxy to handler ──────────────────────────────────────────
   if (urlPath.startsWith('/api/')) {
+    // Derive handler from URL: /api/sheets → ./api/sheets.js, /api/auth → ./api/auth.js
+    const handlerName = urlPath.replace(/^\/api\//, '').split('/')[0];
     try {
-      const { default: handler } = await import('./api/sheets.js');
+      const handlerUrl = pathToFileURL(path.join(ROOT, 'api', `${handlerName}.js`)).href;
+      const { default: handler } = await import(handlerUrl);
 
       // Attach query params
       const searchParams = new URL(req.url, 'http://localhost').searchParams;
@@ -86,18 +90,23 @@ const server = http.createServer(async (req, res) => {
 
       await handler(req, res);
     } catch (err) {
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: err.message }));
+      if (err.code === 'ERR_MODULE_NOT_FOUND') {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: `No handler for ${urlPath}` }));
+      } else {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: err.message }));
+      }
     }
     return;
   }
 
   // ── Static files ──────────────────────────────────────────────────────────
-  let filePath = path.join(__dirname, urlPath);
+  let filePath = path.join(ROOT, urlPath);
 
   // SPA fallback — serve index.html for extensionless routes
   if (!path.extname(urlPath)) {
-    filePath = path.join(__dirname, 'index.html');
+    filePath = path.join(ROOT, 'index.html');
   }
 
   fs.readFile(filePath, (err, data) => {

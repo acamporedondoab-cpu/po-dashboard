@@ -1,4 +1,5 @@
 import { google } from 'googleapis';
+import { createHmac, timingSafeEqual } from 'crypto';
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
@@ -99,17 +100,48 @@ function parseGeneric(rows) {
   });
 }
 
+// ─── Token Verification ───────────────────────────────────────────────────────
+
+function verifyToken(token, secret) {
+  if (!token || typeof token !== 'string') return null;
+  const parts = token.split('.');
+  if (parts.length !== 3) return null;
+  const [header, payload, sig] = parts;
+  const expected = createHmac('sha256', secret)
+    .update(`${header}.${payload}`)
+    .digest('hex');
+  const bExp = Buffer.from(expected), bSig = Buffer.from(sig);
+  if (bExp.length !== bSig.length) return null;
+  if (!timingSafeEqual(bExp, bSig)) return null;
+  try {
+    const claims = JSON.parse(Buffer.from(payload, 'base64').toString('utf8'));
+    if (Date.now() / 1000 > claims.exp) return null;
+    return claims;
+  } catch { return null; }
+}
+
 // ─── Main Handler ─────────────────────────────────────────────────────────────
 
 export default async function handler(req, res) {
   // CORS headers (for local dev)
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, PUT, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
+  }
+
+  // ── Auth guard ────────────────────────────────────────────────────────────
+  const secret = process.env.JWT_SECRET;
+  if (secret) {
+    const authHeader = req.headers['authorization'] || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    if (!verifyToken(token, secret)) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
   }
 
   const spreadsheetId = process.env.SPREADSHEET_ID;
