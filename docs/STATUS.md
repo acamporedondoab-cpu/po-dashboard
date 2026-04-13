@@ -7,18 +7,18 @@ ServiceM8 / Field Service (internal tool)
 2026-04-13
 
 ## Last Deployed Commit
-82551ea (pending — auth feature not yet deployed)
+3a1585f — feat: add auth wall, login UI polish, sidebar/topbar redesign, donut overhaul, empty states
 
 ## Current State
-Fully functional SPA dashboard with login wall. Username/password auth protects both the frontend and /api/sheets endpoint. 24h token stored in localStorage.
+Fully functional SPA dashboard with login wall, polished UI, and full empty state coverage. Auth protects both frontend and /api/sheets. All charts and tables have graceful no-data states.
 
 ## What Was Last Changed
-- Login screen with dark/light theme support
-- Logout button in topbar (red hover, sign-out icon)
-- HMAC-SHA256 token auth (no npm package — Node crypto built-in)
-- /api/auth.js — new login endpoint
-- /api/sheets.js — verifyToken guard on all requests
-- scripts/serve.mjs — dynamic API handler routing + ROOT path fix
+- Auth system: HMAC-SHA256 token login, /api/auth.js, API guard on /api/sheets, logout button
+- Login card: frosted glass with mask-composite shine border, centered "Welcome Back" header
+- Sidebar: replaced green banner with 36px circle avatar "AC", removed "Field Service" label
+- Topbar: replaced page title with live date (Inter font — day name + Month DD YYYY)
+- Donut chart: side-by-side layout, borderWidth 0, 6-color bright green palette, subtle glow plugin
+- Empty states: full system — CSS + JS helper + 8 tables + 6 charts + activity feed
 - Item Search dark mode dropdown fix (select option styling)
 
 ## Pages / Features
@@ -45,3 +45,6 @@ Fully functional SPA dashboard with login wall. Username/password auth protects 
 - checkpoint-006.md — UI interaction polish
 - checkpoint-007.md — Premium toast system
 - checkpoint-008.md — Activity feed icons + poll-based toast wiring
+- checkpoint-009.md — Skeleton loading states (KPI cards, charts, tables, activity feed)
+- checkpoint-010.md — Auth wall, login card frosted glass + shine border
+- checkpoint-011.md — Sidebar/topbar redesign, donut overhaul, full empty state system
