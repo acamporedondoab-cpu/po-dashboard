@@ -2754,8 +2754,8 @@ setInterval(() => {
 // Set initial state
 updateLastRefreshed(true);
 
-// ── 30-second polling ──────────────────────────────────────
-window.POLL_INTERVAL = 30000;
+// ── 10-second polling ──────────────────────────────────────
+window.POLL_INTERVAL = 10000;
 window._pollCallbacks = [];
 
 window.registerPollCallback = function(fn) {
@@ -2853,7 +2853,7 @@ setInterval(async () => {
 
     const latestTS = parseTS(sorted[0].timestamp);
 
-    if (!_isFirstLoad && _lastSeenTS !== null) {
+    if (!_isFirstLoad && _lastSeenTS !== null && window.AUTH_TOKEN) {
       // Find any items that arrived since the last poll
       const newItems = sorted.filter(item => parseTS(item.timestamp) > _lastSeenTS);
       newItems.reverse(); // oldest-first so toasts stack in arrival order
@@ -2861,8 +2861,13 @@ setInterval(async () => {
         const type = (item.type || '').toLowerCase();
         const desc = item.description || '';
         if (type === 'updated') {
-          const isDelivery = /delivery status|shipped|quote received|invoiced|received/i.test(desc);
-          showToast(desc || 'PO updated', isDelivery ? 'success' : 'warning');
+          const isNotShipped = /not shipped/i.test(desc);
+          const isDelivery   = /delivery status|shipped|quote received|invoiced|received/i.test(desc);
+          if (isNotShipped) {
+            showToast(desc || 'PO not shipped', 'error');
+          } else {
+            showToast(desc || 'PO updated', isDelivery ? 'success' : 'warning');
+          }
         } else if (type === 'new po') {
           showToast(desc || 'New PO received', 'success');
         }
