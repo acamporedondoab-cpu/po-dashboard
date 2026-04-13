@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img src="./assets/dashboard-preview.png" /> width="90%" />
+  <img src="./assets/dashboard-preview.png" width="90%" />
 </p>
 
 ---
@@ -22,6 +22,7 @@ PO Dashboard is the frontend visualization layer for the existing PO Parser pipe
 ---
 
 ## ✨ Features
+- Secure Authentication Login Interface
 - KPI Overview Cards  
 - Profit & Spend Analytics Charts  
 - Purchase Order Register  
