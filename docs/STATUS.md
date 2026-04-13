@@ -7,15 +7,17 @@ ServiceM8 / Field Service (internal tool)
 2026-04-14
 
 ## Last Deployed Commit
-pending — toast fixes + auth guard + poll speed
+pending — notification bell polish + discount threshold vanish fix
 
 ## Current State
-Fully functional SPA dashboard with login wall, polished UI, and full empty state coverage. Auth protects both frontend and /api/sheets. All charts and tables have graceful no-data states. Toasts only appear on dashboard (not login screen).
+Fully functional SPA dashboard with login wall, polished UI, and full empty state coverage. Auth protects both frontend and /api/sheets. All charts and tables have graceful no-data states. Notification bell in topbar with per-PO detail and mark-as-read on close. Sidebar badges for Not Shipped and Discount Threshold persist independently of bell read state.
 
 ## What Was Last Changed
-- Not Shipped toast now shows red (error) instead of green — fixed regex ordering bug
-- Toast auth guard: toasts only fire when `window.AUTH_TOKEN` is set (dashboard only)
-- Poll interval reduced 30s → 10s for faster toast response after parser runs
+- Notification bell mark-as-read on close (dropdown clears after viewing, sidebar badges stay)
+- Not Shipped dropdown: per-PO detail (PO number, job #, client name)
+- Discount threshold dot: green → amber (#F59E0B) to avoid clash with active nav
+- Threshold notification text: "Threshold met / Supplier — 119%"
+- Discount threshold vanish bug fixed: `_dtLoaded` guard prevents poll failure from re-rendering with SAMPLE data
 
 ## Pages / Features
 - Overview — stats, profit chart, donut chart, recent POs, delivery status
@@ -45,3 +47,4 @@ Fully functional SPA dashboard with login wall, polished UI, and full empty stat
 - checkpoint-011.md — Sidebar/topbar redesign, donut overhaul, full empty state system
 - checkpoint-012.md — Login UI premium polish (card depth, inputs, button, typography)
 - checkpoint-013.md — Toast fixes: Not Shipped red, auth guard, poll 10s
+- checkpoint-014.md — Notification bell polish, per-PO detail, amber dot, discount threshold vanish fix

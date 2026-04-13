@@ -381,6 +381,93 @@
       gap: 12px;
     }
 
+    /* ── Notification Bell ─────────────────────────────────── */
+    #notif-bell-btn {
+      position: relative;
+      width: 34px; height: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    #notif-bell-btn:hover { border-color: var(--green-primary); color: var(--green-primary); }
+
+    #notif-bell-count {
+      position: absolute;
+      top: -5px; right: -5px;
+      background: #ef4444;
+      color: #fff;
+      font-size: 9px; font-weight: 700;
+      min-width: 16px; height: 16px;
+      border-radius: 8px;
+      padding: 0 4px;
+      display: none;
+      align-items: center; justify-content: center;
+      border: 2px solid var(--bg-primary);
+      line-height: 1;
+    }
+
+    #notif-dropdown {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      width: 300px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.15);
+      z-index: 500;
+      overflow: hidden;
+      display: none;
+      flex-direction: column;
+    }
+    #notif-dropdown.open { display: flex; }
+
+    .notif-header {
+      padding: 12px 16px 10px;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.07em; text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .notif-item {
+      display: flex; align-items: flex-start;
+      gap: 10px;
+      padding: 11px 16px;
+      cursor: pointer;
+      transition: background 0.12s;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .notif-item:last-child { border-bottom: none; }
+    .notif-item:hover { background: var(--bg-tertiary); }
+
+    .notif-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      margin-top: 4px; flex-shrink: 0;
+    }
+    .notif-dot-amber { background: #F59E0B; }
+    .notif-dot-red   { background: #ef4444; }
+
+    .notif-title {
+      font-size: 13px; font-weight: 600;
+      color: var(--text-primary); line-height: 1.3;
+    }
+    .notif-sub {
+      font-size: 11px; color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .notif-empty {
+      padding: 20px 16px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
     .last-updated {
       font-size: 11px;
       color: var(--text-muted);
@@ -1332,11 +1419,12 @@ html[data-theme="light"] .login-input {
         Delivery Tracker
       </div>
 
-      <div class="nav-item" data-page="discount-threshold" tabindex="0" role="button">
+      <div class="nav-item" data-page="discount-threshold" tabindex="0" role="button" style="position:relative;">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
         </svg>
         Discount Threshold
+        <span id="discount-badge" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:#4CAF50; color:#ffffff; font-size:10px; font-weight:700; min-width:18px; height:18px; border-radius:9px; align-items:center; justify-content:center; padding:0 4px; display:none;"></span>
       </div>
 
       <div class="nav-section-label" style="margin-top:6px;">Tools</div>
@@ -1373,10 +1461,23 @@ html[data-theme="light"] .login-input {
         <div id="topbar-date-day"></div>
         <div id="topbar-date-full"></div>
       </div>
-      <div class="topbar-right">
+      <div class="topbar-right" style="position:relative;">
         <div class="last-updated">
           <div class="pulse-dot"></div>
           <span id="last-updated-text">Connecting…</span>
+        </div>
+        <!-- Notification Bell -->
+        <button id="notif-bell-btn" title="Notifications">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          <span id="notif-bell-count"></span>
+        </button>
+        <!-- Notification Dropdown -->
+        <div id="notif-dropdown">
+          <div class="notif-header">Alerts</div>
+          <div id="notif-list"><div class="notif-empty">No alerts right now</div></div>
         </div>
         <!-- Theme toggle -->
         <button id="theme-toggle" title="Toggle dark/light mode"
@@ -2534,6 +2635,129 @@ navItems.forEach(item => {
   });
 });
 
+// ── Notification Bell ──────────────────────────────────────
+window.NOTIFICATIONS = {
+  thresholdMet: [],      // raw items — drives sidebar badge
+  notShippedItems: [],   // raw rows — drives sidebar badge + detail display
+  _prevThresholdCount: 0,
+  _prevNotShippedCount: 0,
+  _newThreshold: false,
+  _newNotShipped: false,
+};
+
+window.updateNotificationBell = function() {
+  const N = window.NOTIFICATIONS;
+  const { thresholdMet, notShippedItems, _newThreshold, _newNotShipped } = N;
+
+  // Detect new data since last bell open → mark as unread
+  if (thresholdMet.length !== N._prevThresholdCount) {
+    N._newThreshold = true;
+    N._prevThresholdCount = thresholdMet.length;
+  }
+  if (notShippedItems.length !== N._prevNotShippedCount) {
+    N._newNotShipped = true;
+    N._prevNotShippedCount = notShippedItems.length;
+  }
+
+  // Bell badge = count of unread categories (re-read flags after update above)
+  const bellCount = (N._newThreshold && thresholdMet.length > 0 ? thresholdMet.length : 0)
+                  + (N._newNotShipped && notShippedItems.length > 0 ? notShippedItems.length : 0);
+  const count = document.getElementById('notif-bell-count');
+  if (count) {
+    count.textContent = bellCount;
+    count.style.display = bellCount > 0 ? 'flex' : 'none';
+  }
+
+  // Sidebar badges — always reflect current data regardless of read state
+  const dtBadge = document.getElementById('discount-badge');
+  if (dtBadge) {
+    dtBadge.textContent = thresholdMet.length;
+    dtBadge.style.display = thresholdMet.length > 0 ? 'flex' : 'none';
+  }
+  const nsBadge = document.getElementById('not-shipped-badge');
+  if (nsBadge) {
+    nsBadge.textContent = notShippedItems.length;
+    nsBadge.style.display = notShippedItems.length > 0 ? 'flex' : 'none';
+  }
+
+  // Dropdown list — only show unread items
+  const list = document.getElementById('notif-list');
+  if (!list) return;
+
+  const showThreshold = N._newThreshold && thresholdMet.length > 0;
+  const showNotShipped = N._newNotShipped && notShippedItems.length > 0;
+
+  if (!showThreshold && !showNotShipped) {
+    list.innerHTML = '<div class="notif-empty">No alerts right now</div>';
+    return;
+  }
+
+  let html = '';
+  if (showThreshold) {
+    thresholdMet.forEach(s => {
+      const pct = Math.round(s.pct_reached);
+      html += `
+        <div class="notif-item" onclick="navigateTo('discount-threshold'); closeNotifDropdown();">
+          <div class="notif-dot notif-dot-amber"></div>
+          <div>
+            <div class="notif-title">Threshold met</div>
+            <div class="notif-sub">${s.supplier_name} — ${pct}%</div>
+          </div>
+        </div>`;
+    });
+  }
+  if (showNotShipped) {
+    notShippedItems.forEach(r => {
+      const poNum = r.po_number || '—';
+      const jobNum = r.job_number ? `job # ${r.job_number}` : '';
+      const clientName = r.client_name || r.supplier_name || '—';
+      const sub = [poNum, jobNum, clientName].filter(Boolean).join(' - ');
+      html += `
+        <div class="notif-item" onclick="navigateTo('not-shipped'); closeNotifDropdown();">
+          <div class="notif-dot notif-dot-red"></div>
+          <div>
+            <div class="notif-title">PO status: Not Shipped</div>
+            <div class="notif-sub">${sub}</div>
+          </div>
+        </div>`;
+    });
+  }
+  list.innerHTML = html;
+};
+
+window.closeNotifDropdown = function() {
+  document.getElementById('notif-dropdown')?.classList.remove('open');
+};
+
+(function() {
+  const btn = document.getElementById('notif-bell-btn');
+  const dropdown = document.getElementById('notif-dropdown');
+  if (!btn || !dropdown) return;
+
+  function markBellRead() {
+    window.NOTIFICATIONS._newThreshold = false;
+    window.NOTIFICATIONS._newNotShipped = false;
+    window.updateNotificationBell(); // clears bell badge; sidebar stays
+  }
+
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    const wasOpen = dropdown.classList.contains('open');
+    dropdown.classList.toggle('open');
+    // Mark as read when CLOSING (user saw the items while open)
+    if (wasOpen) markBellRead();
+  });
+
+  document.addEventListener('click', e => {
+    if (!dropdown.contains(e.target) && e.target !== btn) {
+      if (dropdown.classList.contains('open')) {
+        dropdown.classList.remove('open');
+        markBellRead();
+      }
+    }
+  });
+})();
+
 // ── Theme toggle ───────────────────────────────────────────
 (function() {
   const html = document.documentElement;
@@ -2593,10 +2817,10 @@ window.API = {
       const json = await res.json();
       const data = json.data || [];
       if (data.length > 0) window._lastApiSuccess = Date.now();
-      return data.length > 0 ? data : null;
+      return data; // [] = empty, [...] = has data, null only on failure
     } catch (err) {
       console.warn(`[API] GET ?tab=${tab} failed:`, err.message);
-      return null; // null = caller uses sample data
+      return null; // null = request failed (network/server error)
     }
   },
 
@@ -2888,6 +3112,7 @@ setInterval(async () => {
 (function initDiscountThreshold() {
 
   let rows = [];  // { supplier_name, threshold, actual_spend }
+  let _dtLoaded = false;
 
   // ── Sample data ────────────────────────────────────────────
   const SAMPLE = [
@@ -3026,6 +3251,10 @@ setInterval(async () => {
       window.API.get('thresholds'),
     ]);
 
+    // On poll, if both APIs return empty/null and we already have rendered data, keep it
+    const hasData = (discountRaw && discountRaw.length) || (thresholdsRaw && thresholdsRaw.length);
+    if (!hasData && _dtLoaded) return;
+
     const n = (s) => parseFloat(String(s || '').replace(/[^0-9.-]/g, '')) || 0;
 
     if (discountRaw && discountRaw.length) {
@@ -3075,6 +3304,17 @@ setInterval(async () => {
 
     renderCards();
     renderTable();
+    _dtLoaded = true;
+
+    // Feed notification bell
+    window.NOTIFICATIONS.thresholdMet = rows.filter(r => {
+      const pct = r.pct_reached > 0 ? r.pct_reached : (r.threshold > 0 ? (r.actual_spend / r.threshold) * 100 : 0);
+      return pct >= 100;
+    }).map(r => ({
+      supplier_name: r.supplier_name,
+      pct_reached: r.pct_reached > 0 ? r.pct_reached : (r.threshold > 0 ? (r.actual_spend / r.threshold) * 100 : 0),
+    }));
+    window.updateNotificationBell?.();
   }
 
   load();
@@ -3293,6 +3533,15 @@ setInterval(async () => {
 
     const rows = headers.filter(r => r.delivery_status === 'Not Shipped');
     updateBadge(rows.length);
+
+    // Feed notification bell
+    window.NOTIFICATIONS.notShippedItems = rows.map(r => ({
+      po_number:   r.po_number,
+      job_number:  r.job_number,
+      client_name: r.client_name,
+      supplier_name: r.supplier_name,
+    }));
+    window.updateNotificationBell?.();
 
     // Summary cards
     const totalCost = rows.reduce((a, r) => a + parseMoney(r.total_supplier_cost), 0);
@@ -4884,12 +5133,26 @@ setInterval(async () => {
     }).join('');
   }
 
+  let _overviewLoaded = false;
+  let _overviewRetrying = false;
+
   // ── Main render orchestrator ───────────────────────────────
   async function renderOverview() {
     const raw = await window.API.get('po_headers');
-    const headers = raw || [];
 
-    if (!headers.length) {
+    // null = request failed (not empty data)
+    if (raw === null) {
+      if (_overviewLoaded) return; // keep existing values — don't wipe KPIs
+      // First load failed — retry in 2s, leave skeleton dashes showing
+      if (!_overviewRetrying) {
+        _overviewRetrying = true;
+        setTimeout(() => { _overviewRetrying = false; renderOverview(); }, 2000);
+      }
+      return;
+    }
+
+    // raw is now always an array ([] or [...data])
+    if (!raw.length) {
       document.getElementById('kpi-total-pos').textContent = '0';
       document.getElementById('kpi-supplier-cost').textContent = '$0.00';
       document.getElementById('kpi-revenue').textContent = '$0.00';
@@ -4898,8 +5161,11 @@ setInterval(async () => {
       if (marginEl) { marginEl.textContent = '0.0%'; }
       // Clear all overview skeletons even when no data
       document.querySelectorAll('#page-overview .sk-cover, #sk-chart-profit, #sk-chart-donut').forEach(el => el.classList.add('sk-done'));
+      _overviewLoaded = true;
       return;
     }
+
+    const headers = raw;
 
     const data = processHeaders(headers);
     renderKPIs(data);
@@ -4908,6 +5174,7 @@ setInterval(async () => {
     window._rerenderSupplierChart = () => renderSupplierChart(data);
     renderRecentPOs(data);
     renderStatusBreakdown(data);
+    _overviewLoaded = true;
   }
 
   // ── Init on DOM ready ──────────────────────────────────────
