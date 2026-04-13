@@ -1173,6 +1173,30 @@
       opacity: 0.025;
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
     }
+
+    /* ── Search highlight ────────────────────────────────── */
+    mark.hl { background:rgba(245,158,11,.22); color:inherit; border-radius:2px; padding:0 1px; }
+    html[data-theme="light"] mark.hl { background:rgba(245,158,11,.3); }
+
+    /* ── Filter chips ────────────────────────────────────── */
+    .chips-row { display:flex; flex-wrap:wrap; gap:6px; }
+    .filter-chip { display:inline-flex; align-items:center; gap:5px; padding:3px 6px 3px 10px; background:rgba(76,175,80,.1); border:1px solid rgba(76,175,80,.28); border-radius:20px; font-size:11.5px; font-weight:500; color:var(--green-primary); user-select:none; }
+    html[data-theme="light"] .filter-chip { background:rgba(76,175,80,.07); border-color:rgba(76,175,80,.3); }
+    .chip-x { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; background:rgba(76,175,80,.18); font-size:10px; line-height:1; cursor:pointer; transition:background .15s ease; color:var(--green-primary); }
+    .chip-x:hover { background:rgba(76,175,80,.42); }
+
+    /* ── Advanced filter panel ───────────────────────────── */
+    .adv-panel { overflow:hidden; max-height:0; opacity:0; transition:max-height .28s cubic-bezier(.4,0,.2,1), opacity .2s ease; }
+    .adv-panel.open { max-height:140px; opacity:1; }
+    .adv-filter-btn { display:inline-flex; align-items:center; gap:5px; padding:6px 11px; background:transparent; border:1px solid var(--border-color); border-radius:8px; font-size:12px; font-weight:500; color:var(--text-secondary); cursor:pointer; transition:border-color .15s ease, color .15s ease, background .15s ease; white-space:nowrap; }
+    .adv-filter-btn:hover { border-color:var(--green-primary); color:var(--green-primary); }
+    .adv-filter-btn.active { border-color:var(--green-primary); background:rgba(76,175,80,.08); color:var(--green-primary); }
+    .adv-filter-btn svg.adv-chevron { transition:transform .2s ease; }
+    .adv-filter-btn.active svg.adv-chevron { transform:rotate(180deg); }
+    .adv-input-group { display:flex; flex-direction:column; gap:4px; }
+    .adv-input-group label { font-size:10.5px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em; }
+    .adv-input-row { display:flex; align-items:center; gap:6px; }
+    .adv-input-row span { font-size:12px; color:var(--text-muted); }
   </style>
 </head>
 <body>
@@ -1732,11 +1756,47 @@ html[data-theme="light"] .login-input {
           <input id="por-date-from" class="input" type="date" title="Date from" style="width:140px;" />
           <input id="por-date-to"   class="input" type="date" title="Date to"   style="width:140px;" />
 
+          <!-- More filters -->
+          <button id="por-adv-btn" class="adv-filter-btn">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+            More filters
+            <svg class="adv-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+
           <!-- Export PDF -->
           <button id="por-export" class="btn btn-ghost" style="white-space:nowrap;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Export PDF
           </button>
+        </div>
+
+        <!-- Filter chips -->
+        <div id="por-chips-row" class="chips-row" style="display:none;"></div>
+
+        <!-- Advanced filter panel -->
+        <div id="por-adv-panel" class="adv-panel">
+          <div style="display:flex; flex-wrap:wrap; gap:14px; padding:12px 2px 6px;">
+            <div class="adv-input-group">
+              <label>Supplier Cost</label>
+              <div class="adv-input-row">
+                <input id="por-adv-cost-min" class="input" type="number" placeholder="Min $" step="0.01" style="width:88px; font-size:12px;" />
+                <span>–</span>
+                <input id="por-adv-cost-max" class="input" type="number" placeholder="Max $" step="0.01" style="width:88px; font-size:12px;" />
+              </div>
+            </div>
+            <div class="adv-input-group">
+              <label>Margin %</label>
+              <div class="adv-input-row">
+                <input id="por-adv-margin-min" class="input" type="number" placeholder="Min %" style="width:78px; font-size:12px;" />
+                <span>–</span>
+                <input id="por-adv-margin-max" class="input" type="number" placeholder="Max %" style="width:78px; font-size:12px;" />
+              </div>
+            </div>
+            <div class="adv-input-group">
+              <label>Job Number</label>
+              <input id="por-adv-job" class="input" type="text" placeholder="e.g. JOB-1031" style="width:130px; font-size:12px;" />
+            </div>
+          </div>
         </div>
 
         <!-- Results info -->
@@ -1951,7 +2011,42 @@ html[data-theme="light"] .login-input {
             <svg style="position:absolute; left:10px; top:50%; transform:translateY(-50%); width:14px; height:14px; color:var(--text-muted); pointer-events:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input id="sv-search" class="input" type="text" placeholder="Search PO number, supplier, item code…" style="padding-left:34px; width:100%;" />
           </div>
+          <!-- More filters -->
+          <button id="sv-adv-btn" class="adv-filter-btn">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+            More filters
+            <svg class="adv-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
           <button id="sv-clear" class="btn btn-ghost" style="white-space:nowrap;">Clear</button>
+        </div>
+
+        <!-- Filter chips -->
+        <div id="sv-chips-row" class="chips-row" style="display:none;"></div>
+
+        <!-- Advanced filter panel -->
+        <div id="sv-adv-panel" class="adv-panel">
+          <div style="display:flex; flex-wrap:wrap; gap:14px; padding:12px 2px 6px;">
+            <div class="adv-input-group">
+              <label>Supplier Cost</label>
+              <div class="adv-input-row">
+                <input id="sv-adv-cost-min" class="input" type="number" placeholder="Min $" step="0.01" style="width:88px; font-size:12px;" />
+                <span>–</span>
+                <input id="sv-adv-cost-max" class="input" type="number" placeholder="Max $" step="0.01" style="width:88px; font-size:12px;" />
+              </div>
+            </div>
+            <div class="adv-input-group">
+              <label>Margin %</label>
+              <div class="adv-input-row">
+                <input id="sv-adv-margin-min" class="input" type="number" placeholder="Min %" style="width:78px; font-size:12px;" />
+                <span>–</span>
+                <input id="sv-adv-margin-max" class="input" type="number" placeholder="Max %" style="width:78px; font-size:12px;" />
+              </div>
+            </div>
+            <div class="adv-input-group">
+              <label>Job Number</label>
+              <input id="sv-adv-job" class="input" type="text" placeholder="e.g. JOB-1031" style="width:130px; font-size:12px;" />
+            </div>
+          </div>
         </div>
 
         <!-- Count -->
@@ -3753,6 +3848,42 @@ setInterval(async () => {
   let allRows    = [];
   let filtered   = [];
   let expandedPOs = new Set();
+  let currentQ   = '';
+
+  // ── Search highlight helper ────────────────────────────────
+  function hlText(str, q) {
+    if (!q || !str) return str || '';
+    const safe = String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const esc  = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return safe.replace(new RegExp(esc, 'gi'), m => `<mark class="hl">${m}</mark>`);
+  }
+
+  // ── Render active filter chips ────────────────────────────
+  function renderChips() {
+    const row = document.getElementById('sv-chips-row');
+    if (!row) return;
+    const defs = [
+      { id:'sv-search',          label: v => `Search: "${v}"`,         clear: () => { document.getElementById('sv-search').value=''; } },
+      { id:'sv-filter-supplier', label: v => `Supplier: ${v}`,          clear: () => { document.getElementById('sv-filter-supplier').value=''; } },
+      { id:'sv-filter-status',   label: v => `Status: ${v}`,            clear: () => { document.getElementById('sv-filter-status').value=''; } },
+      { id:'sv-date-from',       label: v => `From: ${v}`,              clear: () => { document.getElementById('sv-date-from').value=''; } },
+      { id:'sv-date-to',         label: v => `To: ${v}`,                clear: () => { document.getElementById('sv-date-to').value=''; } },
+      { id:'sv-adv-cost-min',    label: v => `Cost ≥ $${v}`,            clear: () => { document.getElementById('sv-adv-cost-min').value=''; } },
+      { id:'sv-adv-cost-max',    label: v => `Cost ≤ $${v}`,            clear: () => { document.getElementById('sv-adv-cost-max').value=''; } },
+      { id:'sv-adv-margin-min',  label: v => `Margin ≥ ${v}%`,          clear: () => { document.getElementById('sv-adv-margin-min').value=''; } },
+      { id:'sv-adv-margin-max',  label: v => `Margin ≤ ${v}%`,          clear: () => { document.getElementById('sv-adv-margin-max').value=''; } },
+      { id:'sv-adv-job',         label: v => `Job: ${v}`,               clear: () => { document.getElementById('sv-adv-job').value=''; } },
+    ];
+    const chips = defs.filter(d => (document.getElementById(d.id)?.value || '').trim() !== '');
+    row.style.display = chips.length ? 'flex' : 'none';
+    row.innerHTML = chips.map((d, i) => {
+      const val = document.getElementById(d.id).value;
+      return `<span class="filter-chip">${d.label(val)}<span class="chip-x" data-chip="${i}" title="Remove">×</span></span>`;
+    }).join('');
+    row.querySelectorAll('.chip-x').forEach(x => {
+      x.addEventListener('click', () => { chips[+x.dataset.chip].clear(); applyFilters(); });
+    });
+  }
 
   // ── Date normaliser (handles "30-Apr-2026", "27/04/2026", ISO) ────────────
   const MO = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
@@ -3817,17 +3948,24 @@ setInterval(async () => {
 
   // ── Filter ────────────────────────────────────────────────────────────────
   function applyFilters() {
+    const q        = (document.getElementById('sv-search')?.value         || '').toLowerCase().trim();
+    currentQ = q;
     const supplier = document.getElementById('sv-filter-supplier')?.value || '';
     const status   = document.getElementById('sv-filter-status')?.value   || '';
     const dateFrom = document.getElementById('sv-date-from')?.value       || '';
     const dateTo   = document.getElementById('sv-date-to')?.value         || '';
-    const q        = (document.getElementById('sv-search')?.value         || '').toLowerCase();
+    const costMin  = parseFloat(document.getElementById('sv-adv-cost-min')?.value)   || null;
+    const costMax  = parseFloat(document.getElementById('sv-adv-cost-max')?.value)   || null;
+    const mgnMin   = parseFloat(document.getElementById('sv-adv-margin-min')?.value) || null;
+    const mgnMax   = parseFloat(document.getElementById('sv-adv-margin-max')?.value) || null;
+    const jobFilter= (document.getElementById('sv-adv-job')?.value || '').toLowerCase().trim();
 
     filtered = allRows.filter(r => {
       if (supplier && r.supplier_name !== supplier) return false;
       if (status   && r.delivery_status !== status)  return false;
       if (dateFrom && r.date_required_by && r.date_required_by < dateFrom) return false;
       if (dateTo   && r.date_required_by && r.date_required_by > dateTo)   return false;
+      if (jobFilter && !(r.job_number || '').toLowerCase().includes(jobFilter)) return false;
       if (q) {
         const haystack = Object.values(r)
           .filter(v => typeof v === 'string')
@@ -3838,6 +3976,22 @@ setInterval(async () => {
       return true;
     });
 
+    // Advanced numeric filters at group level
+    if (costMin !== null || costMax !== null || mgnMin !== null || mgnMax !== null) {
+      const groups = groupByPO(filtered);
+      const validPOs = new Set(groups.filter(g => {
+        const cost = g.supplier_cost;
+        const mgn  = g.customer_price > 0 ? (g.gross_profit / g.customer_price * 100) : 0;
+        if (costMin !== null && cost < costMin) return false;
+        if (costMax !== null && cost > costMax) return false;
+        if (mgnMin  !== null && mgn  < mgnMin)  return false;
+        if (mgnMax  !== null && mgn  > mgnMax)  return false;
+        return true;
+      }).map(g => g.po_number));
+      filtered = filtered.filter(r => validPOs.has(r.po_number));
+    }
+
+    renderChips();
     renderTable();
   }
 
@@ -3868,12 +4022,12 @@ setInterval(async () => {
           <td style="white-space:nowrap; font-weight:500;">
             <span style="display:inline-flex; align-items:center; gap:6px;">
               <svg style="width:12px; height:12px; transition:transform .2s; transform:rotate(${open?90:0}deg); flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-              ${g.supplier_name || '—'}
+              ${hlText(g.supplier_name || '—', currentQ)}
             </span>
           </td>
           <td style="white-space:nowrap; font-size:12px;">${Utils.formatDate(g.date_required_by)}</td>
-          <td style="font-size:12px; color:var(--text-muted);">${g.job_number || '—'}</td>
-          <td style="font-family:monospace; font-size:12px; color:var(--green-primary); white-space:nowrap;">${poKey}</td>
+          <td style="font-size:12px; color:var(--text-muted);">${hlText(g.job_number || '—', currentQ)}</td>
+          <td style="font-family:monospace; font-size:12px; color:var(--green-primary); white-space:nowrap;">${hlText(poKey, currentQ)}</td>
           <td style="text-align:right; padding-right:16px; color:var(--text-muted); font-size:12px;">${g.lines.length}</td>
           <td style="text-align:right; padding-right:16px; font-weight:500;">${Utils.formatCurrency(g.supplier_cost)}</td>
           <td style="text-align:right; padding-right:16px;">${Utils.formatCurrency(g.customer_price)}</td>
@@ -3907,8 +4061,8 @@ setInterval(async () => {
                       const m = parseFloat(l.margin_pct) || 0;
                       return `<tr style="border-bottom:1px solid var(--border-color);">
                         <td style="padding:5px 8px; color:var(--text-muted);">${l.line_number || '—'}</td>
-                        <td style="padding:5px 8px; max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${l.description||''}">${l.description || '—'}</td>
-                        <td style="padding:5px 8px; color:var(--text-muted); white-space:nowrap;">${l.item_code || '—'}</td>
+                        <td style="padding:5px 8px; max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${l.description||''}">${hlText(l.description || '—', currentQ)}</td>
+                        <td style="padding:5px 8px; color:var(--text-muted); white-space:nowrap;">${hlText(l.item_code || '—', currentQ)}</td>
                         <td style="padding:5px 8px; text-align:right;">${l.qty || '—'}</td>
                         <td style="padding:5px 8px; text-align:right;">${Utils.formatCurrency(l.price_ex_tax || l.amount_ex_tax)}</td>
                         <td style="padding:5px 8px; text-align:right;">${Utils.formatCurrency(l.customer_price)}</td>
@@ -3944,8 +4098,25 @@ setInterval(async () => {
       document.getElementById(id)?.addEventListener('change', applyFilters);
     });
     document.getElementById('sv-search')?.addEventListener('input', applyFilters);
+
+    // Advanced filter panel toggle
+    const advBtn   = document.getElementById('sv-adv-btn');
+    const advPanel = document.getElementById('sv-adv-panel');
+    if (advBtn && advPanel) {
+      advBtn.addEventListener('click', () => {
+        const open = advPanel.classList.toggle('open');
+        advBtn.classList.toggle('active', open);
+      });
+    }
+    // Advanced filter inputs
+    ['sv-adv-cost-min','sv-adv-cost-max','sv-adv-margin-min','sv-adv-margin-max'].forEach(id => {
+      document.getElementById(id)?.addEventListener('input', applyFilters);
+    });
+    document.getElementById('sv-adv-job')?.addEventListener('input', applyFilters);
+
     document.getElementById('sv-clear')?.addEventListener('click', () => {
-      ['sv-filter-supplier','sv-filter-status','sv-date-from','sv-date-to'].forEach(id => {
+      ['sv-filter-supplier','sv-filter-status','sv-date-from','sv-date-to',
+       'sv-adv-cost-min','sv-adv-cost-max','sv-adv-margin-min','sv-adv-margin-max','sv-adv-job'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
       });
@@ -4228,6 +4399,7 @@ setInterval(async () => {
   let sortDir     = 1;
   let currentPage = 1;
   let selectedPOs = new Set();
+  let currentQ    = '';
 
   // Normalise sheet date strings to ISO YYYY-MM-DD for comparison
   const MO = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
@@ -4242,6 +4414,41 @@ setInterval(async () => {
   }
 
 
+  // ── Search highlight helper ────────────────────────────────
+  function hlText(str, q) {
+    if (!q || !str) return str || '';
+    const safe = String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const esc  = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return safe.replace(new RegExp(esc, 'gi'), m => `<mark class="hl">${m}</mark>`);
+  }
+
+  // ── Render active filter chips ─────────────────────────────
+  function renderChips() {
+    const row = document.getElementById('por-chips-row');
+    if (!row) return;
+    const defs = [
+      { id:'por-search',          label: v => `Search: "${v}"`,         clear: () => { document.getElementById('por-search').value=''; } },
+      { id:'por-filter-supplier', label: v => `Supplier: ${v}`,          clear: () => { document.getElementById('por-filter-supplier').value=''; } },
+      { id:'por-filter-status',   label: v => `Status: ${v}`,            clear: () => { document.getElementById('por-filter-status').value=''; } },
+      { id:'por-date-from',       label: v => `From: ${v}`,              clear: () => { document.getElementById('por-date-from').value=''; } },
+      { id:'por-date-to',         label: v => `To: ${v}`,                clear: () => { document.getElementById('por-date-to').value=''; } },
+      { id:'por-adv-cost-min',    label: v => `Cost ≥ $${v}`,            clear: () => { document.getElementById('por-adv-cost-min').value=''; } },
+      { id:'por-adv-cost-max',    label: v => `Cost ≤ $${v}`,            clear: () => { document.getElementById('por-adv-cost-max').value=''; } },
+      { id:'por-adv-margin-min',  label: v => `Margin ≥ ${v}%`,          clear: () => { document.getElementById('por-adv-margin-min').value=''; } },
+      { id:'por-adv-margin-max',  label: v => `Margin ≤ ${v}%`,          clear: () => { document.getElementById('por-adv-margin-max').value=''; } },
+      { id:'por-adv-job',         label: v => `Job: ${v}`,               clear: () => { document.getElementById('por-adv-job').value=''; } },
+    ];
+    const chips = defs.filter(d => (document.getElementById(d.id)?.value || '').trim() !== '');
+    row.style.display = chips.length ? 'flex' : 'none';
+    row.innerHTML = chips.map((d, i) => {
+      const val = document.getElementById(d.id).value;
+      return `<span class="filter-chip">${d.label(val)}<span class="chip-x" data-chip="${i}" title="Remove">×</span></span>`;
+    }).join('');
+    row.querySelectorAll('.chip-x').forEach(x => {
+      x.addEventListener('click', () => { chips[+x.dataset.chip].clear(); applyFilters(); });
+    });
+  }
+
   // ── Populate supplier filter ───────────────────────────────
   function populateSupplierFilter(rows) {
     const sel = document.getElementById('por-filter-supplier');
@@ -4254,17 +4461,24 @@ setInterval(async () => {
 
   // ── Filter + sort rows ─────────────────────────────────────
   function applyFilters() {
-    const q         = (document.getElementById('por-search')?.value   || '').toLowerCase();
+    const q         = (document.getElementById('por-search')?.value   || '').toLowerCase().trim();
+    currentQ = q;
     const supplier  = document.getElementById('por-filter-supplier')?.value || '';
     const status    = document.getElementById('por-filter-status')?.value   || '';
     const dateFrom  = document.getElementById('por-date-from')?.value  || '';
     const dateTo    = document.getElementById('por-date-to')?.value    || '';
+    const costMin   = parseFloat(document.getElementById('por-adv-cost-min')?.value)  || null;
+    const costMax   = parseFloat(document.getElementById('por-adv-cost-max')?.value)  || null;
+    const mgnMin    = parseFloat(document.getElementById('por-adv-margin-min')?.value) || null;
+    const mgnMax    = parseFloat(document.getElementById('por-adv-margin-max')?.value) || null;
+    const jobFilter = (document.getElementById('por-adv-job')?.value || '').toLowerCase().trim();
 
     filtered = allRows.filter(r => {
       if (supplier && r.supplier_name !== supplier) return false;
       if (status   && r.delivery_status !== status)  return false;
       if (dateFrom && r.date_required_by && toISO(r.date_required_by) < dateFrom) return false;
       if (dateTo   && r.date_required_by && toISO(r.date_required_by) > dateTo)   return false;
+      if (jobFilter && !(r.job_number || '').toLowerCase().includes(jobFilter)) return false;
       if (q) {
         // Search across all string fields — covers po_number, supplier_name,
         // item_code, job_number, description regardless of field-name drift
@@ -4276,6 +4490,21 @@ setInterval(async () => {
       }
       return true;
     });
+
+    // Advanced numeric filters applied at group level after grouping
+    if (costMin !== null || costMax !== null || mgnMin !== null || mgnMax !== null) {
+      const groups = groupByPO(filtered);
+      const validPOs = new Set(groups.filter(g => {
+        const cost = g.price_ex_tax;
+        const mgn  = g.margin_pct;
+        if (costMin !== null && cost < costMin) return false;
+        if (costMax !== null && cost > costMax) return false;
+        if (mgnMin  !== null && mgn  < mgnMin)  return false;
+        if (mgnMax  !== null && mgn  > mgnMax)  return false;
+        return true;
+      }).map(g => g.po_number));
+      filtered = filtered.filter(r => validPOs.has(r.po_number));
+    }
 
     if (sortCol) {
       filtered.sort((a, b) => {
@@ -4289,6 +4518,7 @@ setInterval(async () => {
     }
 
     currentPage = 1;
+    renderChips();
     renderTable();
   }
 
@@ -4353,8 +4583,8 @@ setInterval(async () => {
         return `
           <tr style="background:var(--bg-primary);">
             <td style="font-size:11px; color:var(--text-muted); padding:7px 12px; width:36px; text-align:right;">${r.line_number || ''}</td>
-            <td style="font-size:12px; max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:7px 12px;" title="${r.description||''}">${r.description || '—'}</td>
-            <td style="font-size:11px; color:var(--text-muted); padding:7px 12px;">${r.item_code || '—'}</td>
+            <td style="font-size:12px; max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:7px 12px;" title="${r.description||''}">${hlText(r.description || '—', currentQ)}</td>
+            <td style="font-size:11px; color:var(--text-muted); padding:7px 12px;">${hlText(r.item_code || '—', currentQ)}</td>
             <td style="text-align:right; padding:7px 12px;">${r.qty || '—'}</td>
             <td style="text-align:right; padding:7px 12px;">${Utils.formatCurrency(r.price_ex_tax)}</td>
             <td style="text-align:right; padding:7px 12px;">${Utils.formatCurrency(r.customer_price)}</td>
@@ -4368,9 +4598,9 @@ setInterval(async () => {
       return `
         <tr class="por-group-row" data-po="${g.po_number || ''}" style="cursor:pointer;">
           <td style="text-align:center; padding:0 8px;" class="por-cb-cell"><input type="checkbox" class="por-cb" data-po="${g.po_number || ''}" ${isChecked ? 'checked' : ''} style="cursor:pointer; accent-color:var(--green-primary);"></td>
-          <td style="white-space:nowrap; max-width:160px; overflow:hidden; text-overflow:ellipsis;">${g.supplier_name || '—'}</td>
-          <td style="font-size:12px; color:var(--text-muted);">${g.job_number || '—'}</td>
-          <td style="font-family:monospace; font-size:12px; color:var(--green-primary); white-space:nowrap;">${g.po_number || '—'}</td>
+          <td style="white-space:nowrap; max-width:160px; overflow:hidden; text-overflow:ellipsis;">${hlText(g.supplier_name || '—', currentQ)}</td>
+          <td style="font-size:12px; color:var(--text-muted);">${hlText(g.job_number || '—', currentQ)}</td>
+          <td style="font-family:monospace; font-size:12px; color:var(--green-primary); white-space:nowrap;">${hlText(g.po_number || '—', currentQ)}</td>
           <td style="white-space:nowrap; font-size:12px;">${Utils.formatDate(g.date_required_by)}</td>
           <td style="font-size:12px; color:var(--text-muted);">
             <span class="por-chevron" style="display:inline-block; transition:transform 0.2s; margin-right:5px; font-size:10px;">▶</span>${g.lines.length} item${g.lines.length !== 1 ? 's' : ''}
@@ -4656,6 +4886,21 @@ setInterval(async () => {
     document.getElementById('por-date-from')      ?.addEventListener('change', applyFilters);
     document.getElementById('por-date-to')        ?.addEventListener('change', applyFilters);
     document.getElementById('por-export')         ?.addEventListener('click',  exportPDF);
+
+    // Advanced filter panel toggle
+    const advBtn   = document.getElementById('por-adv-btn');
+    const advPanel = document.getElementById('por-adv-panel');
+    if (advBtn && advPanel) {
+      advBtn.addEventListener('click', () => {
+        const open = advPanel.classList.toggle('open');
+        advBtn.classList.toggle('active', open);
+      });
+    }
+    // Advanced filter inputs
+    ['por-adv-cost-min','por-adv-cost-max','por-adv-margin-min','por-adv-margin-max'].forEach(id => {
+      document.getElementById(id)?.addEventListener('input', applyFilters);
+    });
+    document.getElementById('por-adv-job')?.addEventListener('input', applyFilters);
     document.getElementById('por-prev')           ?.addEventListener('click',  () => { if (currentPage > 1) { currentPage--; renderTable(); }});
 
     // Select-all checkbox

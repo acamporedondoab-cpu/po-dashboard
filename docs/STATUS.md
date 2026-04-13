@@ -7,17 +7,17 @@ ServiceM8 / Field Service (internal tool)
 2026-04-14
 
 ## Last Deployed Commit
-pending — notification bell polish + discount threshold vanish fix
+pending — advanced filtering system (search highlight, filter chips, advanced panel)
 
 ## Current State
-Fully functional SPA dashboard with login wall, polished UI, and full empty state coverage. Auth protects both frontend and /api/sheets. All charts and tables have graceful no-data states. Notification bell in topbar with per-PO detail and mark-as-read on close. Sidebar badges for Not Shipped and Discount Threshold persist independently of bell read state.
+Fully functional SPA dashboard with login wall, polished UI, and full empty state coverage. Auth protects both frontend and /api/sheets. All charts and tables have graceful no-data states. Notification bell in topbar with per-PO detail and mark-as-read on close. Sidebar badges for Not Shipped and Discount Threshold persist independently of bell read state. PO Register and Supplier View have premium enterprise-style filtering: search highlighting, removable filter chips, and collapsible advanced filter panel (cost range, margin range, job number).
 
 ## What Was Last Changed
-- Notification bell mark-as-read on close (dropdown clears after viewing, sidebar badges stay)
-- Not Shipped dropdown: per-PO detail (PO number, job #, client name)
-- Discount threshold dot: green → amber (#F59E0B) to avoid clash with active nav
-- Threshold notification text: "Threshold met / Supplier — 119%"
-- Discount threshold vanish bug fixed: `_dtLoaded` guard prevents poll failure from re-rendering with SAMPLE data
+- Search highlighting: matched text in PO Register and Supplier View wrapped in amber `<mark class="hl">` as user types
+- Filter chips: active filters shown as removable green pills above table; × clears individual filter
+- Advanced filter panel: collapsible panel with Supplier Cost range, Margin % range, Job Number text filter
+- Numeric range filters applied at PO group level (post-grouping) for accurate cost/margin matching
+- Covers both PO Register (por- prefix) and Supplier View (sv- prefix)
 
 ## Pages / Features
 - Overview — stats, profit chart, donut chart, recent POs, delivery status
@@ -48,3 +48,4 @@ Fully functional SPA dashboard with login wall, polished UI, and full empty stat
 - checkpoint-012.md — Login UI premium polish (card depth, inputs, button, typography)
 - checkpoint-013.md — Toast fixes: Not Shipped red, auth guard, poll 10s
 - checkpoint-014.md — Notification bell polish, per-PO detail, amber dot, discount threshold vanish fix
+- checkpoint-015.md — Advanced filtering system: search highlight, filter chips, advanced panel
