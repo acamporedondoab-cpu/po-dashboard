@@ -2860,14 +2860,12 @@ setInterval(async () => {
       for (const item of newItems) {
         const type = (item.type || '').toLowerCase();
         const desc = item.description || '';
-        if (type === 'updated') {
-          const isNotShipped = /not shipped/i.test(desc);
-          const isDelivery   = /delivery status|shipped|quote received|invoiced|received/i.test(desc);
-          if (isNotShipped) {
-            showToast(desc || 'PO not shipped', 'error');
-          } else {
-            showToast(desc || 'PO updated', isDelivery ? 'success' : 'warning');
-          }
+        // Not Shipped always red — check first, regardless of type
+        if (/not shipped/i.test(desc)) {
+          showToast(desc || 'PO not shipped', 'error');
+        } else if (type === 'updated') {
+          const isDelivery = /delivery status|shipped|quote received|invoiced|received/i.test(desc);
+          showToast(desc || 'PO updated', isDelivery ? 'success' : 'warning');
         } else if (type === 'new po') {
           showToast(desc || 'New PO received', 'success');
         }
@@ -3291,7 +3289,7 @@ setInterval(async () => {
 
   async function load() {
     const headers = await window.API.get('po_headers');
-    if (!headers) { updateBadge(0); return; }
+    if (!headers) return; // keep last known badge — don't wipe on API failure
 
     const rows = headers.filter(r => r.delivery_status === 'Not Shipped');
     updateBadge(rows.length);
