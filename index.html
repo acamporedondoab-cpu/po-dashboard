@@ -1102,15 +1102,20 @@
 @keyframes shine-spin {
   to { --shine-angle: 360deg; }
 }
+@keyframes loginCardIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)   scale(1);    }
+}
 #login-card-wrapper {
   position: relative;
-  border-radius: 14px;
+  border-radius: 20px;
+  animation: loginCardIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 #login-card-wrapper::before {
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: 14px;
+  border-radius: 20px;
   padding: 1.5px;
   background: conic-gradient(from var(--shine-angle) at 50% 50%,
     transparent 0%,
@@ -1134,23 +1139,80 @@
 #login-card {
   position: relative;
   z-index: 1;
-  border-radius: 13px;
-  padding: 28px;
+  border-radius: 19px;
+  padding: 36px;
   background: rgba(255,255,255,0.45);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  box-shadow:
+    0 2px 5px rgba(0,0,0,0.04),
+    0 10px 27px rgba(0,0,0,0.07),
+    0 32px 61px rgba(0,0,0,0.10);
 }
 html[data-theme="dark"] #login-card {
-  background: rgba(20,20,20,0.45);
+  background: rgba(22,22,22,0.72);
+  box-shadow:
+    0 2px 5px rgba(0,0,0,0.18),
+    0 10px 27px rgba(0,0,0,0.36),
+    0 32px 61px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.login-input {
+  width: 100%;
+  padding: 12px 14px;
+  background: #0f0f0f;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 9px;
+  color: #c8c8c8;
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  outline: none;
+  box-sizing: border-box;
+  box-shadow: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+html[data-theme="light"] .login-input {
+  background: #E5E7EB;
+  border-color: rgba(0,0,0,0.14);
+  color: #1a1a1a;
+  box-shadow: none;
+}
+.login-input:focus {
+  border-color: rgba(76,175,80,0.5);
+  box-shadow: 0 0 0 3px rgba(76,175,80,0.12);
+}
+#login-btn {
+  width: 100%;
+  padding: 17px;
+  background: #4CAF50;
+  border: none;
+  border-radius: 9px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+  box-shadow: 0 2px 8px rgba(76,175,80,0.25);
+}
+#login-btn:hover:not(:disabled) {
+  background: #3D9B35;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(76,175,80,0.4), 0 2px 6px rgba(0,0,0,0.15);
+}
+#login-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(76,175,80,0.25);
 }
 </style>
 <div id="login-screen" style="position:fixed; inset:0; z-index:1000; background:var(--bg-primary); display:flex; align-items:center; justify-content:center;">
-  <div style="width:100%; max-width:360px; padding:0 24px;">
+  <div style="width:100%; max-width:400px; padding:0 24px;">
 
     <!-- Header -->
-    <div style="margin-bottom:20px; text-align:center;">
-      <div style="font-family:'Syne',sans-serif; font-size:24px; font-weight:700; color:var(--text-primary); letter-spacing:-0.03em; line-height:1.2;">Welcome Back</div>
-      <div style="font-size:13px; color:var(--text-muted); margin-top:4px;">Sign in to continue</div>
+    <div style="margin-bottom:28px; text-align:center; animation: loginCardIn 0.4s cubic-bezier(0.22,1,0.36,1) both;">
+      <div style="font-family:'Syne',sans-serif; font-size:28px; font-weight:800; color:var(--text-primary); letter-spacing:-0.04em; line-height:1.15;">Welcome Back</div>
+      <div style="font-size:13.5px; color:var(--text-secondary); margin-top:22px; letter-spacing:0.01em;">Sign in to continue</div>
     </div>
 
     <!-- Card with shine border -->
@@ -1159,30 +1221,19 @@ html[data-theme="dark"] #login-card {
       <div id="login-card">
 
         <form id="login-form" autocomplete="on">
-          <div style="margin-bottom:16px;">
-            <label for="login-username" style="display:block; font-size:11px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; letter-spacing:0.06em; text-transform:uppercase;">Username</label>
-            <input id="login-username" name="username" type="text" autocomplete="username"
-              style="width:100%; padding:10px 12px; background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary); font-size:14px; font-family:'DM Sans',sans-serif; outline:none; box-sizing:border-box;"
-              onfocus="this.style.borderColor='#4CAF50'; this.style.boxShadow='0 0 0 1px rgba(76,175,80,0.3)';"
-              onblur="this.style.borderColor='var(--border-color)'; this.style.boxShadow='none';" />
-          </div>
-
           <div style="margin-bottom:20px;">
-            <label for="login-password" style="display:block; font-size:11px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; letter-spacing:0.06em; text-transform:uppercase;">Password</label>
-            <input id="login-password" name="password" type="password" autocomplete="current-password"
-              style="width:100%; padding:10px 12px; background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary); font-size:14px; font-family:'DM Sans',sans-serif; outline:none; box-sizing:border-box;"
-              onfocus="this.style.borderColor='#4CAF50'; this.style.boxShadow='0 0 0 1px rgba(76,175,80,0.3)';"
-              onblur="this.style.borderColor='var(--border-color)'; this.style.boxShadow='none';" />
+            <label for="login-username" style="display:block; font-size:11px; font-weight:600; color:var(--text-primary); opacity:0.75; margin-bottom:7px; letter-spacing:0.07em; text-transform:uppercase;">Username</label>
+            <input id="login-username" name="username" type="text" autocomplete="username" class="login-input" />
           </div>
 
-          <div id="login-error" style="display:none; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:8px; padding:10px 12px; font-size:13px; color:#ef4444; margin-bottom:16px;"></div>
+          <div style="margin-bottom:24px;">
+            <label for="login-password" style="display:block; font-size:11px; font-weight:600; color:var(--text-primary); opacity:0.75; margin-bottom:7px; letter-spacing:0.07em; text-transform:uppercase;">Password</label>
+            <input id="login-password" name="password" type="password" autocomplete="current-password" class="login-input" />
+          </div>
 
-          <button type="submit" id="login-btn"
-            style="width:100%; padding:11px; background:#4CAF50; border:none; border-radius:8px; color:#ffffff; font-size:14px; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer; letter-spacing:0.01em;"
-            onmouseenter="if(!this.disabled) this.style.background='#3D9B35';"
-            onmouseleave="if(!this.disabled) this.style.background='#4CAF50';">
-            Sign in
-          </button>
+          <div id="login-error" style="display:none; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:8px; padding:10px 14px; font-size:13px; color:#ef4444; margin-bottom:20px;"></div>
+
+          <button type="submit" id="login-btn">Sign in</button>
         </form>
 
       </div>

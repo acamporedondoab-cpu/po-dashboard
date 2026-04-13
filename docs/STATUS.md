@@ -7,19 +7,19 @@ ServiceM8 / Field Service (internal tool)
 2026-04-13
 
 ## Last Deployed Commit
-3a1585f — feat: add auth wall, login UI polish, sidebar/topbar redesign, donut overhaul, empty states
+pending — checkpoint-012 login polish
 
 ## Current State
 Fully functional SPA dashboard with login wall, polished UI, and full empty state coverage. Auth protects both frontend and /api/sheets. All charts and tables have graceful no-data states.
 
 ## What Was Last Changed
-- Auth system: HMAC-SHA256 token login, /api/auth.js, API guard on /api/sheets, logout button
-- Login card: frosted glass with mask-composite shine border, centered "Welcome Back" header
-- Sidebar: replaced green banner with 36px circle avatar "AC", removed "Field Service" label
-- Topbar: replaced page title with live date (Inter font — day name + Month DD YYYY)
-- Donut chart: side-by-side layout, borderWidth 0, 6-color bright green palette, subtle glow plugin
-- Empty states: full system — CSS + JS helper + 8 tables + 6 charts + activity feed
-- Item Search dark mode dropdown fix (select option styling)
+- Login card entrance animation (fade + rise + scale, spring easing)
+- Card padding 28px → 36px, max-width 360 → 400px
+- Card border-radius increased to 20px, shadow softened (×0.85 blur)
+- Input fields: near-black bg (#0f0f0f dark / #E5E7EB light), border barely visible, flat style
+- Input labels: font-weight 600, opacity 0.75 (brighter)
+- Button padding 11px → 17px (chunkier), hover lift + glow
+- "Welcome Back" 28px/800, subtitle margin-top 22px (more breathing room)
 
 ## Pages / Features
 - Overview — stats, profit chart, donut chart, recent POs, delivery status
@@ -48,3 +48,4 @@ Fully functional SPA dashboard with login wall, polished UI, and full empty stat
 - checkpoint-009.md — Skeleton loading states (KPI cards, charts, tables, activity feed)
 - checkpoint-010.md — Auth wall, login card frosted glass + shine border
 - checkpoint-011.md — Sidebar/topbar redesign, donut overhaul, full empty state system
+- checkpoint-012.md — Login UI premium polish (card depth, inputs, button, typography)
