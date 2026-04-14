@@ -589,6 +589,35 @@
     .activity-type.delivery  { color: #4CAF50; }
     .activity-type.updated   { color: #f59e0b; }
 
+    /* Alert icon backgrounds + colors */
+    .activity-icon.ai-alert-overdue   { background: rgba(239,68,68,0.13);  color: #ef4444; }
+    .activity-icon.ai-alert-margin    { background: rgba(245,158,11,0.13); color: #f59e0b; }
+    .activity-icon.ai-alert-threshold { background: rgba(251,146,60,0.13); color: #fb923c; }
+    .activity-icon.ai-alert-critical  { background: rgba(239,68,68,0.18);  color: #ef4444; }
+
+    /* Alert label colors */
+    .activity-type.alert-overdue   { color: #ef4444; }
+    .activity-type.alert-margin    { color: #f59e0b; }
+    .activity-type.alert-threshold { color: #fb923c; }
+    .activity-type.alert-critical  { color: #ef4444; }
+
+    /* Alert items: left severity accent + adjusted padding */
+    .activity-item.alert-overdue   { border-left: 2px solid rgba(239,68,68,0.50); padding-left: 14px; }
+    .activity-item.alert-margin    { border-left: 2px solid rgba(245,158,11,0.50); padding-left: 14px; }
+    .activity-item.alert-threshold { border-left: 2px solid rgba(251,146,60,0.50); padding-left: 14px; }
+    .activity-item.alert-critical  { border-left: 2px solid rgba(239,68,68,0.75); padding-left: 14px; }
+
+    /* Divider between alerts section and activity feed */
+    .alert-feed-divider {
+      padding: 5px 16px 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+    }
+
     .activity-desc {
       font-size: 12px;
       color: var(--text-primary);
@@ -2756,48 +2785,58 @@ html[data-theme="light"] .login-input {
   <aside id="right-panel">
     <div class="panel-header">
       <span class="panel-title">Activity Feed</span>
-      <span class="panel-badge" id="activity-count">Live</span>
+      <div style="display:flex; gap:6px; align-items:center;">
+        <span id="alert-count-badge" style="display:none; background:rgba(239,68,68,0.15); color:#ef4444; font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; border:1px solid rgba(239,68,68,0.3);"></span>
+        <span class="panel-badge" id="activity-count">Live</span>
+      </div>
     </div>
 
     <div class="panel-body" id="activity-feed">
-      <div class="sk-activity-row" aria-hidden="true">
-        <div class="skeleton" style="width:28px; height:28px; border-radius:8px; flex-shrink:0; margin-top:1px;"></div>
-        <div style="flex:1; display:flex; flex-direction:column; gap:6px; padding-top:2px;">
-          <div class="skeleton sk-line" style="width:48px;"></div>
-          <div class="skeleton sk-line" style="width:88%;"></div>
-          <div class="skeleton sk-line" style="width:44px;"></div>
+      <!-- Smart alert items — managed by ALERT_ENGINE -->
+      <div id="alert-items"></div>
+      <!-- Divider shown only when alerts are present -->
+      <div id="alert-feed-divider" class="alert-feed-divider" style="display:none;">Recent Activity</div>
+      <!-- Activity items — managed by activity feed IIFE -->
+      <div id="activity-items">
+        <div class="sk-activity-row" aria-hidden="true">
+          <div class="skeleton" style="width:28px; height:28px; border-radius:8px; flex-shrink:0; margin-top:1px;"></div>
+          <div style="flex:1; display:flex; flex-direction:column; gap:6px; padding-top:2px;">
+            <div class="skeleton sk-line" style="width:48px;"></div>
+            <div class="skeleton sk-line" style="width:88%;"></div>
+            <div class="skeleton sk-line" style="width:44px;"></div>
+          </div>
         </div>
-      </div>
-      <div class="sk-activity-row" aria-hidden="true">
-        <div class="skeleton" style="width:28px; height:28px; border-radius:8px; flex-shrink:0; margin-top:1px;"></div>
-        <div style="flex:1; display:flex; flex-direction:column; gap:6px; padding-top:2px;">
-          <div class="skeleton sk-line" style="width:60px;"></div>
-          <div class="skeleton sk-line" style="width:75%;"></div>
-          <div class="skeleton sk-line" style="width:38px;"></div>
+        <div class="sk-activity-row" aria-hidden="true">
+          <div class="skeleton" style="width:28px; height:28px; border-radius:8px; flex-shrink:0; margin-top:1px;"></div>
+          <div style="flex:1; display:flex; flex-direction:column; gap:6px; padding-top:2px;">
+            <div class="skeleton sk-line" style="width:60px;"></div>
+            <div class="skeleton sk-line" style="width:75%;"></div>
+            <div class="skeleton sk-line" style="width:38px;"></div>
+          </div>
         </div>
-      </div>
-      <div class="sk-activity-row" aria-hidden="true">
-        <div class="skeleton" style="width:28px; height:28px; border-radius:8px; flex-shrink:0; margin-top:1px;"></div>
-        <div style="flex:1; display:flex; flex-direction:column; gap:6px; padding-top:2px;">
-          <div class="skeleton sk-line" style="width:52px;"></div>
-          <div class="skeleton sk-line" style="width:92%;"></div>
-          <div class="skeleton sk-line" style="width:50px;"></div>
+        <div class="sk-activity-row" aria-hidden="true">
+          <div class="skeleton" style="width:28px; height:28px; border-radius:8px; flex-shrink:0; margin-top:1px;"></div>
+          <div style="flex:1; display:flex; flex-direction:column; gap:6px; padding-top:2px;">
+            <div class="skeleton sk-line" style="width:52px;"></div>
+            <div class="skeleton sk-line" style="width:92%;"></div>
+            <div class="skeleton sk-line" style="width:50px;"></div>
+          </div>
         </div>
-      </div>
-      <div class="sk-activity-row" aria-hidden="true">
-        <div class="skeleton" style="width:28px; height:28px; border-radius:8px; flex-shrink:0; margin-top:1px;"></div>
-        <div style="flex:1; display:flex; flex-direction:column; gap:6px; padding-top:2px;">
-          <div class="skeleton sk-line" style="width:48px;"></div>
-          <div class="skeleton sk-line" style="width:80%;"></div>
-          <div class="skeleton sk-line" style="width:42px;"></div>
+        <div class="sk-activity-row" aria-hidden="true">
+          <div class="skeleton" style="width:28px; height:28px; border-radius:8px; flex-shrink:0; margin-top:1px;"></div>
+          <div style="flex:1; display:flex; flex-direction:column; gap:6px; padding-top:2px;">
+            <div class="skeleton sk-line" style="width:48px;"></div>
+            <div class="skeleton sk-line" style="width:80%;"></div>
+            <div class="skeleton sk-line" style="width:42px;"></div>
+          </div>
         </div>
-      </div>
-      <div class="sk-activity-row" aria-hidden="true">
-        <div class="skeleton" style="width:28px; height:28px; border-radius:8px; flex-shrink:0; margin-top:1px;"></div>
-        <div style="flex:1; display:flex; flex-direction:column; gap:6px; padding-top:2px;">
-          <div class="skeleton sk-line" style="width:56px;"></div>
-          <div class="skeleton sk-line" style="width:70%;"></div>
-          <div class="skeleton sk-line" style="width:46px;"></div>
+        <div class="sk-activity-row" aria-hidden="true">
+          <div class="skeleton" style="width:28px; height:28px; border-radius:8px; flex-shrink:0; margin-top:1px;"></div>
+          <div style="flex:1; display:flex; flex-direction:column; gap:6px; padding-top:2px;">
+            <div class="skeleton sk-line" style="width:56px;"></div>
+            <div class="skeleton sk-line" style="width:70%;"></div>
+            <div class="skeleton sk-line" style="width:46px;"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -3334,8 +3373,9 @@ setInterval(async () => {
 
 // ── Activity Feed ───────────────────────────────────────────
 (function() {
-  const feed = document.getElementById('activity-feed');
-  const badge = document.getElementById('activity-count');
+  const feed         = document.getElementById('activity-feed');
+  const activityItems = document.getElementById('activity-items');
+  const badge        = document.getElementById('activity-count');
 
   const SVG_FILE = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.5H3.5a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V5.5L8 1.5z"/><polyline points="8,1.5 8,5.5 11.5,5.5"/><line x1="5" y1="7.5" x2="9" y2="7.5"/><line x1="5" y1="9.5" x2="7" y2="9.5"/></svg>`;
   const SVG_ZAP  = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 1.5L3.5 7.5h4.5L5.5 12.5l6-7H7L8.5 1.5z"/></svg>`;
@@ -3375,7 +3415,7 @@ setInterval(async () => {
 
   function render(items) {
     if (!items || items.length === 0) {
-      feed.innerHTML = emptyState(
+      activityItems.innerHTML = emptyState(
         '<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>',
         'No activity yet',
         'New POs, enrichments, and status changes will appear here in real time.'
@@ -3384,7 +3424,7 @@ setInterval(async () => {
       return;
     }
     badge.textContent = items.length;
-    feed.innerHTML = items.map(item => {
+    activityItems.innerHTML = items.map(item => {
       const meta = activityMeta(item.type, item.description);
       return `
       <div class="activity-item">
@@ -3436,6 +3476,165 @@ setInterval(async () => {
   load();
   window.registerPollCallback(load);
 })();
+
+// ── Smart Alert Engine ──────────────────────────────────────
+window.ALERT_ENGINE = (function() {
+
+  const MARGIN_WARN_PCT  = 15;   // below this % → low margin alert
+  const SPEND_WARN_PCT   = 90;   // at or above this % of threshold → warning
+
+  // SVG icons (14×14, stroke-based)
+  const SVG_CLOCK  = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="5.5"/><polyline points="7,3.5 7,7 9.5,8.5"/></svg>`;
+  const SVG_TREND  = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,4.5 5.5,8.5 8,6 12.5,10.5"/><polyline points="9.5,10.5 12.5,10.5 12.5,7.5"/></svg>`;
+  const SVG_GAUGE  = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 10a5.5 5.5 0 1 1 9 0"/><line x1="7" y1="7" x2="10" y2="4.5"/><circle cx="7" cy="7" r="1"/></svg>`;
+  const SVG_FLAG   = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v10"/><path d="M3 2.5h7l-1.5 3 1.5 3H3"/></svg>`;
+
+  let _poData        = [];
+  let _thresholdData = [];
+
+  function toISO(val) {
+    if (!val) return '';
+    if (/^\d{4}-\d{2}-\d{2}/.test(val)) return val.slice(0, 10);
+    const MO = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
+    const m = val.match(/^(\d{1,2})[-\/]([A-Za-z]+)[-\/](\d{4})/);
+    if (m) return `${m[3]}-${MO[m[2].slice(0,3).toLowerCase()]||'01'}-${m[1].padStart(2,'0')}`;
+    const p = val.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (p) return `${p[3]}-${p[2].padStart(2,'0')}-${p[1].padStart(2,'0')}`;
+    return val;
+  }
+
+  function computeAlerts() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const alerts = [];
+
+    // 1 — Overdue delivery (date_required_by < today AND not delivered/shipped/received)
+    const DONE_STATUSES = new Set(['delivered', 'shipped', 'received']);
+    const overduePoSeen = new Set();
+    _poData.forEach(r => {
+      const po = r.po_number;
+      if (!po || overduePoSeen.has(po)) return;
+      const iso = toISO(r.date_required_by);
+      if (!iso) return;
+      const reqDate = new Date(iso);
+      if (isNaN(reqDate)) return;
+      const status = (r.delivery_status || '').toLowerCase().trim();
+      if (reqDate < today && !DONE_STATUSES.has(status)) {
+        overduePoSeen.add(po);
+        const days = Math.round((today - reqDate) / 86400000);
+        alerts.push({
+          severity:   'overdue',
+          type:       'OVERDUE',
+          desc:       `${po} overdue by ${days} day${days !== 1 ? 's' : ''}`,
+          iconClass:  'ai-alert-overdue',
+          labelClass: 'alert-overdue',
+          svg:        SVG_CLOCK,
+        });
+      }
+    });
+
+    // 2 — Low margin (margin_pct > 0 and < threshold, de-duped by PO)
+    const marginPoSeen = new Set();
+    _poData.forEach(r => {
+      const po = r.po_number;
+      if (!po || marginPoSeen.has(po)) return;
+      const m = parseFloat(String(r.margin_pct || '').replace(/[^0-9.-]/g, ''));
+      if (!isNaN(m) && m > 0 && m < MARGIN_WARN_PCT) {
+        marginPoSeen.add(po);
+        alerts.push({
+          severity:   'margin',
+          type:       'LOW MARGIN',
+          desc:       `${po} — ${m.toFixed(1)}% margin`,
+          iconClass:  'ai-alert-margin',
+          labelClass: 'alert-margin',
+          svg:        SVG_TREND,
+        });
+      }
+    });
+
+    // 3 — Supplier threshold warning (≥ 90% and < 100%)
+    _thresholdData.forEach(r => {
+      const pct = r.pct_reached > 0
+        ? r.pct_reached
+        : (r.threshold > 0 ? (r.actual_spend / r.threshold) * 100 : 0);
+      if (pct >= SPEND_WARN_PCT && pct < 100) {
+        const shortName = r.supplier_name.length > 22 ? r.supplier_name.slice(0, 20) + '…' : r.supplier_name;
+        alerts.push({
+          severity:   'threshold',
+          type:       'THRESHOLD',
+          desc:       `${shortName} at ${pct.toFixed(0)}% of spend limit`,
+          iconClass:  'ai-alert-threshold',
+          labelClass: 'alert-threshold',
+          svg:        SVG_GAUGE,
+        });
+      }
+    });
+
+    // 4 — Critical priority flag (reads localStorage, de-duped by PO)
+    const critPoSeen = new Set();
+    _poData.forEach(r => {
+      const po = r.po_number;
+      if (!po || critPoSeen.has(po)) return;
+      const key  = 'pod_' + po.replace(/[^a-zA-Z0-9_-]/g, '_');
+      const prio = localStorage.getItem(key + '_priority') || 'Normal';
+      if (prio === 'Critical') {
+        critPoSeen.add(po);
+        alerts.push({
+          severity:   'critical',
+          type:       'CRITICAL',
+          desc:       `${po} flagged as Critical`,
+          iconClass:  'ai-alert-critical',
+          labelClass: 'alert-critical',
+          svg:        SVG_FLAG,
+        });
+      }
+    });
+
+    return alerts;
+  }
+
+  function render() {
+    const container = document.getElementById('alert-items');
+    const divider   = document.getElementById('alert-feed-divider');
+    const badge     = document.getElementById('alert-count-badge');
+    if (!container) return;
+
+    const alerts = computeAlerts();
+
+    // Update header badge
+    if (badge) {
+      if (alerts.length > 0) {
+        badge.textContent = `${alerts.length} alert${alerts.length !== 1 ? 's' : ''}`;
+        badge.style.display = '';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    // Show/hide divider
+    if (divider) divider.style.display = alerts.length ? '' : 'none';
+
+    if (!alerts.length) {
+      container.innerHTML = '';
+      return;
+    }
+
+    container.innerHTML = alerts.map(a => `
+      <div class="activity-item alert-item ${a.severity}">
+        <div class="activity-icon ${a.iconClass}">${a.svg}</div>
+        <div class="activity-content">
+          <div class="activity-type ${a.labelClass}">${a.type}</div>
+          <div class="activity-desc">${a.desc}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  return {
+    updatePO(rows)        { _poData        = rows || []; render(); },
+    updateThreshold(rows) { _thresholdData = rows || []; render(); },
+    refresh()             { render(); },
+  };
+})();
 </script>
 
 <!-- ═══════════════════════════════════════════════════════════
@@ -3446,6 +3645,7 @@ setInterval(async () => {
 
   let rows = [];  // { supplier_name, threshold, actual_spend }
   let _dtLoaded = false;
+  const _thresholdOverrides = new Map(); // supplier_name → user-edited threshold (survives poll re-fetch)
 
   // ── Sample data ────────────────────────────────────────────
   const SAMPLE = [
@@ -3559,8 +3759,10 @@ setInterval(async () => {
       const newVal = parseFloat(input.value);
       if (isNaN(newVal) || newVal < 0) { showToast('Invalid amount', 'error'); return; }
       rows[idx].threshold = newVal;
+      _thresholdOverrides.set(r.supplier_name, newVal);
       renderCards();
       renderTable();
+      window.ALERT_ENGINE?.updateThreshold(rows);
       showToast(`Threshold updated: ${Utils.formatCurrency(newVal)}`, 'success');
       // Push to API (fire-and-forget; no credentials locally)
       try { await window.API.updateThreshold(r.supplier_name, newVal); } catch {}
@@ -3606,7 +3808,7 @@ setInterval(async () => {
         const pctKey = Object.keys(r).find(k => k.includes('reached')) || '';
         return {
           supplier_name: name,
-          threshold:     n(r.threshold || r.threshold_amount || tMap[name.toLowerCase()]),
+          threshold:     tMap[name.toLowerCase()] || n(r.threshold || r.threshold_amount),
           actual_spend:  n(r.actual_spend || r.spend),
           pct_reached:   n(pctKey ? r[pctKey] : ''),
           status:        r.status || '',
@@ -3635,9 +3837,17 @@ setInterval(async () => {
       rows = SAMPLE;
     }
 
+    // Apply any user-edited threshold overrides (survive poll re-fetch)
+    if (_thresholdOverrides.size) {
+      rows.forEach(r => {
+        if (_thresholdOverrides.has(r.supplier_name)) r.threshold = _thresholdOverrides.get(r.supplier_name);
+      });
+    }
+
     renderCards();
     renderTable();
     _dtLoaded = true;
+    window.ALERT_ENGINE?.updateThreshold(rows);
 
     // Feed notification bell
     window.NOTIFICATIONS.thresholdMet = rows.filter(r => {
@@ -5370,6 +5580,7 @@ setInterval(async () => {
     }));
     populateSupplierFilter(allRows);
     applyFilters();
+    window.ALERT_ENGINE?.updatePO(allRows);
   }
 
   // ── Init ───────────────────────────────────────────────────

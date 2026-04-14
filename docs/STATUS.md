@@ -7,16 +7,14 @@ ServiceM8 / Field Service (internal tool)
 2026-04-14
 
 ## Last Deployed Commit
-pending — advanced filter panel 2-column compact layout
+pending — smart alert engine + threshold save fix
 
 ## Current State
-Fully functional SPA dashboard with login wall, polished UI, and full empty state coverage. Auth protects both frontend and /api/sheets. All charts and tables have graceful no-data states. Notification bell in topbar with per-PO detail and mark-as-read on close. Sidebar badges for Not Shipped and Discount Threshold persist independently of bell read state. PO Register and Supplier View have premium enterprise-style filtering: search highlighting, removable filter chips, and collapsible advanced filter panel — now in a compact 2-column layout (numeric filters left, metadata filters right) reducing expanded panel height from ~200px to ~120px. Global PO detail drawer slides in from right on row click with financials, line items, internal notes, priority flags, and attention tags.
+Fully functional SPA dashboard with login wall, polished UI, and full empty state coverage. Auth protects both frontend and /api/sheets. All charts and tables have graceful no-data states. Notification bell in topbar with per-PO detail and mark-as-read on close. Sidebar badges for Not Shipped and Discount Threshold persist independently of bell read state. PO Register and Supplier View have premium enterprise-style filtering: search highlighting, removable filter chips, and collapsible advanced filter panel in compact 2-column layout. Global PO detail drawer slides in from right on row click with financials, line items, internal notes, priority flags, and attention tags. Smart Alert Engine proactively surfaces overdue deliveries, low margin POs, supplier threshold warnings, and critical flags inside the Activity Feed panel.
 
 ## What Was Last Changed
-- Advanced filter panel redesigned to a 2-column grid: numeric inputs (Cost/Margin/Job) on left, Internal Metadata Filters on right, separated by a vertical divider
-- Panel expanded height reduced from ~200px to ~120px; max-height capped at 200px; transition snapped from 0.28s to 0.22s
-- Added `.meta-filter-section.meta-side` CSS class for the right-column variant (no top border, left border separator)
-- Active filter chips still persist above the table when the panel is collapsed
+- Smart Alert Engine: 4 alert types (overdue, low margin, threshold warning, critical flag) rendered in Activity Feed with severity colors, left-border accents, red count badge, and "Recent Activity" divider
+- Discount threshold save fix: `_thresholdOverrides` map prevents poll from wiping user edits; `tMap` priority corrected so Thresholds tab wins over Discount tab; alert engine now updates immediately on save
 
 ## Pages / Features
 - Overview — stats, profit chart, donut chart, recent POs, delivery status
@@ -51,3 +49,4 @@ Fully functional SPA dashboard with login wall, polished UI, and full empty stat
 - checkpoint-016.md — Global PO detail drawer: slide-out panel, financials, line items, notes/priority/tags
 - checkpoint-017.md — Row metadata chips + smart metadata filters (priority, tag, notes, flagged)
 - checkpoint-018.md — Advanced filter panel 2-column compact layout
+- checkpoint-019.md — Smart Alert Engine + discount threshold save fix
