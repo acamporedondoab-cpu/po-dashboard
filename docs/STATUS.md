@@ -7,16 +7,16 @@ ServiceM8 / Field Service (internal tool)
 2026-04-14
 
 ## Last Deployed Commit
-pending — smart alert feed interactive polish
+pending — audit trail / activity history timeline
 
 ## Current State
-Fully functional SPA dashboard with login wall, polished UI, and full empty state coverage. Auth protects both frontend and /api/sheets. All charts and tables have graceful no-data states. Notification bell in topbar with per-PO detail and mark-as-read on close. Sidebar badges for Not Shipped and Discount Threshold persist independently of bell read state. PO Register and Supplier View have premium enterprise-style filtering: search highlighting, removable filter chips, and collapsible advanced filter panel in compact 2-column layout. Global PO detail drawer slides in from right on row click with financials, line items, internal notes, priority flags, and attention tags. Smart Alert Engine proactively surfaces overdue deliveries, low margin POs, supplier threshold warnings, and critical flags inside the Activity Feed panel. Alert items are fully interactive: hover/press states, click navigation to the related page, and severity-colored row focus highlight that scrolls to and pulses the matching record.
+Fully functional SPA dashboard with login wall, polished UI, and full empty state coverage. Auth protects both frontend and /api/sheets. All charts and tables have graceful no-data states. Notification bell in topbar with per-PO detail and mark-as-read on close. Sidebar badges for Not Shipped and Discount Threshold persist independently of bell read state. PO Register and Supplier View have premium enterprise-style filtering: search highlighting, removable filter chips, and collapsible advanced filter panel in compact 2-column layout. Global PO detail drawer slides in from right on row click with financials, line items, internal notes, priority flags, and attention tags. Smart Alert Engine proactively surfaces overdue deliveries, low margin POs, supplier threshold warnings, and critical flags inside the Activity Feed panel. Alert items are fully interactive: hover/press states, click navigation to the related page, and severity-colored row focus highlight. PO drawer includes an Audit Trail / Activity History timeline tracking note, priority, and tag changes with before→after value chips and relative timestamps.
 
 ## What Was Last Changed
-- Alert item hover states: cursor pointer, per-severity glow on hover, scale press on active
-- Alert click navigation: Overdue → Delivery Tracker, Low Margin/Critical → PO Register, Threshold → Discount Thresholds
-- Row focus highlight: severity-colored background tint + inset top/bottom band lines, holds bright for 3.25s then fades, removes on click
-- `data-supplier` added to discount threshold rows for queryability
+- Audit Trail section added to PO detail drawer — vertical timeline, newest first, max 50 entries
+- Tracks: note added/updated, priority changed, attention tag changed
+- From→to value chips: old value muted/subdued, new value prominent/elevated, arrow `→` bold
+- `currentFlag`/`currentTag` trackers capture correct before value on rapid re-clicks
 
 ## Pages / Features
 - Overview — stats, profit chart, donut chart, recent POs, delivery status
@@ -52,3 +52,5 @@ Fully functional SPA dashboard with login wall, polished UI, and full empty stat
 - checkpoint-017.md — Row metadata chips + smart metadata filters (priority, tag, notes, flagged)
 - checkpoint-018.md — Advanced filter panel 2-column compact layout
 - checkpoint-019.md — Smart Alert Engine + discount threshold save fix
+- checkpoint-020.md — Smart Alert Feed interactive polish: hover/press, click navigation, row focus highlight
+- checkpoint-021.md — Audit Trail / Activity History timeline in PO drawer

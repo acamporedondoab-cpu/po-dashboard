@@ -1445,6 +1445,27 @@
     /* Attention tag active state */
     .drawer-pill.tag-active { background:rgba(76,175,80,.13); color:var(--green-primary); border-color:var(--green-primary); box-shadow:0 0 0 3px rgba(76,175,80,.11); }
 
+    /* ── Audit trail timeline ────────────────────────────────── */
+    .drawer-timeline { display:flex; flex-direction:column; }
+    .drawer-tl-item  { display:flex; gap:11px; }
+    .drawer-tl-left  { display:flex; flex-direction:column; align-items:center; width:14px; flex-shrink:0; }
+    .drawer-tl-dot   { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:3px; box-shadow:0 0 5px currentColor; }
+    .drawer-tl-line  { width:1.5px; flex:1; background:var(--border-color); margin-top:4px; min-height:14px; }
+    .drawer-tl-content { flex:1; padding-bottom:14px; }
+    .drawer-tl-item:last-child .drawer-tl-content { padding-bottom:2px; }
+    .drawer-tl-label { font-size:12px; font-weight:500; color:var(--text-primary); line-height:1.4; }
+    .drawer-tl-time  { font-size:10.5px; color:var(--text-muted); margin-top:2px; letter-spacing:.01em; }
+    .drawer-tl-empty { font-size:12px; color:var(--text-muted); opacity:.55; padding:4px 0 2px; }
+    .drawer-tl-detail   { display:flex; align-items:center; gap:6px; margin-top:5px; flex-wrap:wrap; }
+    .drawer-tl-val-from { font-size:11px; font-weight:500; color:var(--text-muted); opacity:0.65;
+                          background:var(--bg-secondary); padding:2px 8px; border-radius:5px;
+                          border:1px solid var(--border-color); }
+    .drawer-tl-val-to   { font-size:11px; font-weight:600; color:var(--text-primary);
+                          background:rgba(255,255,255,0.08); padding:2px 8px; border-radius:5px;
+                          border:1px solid rgba(255,255,255,0.14); }
+    html[data-theme="light"] .drawer-tl-val-to { background:rgba(0,0,0,0.06); border-color:rgba(0,0,0,0.14); }
+    .drawer-tl-arrow    { font-size:12px; font-weight:600; color:var(--text-muted); opacity:0.54; flex-shrink:0; line-height:1; }
+
     /* ── Row metadata chips (inline supplier cell) ──────────── */
     .row-meta-chips { display:flex; flex-wrap:wrap; gap:4px; margin-top:3px; }
     .rmc {
@@ -6715,7 +6736,89 @@ window.ALERT_ENGINE = (function() {
     const savedFlag   = localStorage.getItem(poKey + '_priority') || 'Normal';
     const savedTag    = localStorage.getItem(poKey + '_tag')      || '';
 
-    const safeNotes = savedNotes.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const safeNotes   = savedNotes.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const noteWasEmpty = !savedNotes;
+
+    // ── Audit trail helpers ──────────────────────────────────
+    const PRIORITY_DOT = { Normal:'#64748b', Watch:'#f59e0b', Urgent:'#f97316', Critical:'#ef4444' };
+    // Mutable trackers so event handlers can always read the current "before" value
+    let currentFlag = savedFlag;
+    let currentTag  = savedTag;
+
+    function getAuditLog() {
+      try { return JSON.parse(localStorage.getItem(poKey + '_audit') || '[]'); }
+      catch { return []; }
+    }
+
+    // appendAudit(label, dotColor, from, to, dedup)
+    //   from / to  — optional before/after value strings (shown as chips below the label)
+    //   dedup      — if true, refreshes timestamp instead of adding a duplicate within 2 min
+    function appendAudit(label, dotColor, from, to, dedup) {
+      const log = getAuditLog();
+      if (dedup && log.length && log[0].label === label && (Date.now() - log[0].ts) < 120000) {
+        log[0].ts = Date.now();
+        localStorage.setItem(poKey + '_audit', JSON.stringify(log));
+        refreshAuditUI();
+        return;
+      }
+      const entry = { label, dot: dotColor || '#4CAF50', ts: Date.now() };
+      if (from !== undefined && from !== null) entry.from = from;
+      if (to   !== undefined && to   !== null) entry.to   = to;
+      log.unshift(entry);
+      if (log.length > 50) log.length = 50;
+      localStorage.setItem(poKey + '_audit', JSON.stringify(log));
+      refreshAuditUI();
+    }
+
+    function formatAuditTime(ts) {
+      const d = new Date(ts);
+      const now  = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const yest  = new Date(today - 86400000);
+      const day   = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      const t = d.toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
+      if (day.getTime() === today.getTime()) return `Today ${t}`;
+      if (day.getTime() === yest.getTime())  return `Yesterday ${t}`;
+      return d.toLocaleDateString([], { month:'short', day:'numeric' }) + ' ' + t;
+    }
+
+    function renderAuditItems() {
+      const log = getAuditLog();
+      if (!log.length) return `<div class="drawer-tl-empty">No activity recorded yet.</div>`;
+      return log.map((e, i) => {
+        const hasDetail = e.from !== undefined || e.to !== undefined;
+        const detailHTML = hasDetail ? `
+          <div class="drawer-tl-detail">
+            ${e.from !== undefined ? `<span class="drawer-tl-val-from">${e.from}</span>` : ''}
+            ${(e.from !== undefined && e.to !== undefined) ? `<span class="drawer-tl-arrow">→</span>` : ''}
+            ${e.to   !== undefined ? `<span class="drawer-tl-val-to">${e.to}</span>` : ''}
+          </div>` : '';
+        return `
+        <div class="drawer-tl-item">
+          <div class="drawer-tl-left">
+            <div class="drawer-tl-dot" style="background:${e.dot}; color:${e.dot};"></div>
+            ${i < log.length - 1 ? '<div class="drawer-tl-line"></div>' : ''}
+          </div>
+          <div class="drawer-tl-content">
+            <div class="drawer-tl-label">${e.label}</div>
+            ${detailHTML}
+            <div class="drawer-tl-time">${formatAuditTime(e.ts)}</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function refreshAuditUI() {
+      const el = document.getElementById('drawer-audit-body');
+      if (el) el.innerHTML = renderAuditItems();
+    }
+
+    const auditHTML = `
+      <div class="drawer-section">
+        <div class="drawer-section-label">Activity History</div>
+        <div class="drawer-timeline" id="drawer-audit-body">${renderAuditItems()}</div>
+      </div>`;
+
     const notesHTML = `
       <div class="drawer-section">
         <div class="drawer-section-label">Internal Notes</div>
@@ -6749,7 +6852,7 @@ window.ALERT_ENGINE = (function() {
         <div class="drawer-pills" id="drawer-attn-pills">${tagPills}</div>
       </div>`;
 
-    body.innerHTML = infoHTML + finHTML + linesHTML + notesHTML + priorityHTML + attnHTML;
+    body.innerHTML = infoHTML + finHTML + linesHTML + notesHTML + priorityHTML + attnHTML + auditHTML;
 
     // Wire — notes auto-save with debounced toast
     const notesEl = body.querySelector('#drawer-notes');
@@ -6760,6 +6863,7 @@ window.ALERT_ENGINE = (function() {
         clearTimeout(notesSaveTimer);
         notesSaveTimer = setTimeout(() => {
           if (window.showToast) window.showToast('Notes saved', 'success');
+          appendAudit(noteWasEmpty && notesEl.value ? 'Note added' : 'Note updated', '#4CAF50', undefined, undefined, true);
         }, 900);
       });
     }
@@ -6768,12 +6872,15 @@ window.ALERT_ENGINE = (function() {
     body.querySelectorAll('[data-flag]').forEach(btn => {
       btn.addEventListener('click', () => {
         const f = btn.dataset.flag;
+        const prevFlag = currentFlag;
+        currentFlag = f;
         localStorage.setItem(poKey + '_priority', f);
         body.querySelectorAll('[data-flag]').forEach(b => {
           b.className = 'drawer-pill' + (b.dataset.flag === f ? ` flag-${f.toLowerCase()}` : '');
         });
         const toastType = f === 'Critical' ? 'error' : f === 'Urgent' ? 'warning' : 'success';
         if (window.showToast) window.showToast(`Priority set to ${f}`, toastType);
+        appendAudit('Priority changed', PRIORITY_DOT[f] || '#64748b', prevFlag, f);
         if (window.updateRowFlags) window.updateRowFlags();
       });
     });
@@ -6782,6 +6889,9 @@ window.ALERT_ENGINE = (function() {
     body.querySelectorAll('[data-attn]').forEach(btn => {
       btn.addEventListener('click', () => {
         const t = btn.dataset.attn;
+        const prevTag = currentTag || 'None';
+        const nextTag = t || 'None';
+        currentTag = t;
         localStorage.setItem(poKey + '_tag', t);
         body.querySelectorAll('[data-attn]').forEach(b => {
           b.className = 'drawer-pill' + (b.dataset.attn === t ? ' tag-active' : '');
@@ -6789,6 +6899,7 @@ window.ALERT_ENGINE = (function() {
         if (window.showToast) {
           window.showToast(t ? `Tagged: ${t}` : 'Tag cleared', 'success');
         }
+        appendAudit('Attention tag', '#67e8f9', prevTag, nextTag);
       });
     });
 
