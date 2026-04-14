@@ -607,6 +607,58 @@
     .activity-item.alert-threshold { border-left: 2px solid rgba(251,146,60,0.50); padding-left: 14px; }
     .activity-item.alert-critical  { border-left: 2px solid rgba(239,68,68,0.75); padding-left: 14px; }
 
+    /* Alert items: interactive states */
+    .alert-item {
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.12s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.15s ease;
+    }
+    .alert-item:hover {
+      background: var(--bg-tertiary);
+    }
+    .alert-item:active {
+      transform: scale(0.985);
+    }
+
+    /* Per-severity hover glows */
+    .alert-item.alert-overdue:hover,
+    .alert-item.alert-critical:hover  { box-shadow: inset 0 0 0 1px rgba(239,68,68,0.12), 2px 2px 12px rgba(239,68,68,0.08); }
+    .alert-item.alert-margin:hover     { box-shadow: inset 0 0 0 1px rgba(245,158,11,0.12), 2px 2px 12px rgba(245,158,11,0.08); }
+    .alert-item.alert-threshold:hover  { box-shadow: inset 0 0 0 1px rgba(251,146,60,0.12), 2px 2px 12px rgba(251,146,60,0.08); }
+
+    /* Alert row focus — severity-colored, holds bright then fades last 35% */
+    @keyframes alertFocusOverdue {
+      0%   { background: rgba(239,68,68,0.28);  box-shadow: inset 0 2px 0 rgba(239,68,68,0.80), inset 0 -2px 0 rgba(239,68,68,0.80); }
+      12%  { background: rgba(239,68,68,0.22);  box-shadow: inset 0 2px 0 rgba(239,68,68,0.60), inset 0 -2px 0 rgba(239,68,68,0.60); }
+      24%  { background: rgba(239,68,68,0.26);  box-shadow: inset 0 2px 0 rgba(239,68,68,0.72), inset 0 -2px 0 rgba(239,68,68,0.72); }
+      65%  { background: rgba(239,68,68,0.22);  box-shadow: inset 0 2px 0 rgba(239,68,68,0.60), inset 0 -2px 0 rgba(239,68,68,0.60); }
+      100% { background: transparent;            box-shadow: inset 0 2px 0 transparent,           inset 0 -2px 0 transparent; }
+    }
+    @keyframes alertFocusMargin {
+      0%   { background: rgba(245,158,11,0.28); box-shadow: inset 0 2px 0 rgba(245,158,11,0.80), inset 0 -2px 0 rgba(245,158,11,0.80); }
+      12%  { background: rgba(245,158,11,0.22); box-shadow: inset 0 2px 0 rgba(245,158,11,0.60), inset 0 -2px 0 rgba(245,158,11,0.60); }
+      24%  { background: rgba(245,158,11,0.26); box-shadow: inset 0 2px 0 rgba(245,158,11,0.72), inset 0 -2px 0 rgba(245,158,11,0.72); }
+      65%  { background: rgba(245,158,11,0.22); box-shadow: inset 0 2px 0 rgba(245,158,11,0.60), inset 0 -2px 0 rgba(245,158,11,0.60); }
+      100% { background: transparent;            box-shadow: inset 0 2px 0 transparent,           inset 0 -2px 0 transparent; }
+    }
+    @keyframes alertFocusThreshold {
+      0%   { background: rgba(251,146,60,0.28); box-shadow: inset 0 2px 0 rgba(251,146,60,0.80), inset 0 -2px 0 rgba(251,146,60,0.80); }
+      12%  { background: rgba(251,146,60,0.22); box-shadow: inset 0 2px 0 rgba(251,146,60,0.60), inset 0 -2px 0 rgba(251,146,60,0.60); }
+      24%  { background: rgba(251,146,60,0.26); box-shadow: inset 0 2px 0 rgba(251,146,60,0.72), inset 0 -2px 0 rgba(251,146,60,0.72); }
+      65%  { background: rgba(251,146,60,0.22); box-shadow: inset 0 2px 0 rgba(251,146,60,0.60), inset 0 -2px 0 rgba(251,146,60,0.60); }
+      100% { background: transparent;            box-shadow: inset 0 2px 0 transparent,           inset 0 -2px 0 transparent; }
+    }
+    @keyframes alertFocusCritical {
+      0%   { background: rgba(239,68,68,0.34);  box-shadow: inset 0 2px 0 rgba(239,68,68,0.90), inset 0 -2px 0 rgba(239,68,68,0.90); }
+      12%  { background: rgba(239,68,68,0.26);  box-shadow: inset 0 2px 0 rgba(239,68,68,0.68), inset 0 -2px 0 rgba(239,68,68,0.68); }
+      24%  { background: rgba(239,68,68,0.31);  box-shadow: inset 0 2px 0 rgba(239,68,68,0.82), inset 0 -2px 0 rgba(239,68,68,0.82); }
+      65%  { background: rgba(239,68,68,0.26);  box-shadow: inset 0 2px 0 rgba(239,68,68,0.68), inset 0 -2px 0 rgba(239,68,68,0.68); }
+      100% { background: transparent;            box-shadow: inset 0 2px 0 transparent,           inset 0 -2px 0 transparent; }
+    }
+    tr.alert-row-focus-overdue   > td { animation: alertFocusOverdue   5s linear forwards !important; }
+    tr.alert-row-focus-margin    > td { animation: alertFocusMargin    5s linear forwards !important; }
+    tr.alert-row-focus-threshold > td { animation: alertFocusThreshold 5s linear forwards !important; }
+    tr.alert-row-focus-critical  > td { animation: alertFocusCritical  5s linear forwards !important; }
+
     /* Divider between alerts section and activity feed */
     .alert-feed-divider {
       padding: 5px 16px 4px;
@@ -3529,6 +3581,9 @@ window.ALERT_ENGINE = (function() {
           iconClass:  'ai-alert-overdue',
           labelClass: 'alert-overdue',
           svg:        SVG_CLOCK,
+          navTarget:  'delivery-tracker',
+          navLabel:   'Delivery Tracker',
+          navKey:     po,
         });
       }
     });
@@ -3548,6 +3603,9 @@ window.ALERT_ENGINE = (function() {
           iconClass:  'ai-alert-margin',
           labelClass: 'alert-margin',
           svg:        SVG_TREND,
+          navTarget:  'po-register',
+          navLabel:   'PO Register',
+          navKey:     po,
         });
       }
     });
@@ -3566,6 +3624,9 @@ window.ALERT_ENGINE = (function() {
           iconClass:  'ai-alert-threshold',
           labelClass: 'alert-threshold',
           svg:        SVG_GAUGE,
+          navTarget:  'discount-threshold',
+          navLabel:   'Discount Thresholds',
+          navKey:     r.supplier_name,
         });
       }
     });
@@ -3586,6 +3647,9 @@ window.ALERT_ENGINE = (function() {
           iconClass:  'ai-alert-critical',
           labelClass: 'alert-critical',
           svg:        SVG_FLAG,
+          navTarget:  'po-register',
+          navLabel:   'PO Register',
+          navKey:     po,
         });
       }
     });
@@ -3620,7 +3684,7 @@ window.ALERT_ENGINE = (function() {
     }
 
     container.innerHTML = alerts.map(a => `
-      <div class="activity-item alert-item ${a.severity}">
+      <div class="activity-item alert-item ${a.severity}" data-nav="${a.navTarget}" data-nav-key="${(a.navKey||'').replace(/"/g,'&quot;')}" data-nav-severity="${a.severity}" tabindex="0" role="button" aria-label="Go to ${a.navLabel}">
         <div class="activity-icon ${a.iconClass}">${a.svg}</div>
         <div class="activity-content">
           <div class="activity-type ${a.labelClass}">${a.type}</div>
@@ -3628,6 +3692,78 @@ window.ALERT_ENGINE = (function() {
         </div>
       </div>`).join('');
   }
+
+  // Delegated click + keyboard on the static container — survives innerHTML re-renders
+  (function wireAlertNav() {
+    const container = document.getElementById('alert-items');
+    if (!container) return;
+    function handleActivate(e) {
+      const item = e.target.closest('[data-nav]');
+      if (!item) return;
+      if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+      if (e.type === 'keydown') e.preventDefault();
+      const navTarget   = item.dataset.nav;
+      const navKey      = item.dataset.navKey || '';
+      const navSeverity = item.dataset.navSeverity || 'overdue';
+      if (typeof navigateTo === 'function') navigateTo(navTarget);
+      if (typeof window.focusAlertTarget === 'function') window.focusAlertTarget(navTarget, navKey, navSeverity);
+    }
+    container.addEventListener('click',   handleActivate);
+    container.addEventListener('keydown', handleActivate);
+  })();
+
+  // Global: scroll + severity-colored pulse-highlight the matching row after alert navigation
+  const _FOCUS_CLASSES = ['alert-row-focus-overdue','alert-row-focus-margin','alert-row-focus-threshold','alert-row-focus-critical'];
+
+  window.focusAlertTarget = function(navTarget, navKey, severity) {
+    if (!navKey) return;
+    const cls = 'alert-row-focus-' + (severity || 'overdue');
+
+    function pulse(row) {
+      // Clear any in-progress highlight (including different severity)
+      _FOCUS_CLASSES.forEach(c => row.classList.remove(c));
+      void row.offsetWidth; // force reflow to restart animation
+
+      row.classList.add(cls);
+      row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      function dismiss() {
+        row.classList.remove(cls);
+        row.removeEventListener('click', dismiss);
+        clearTimeout(timer);
+      }
+      // Auto-remove after 5s (slightly past animation end)
+      const timer = setTimeout(dismiss, 5200);
+      // Remove immediately on row interaction
+      row.addEventListener('click', dismiss, { once: true });
+    }
+
+    function findRow() {
+      if (navTarget === 'po-register') {
+        return document.querySelector(`#por-tbody tr.por-group-row[data-po="${CSS.escape(navKey)}"]`);
+      }
+      if (navTarget === 'delivery-tracker') {
+        return document.querySelector(`#dt-tbody tr.dt-row[data-po="${CSS.escape(navKey)}"]`);
+      }
+      if (navTarget === 'discount-threshold') {
+        const key = navKey.toLowerCase();
+        for (const tr of document.querySelectorAll('#dt2-tbody tr[data-supplier]')) {
+          if (tr.dataset.supplier.toLowerCase() === key) return tr;
+        }
+        return null;
+      }
+      return null;
+    }
+
+    function tryFind(attempt) {
+      const row = findRow();
+      if (row) { pulse(row); return; }
+      if (attempt < 10) setTimeout(() => tryFind(attempt + 1), 180);
+    }
+
+    // Short delay so navigateTo's DOM show/hide settles before we query
+    setTimeout(() => tryFind(0), 80);
+  };
 
   return {
     updatePO(rows)        { _poData        = rows || []; render(); },
@@ -3707,7 +3843,7 @@ window.ALERT_ENGINE = (function() {
       const fill   = barColor(rawPct);
       const barW   = Math.min(rawPct, 100).toFixed(1);
       return `
-        <tr>
+        <tr data-supplier="${(r.supplier_name||'').replace(/"/g,'&quot;')}">
           <td style="font-weight:500; color:var(--text-primary);">${r.supplier_name}</td>
           <td style="text-align:right; padding-right:20px;">
             <div class="threshold-cell" data-idx="${idx}" style="display:inline-flex; align-items:center; gap:8px; cursor:pointer; padding:4px 8px; border-radius:6px; transition:background 0.15s ease;" title="Click to edit">
