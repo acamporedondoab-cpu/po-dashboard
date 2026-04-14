@@ -1186,8 +1186,8 @@
     .chip-x:hover { background:rgba(76,175,80,.42); }
 
     /* ── Advanced filter panel ───────────────────────────── */
-    .adv-panel { overflow:hidden; max-height:0; opacity:0; transition:max-height .28s cubic-bezier(.4,0,.2,1), opacity .2s ease; }
-    .adv-panel.open { max-height:300px; opacity:1; }
+    .adv-panel { overflow:hidden; max-height:0; opacity:0; transition:max-height .22s cubic-bezier(.4,0,.2,1), opacity .18s ease; }
+    .adv-panel.open { max-height:200px; opacity:1; }
     .adv-filter-btn { display:inline-flex; align-items:center; gap:5px; padding:6px 11px; background:transparent; border:1px solid var(--border-color); border-radius:8px; font-size:12px; font-weight:500; color:var(--text-secondary); cursor:pointer; transition:border-color .15s ease, color .15s ease, background .15s ease; white-space:nowrap; }
     .adv-filter-btn:hover { border-color:var(--green-primary); color:var(--green-primary); }
     .adv-filter-btn.active { border-color:var(--green-primary); background:rgba(76,175,80,.08); color:var(--green-primary); }
@@ -1197,6 +1197,7 @@
 
     /* ── Metadata filter section ──────────────────────────── */
     .meta-filter-section { border-top:1px solid var(--border-color); padding-top:10px; margin-top:4px; width:100%; }
+    .meta-filter-section.meta-side { border-top:none; border-left:1px solid var(--border-color); padding-top:0; padding-left:16px; margin-top:0; }
     .meta-filter-label { font-size:10px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:7px; }
     .meta-filter-row { display:flex; flex-wrap:wrap; align-items:center; gap:5px; margin-bottom:5px; }
     .meta-filter-sublabel { font-size:10.5px; font-weight:600; color:var(--text-muted); min-width:50px; }
@@ -1962,29 +1963,32 @@ html[data-theme="light"] .login-input {
 
         <!-- Advanced filter panel -->
         <div id="por-adv-panel" class="adv-panel">
-          <div style="display:flex; flex-wrap:wrap; gap:14px; padding:12px 2px 6px;">
-            <div class="adv-input-group">
-              <label>Supplier Cost</label>
-              <div class="adv-input-row">
-                <input id="por-adv-cost-min" class="input" type="number" placeholder="Min $" step="0.01" style="width:88px; font-size:12px;" />
-                <span>–</span>
-                <input id="por-adv-cost-max" class="input" type="number" placeholder="Max $" step="0.01" style="width:88px; font-size:12px;" />
+          <div style="display:grid; grid-template-columns:max-content 1fr; gap:0; padding:12px 4px 10px; align-items:start;">
+            <!-- Numeric filters (left column) -->
+            <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:flex-start; padding-right:18px; border-right:1px solid var(--border-color);">
+              <div class="adv-input-group">
+                <label>Supplier Cost</label>
+                <div class="adv-input-row">
+                  <input id="por-adv-cost-min" class="input" type="number" placeholder="Min $" step="0.01" style="width:88px; font-size:12px;" />
+                  <span>–</span>
+                  <input id="por-adv-cost-max" class="input" type="number" placeholder="Max $" step="0.01" style="width:88px; font-size:12px;" />
+                </div>
+              </div>
+              <div class="adv-input-group">
+                <label>Margin %</label>
+                <div class="adv-input-row">
+                  <input id="por-adv-margin-min" class="input" type="number" placeholder="Min %" style="width:78px; font-size:12px;" />
+                  <span>–</span>
+                  <input id="por-adv-margin-max" class="input" type="number" placeholder="Max %" style="width:78px; font-size:12px;" />
+                </div>
+              </div>
+              <div class="adv-input-group">
+                <label>Job Number</label>
+                <input id="por-adv-job" class="input" type="text" placeholder="e.g. JOB-1031" style="width:130px; font-size:12px;" />
               </div>
             </div>
-            <div class="adv-input-group">
-              <label>Margin %</label>
-              <div class="adv-input-row">
-                <input id="por-adv-margin-min" class="input" type="number" placeholder="Min %" style="width:78px; font-size:12px;" />
-                <span>–</span>
-                <input id="por-adv-margin-max" class="input" type="number" placeholder="Max %" style="width:78px; font-size:12px;" />
-              </div>
-            </div>
-            <div class="adv-input-group">
-              <label>Job Number</label>
-              <input id="por-adv-job" class="input" type="text" placeholder="e.g. JOB-1031" style="width:130px; font-size:12px;" />
-            </div>
-            <!-- Metadata filters -->
-            <div class="meta-filter-section">
+            <!-- Metadata filters (right column) -->
+            <div class="meta-filter-section meta-side">
               <div class="meta-filter-label">Internal Metadata Filters</div>
               <div class="meta-filter-row">
                 <span class="meta-filter-sublabel">Priority</span>
@@ -2234,29 +2238,32 @@ html[data-theme="light"] .login-input {
 
         <!-- Advanced filter panel -->
         <div id="sv-adv-panel" class="adv-panel">
-          <div style="display:flex; flex-wrap:wrap; gap:14px; padding:12px 2px 6px;">
-            <div class="adv-input-group">
-              <label>Supplier Cost</label>
-              <div class="adv-input-row">
-                <input id="sv-adv-cost-min" class="input" type="number" placeholder="Min $" step="0.01" style="width:88px; font-size:12px;" />
-                <span>–</span>
-                <input id="sv-adv-cost-max" class="input" type="number" placeholder="Max $" step="0.01" style="width:88px; font-size:12px;" />
+          <div style="display:grid; grid-template-columns:max-content 1fr; gap:0; padding:12px 4px 10px; align-items:start;">
+            <!-- Numeric filters (left column) -->
+            <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:flex-start; padding-right:18px; border-right:1px solid var(--border-color);">
+              <div class="adv-input-group">
+                <label>Supplier Cost</label>
+                <div class="adv-input-row">
+                  <input id="sv-adv-cost-min" class="input" type="number" placeholder="Min $" step="0.01" style="width:88px; font-size:12px;" />
+                  <span>–</span>
+                  <input id="sv-adv-cost-max" class="input" type="number" placeholder="Max $" step="0.01" style="width:88px; font-size:12px;" />
+                </div>
+              </div>
+              <div class="adv-input-group">
+                <label>Margin %</label>
+                <div class="adv-input-row">
+                  <input id="sv-adv-margin-min" class="input" type="number" placeholder="Min %" style="width:78px; font-size:12px;" />
+                  <span>–</span>
+                  <input id="sv-adv-margin-max" class="input" type="number" placeholder="Max %" style="width:78px; font-size:12px;" />
+                </div>
+              </div>
+              <div class="adv-input-group">
+                <label>Job Number</label>
+                <input id="sv-adv-job" class="input" type="text" placeholder="e.g. JOB-1031" style="width:130px; font-size:12px;" />
               </div>
             </div>
-            <div class="adv-input-group">
-              <label>Margin %</label>
-              <div class="adv-input-row">
-                <input id="sv-adv-margin-min" class="input" type="number" placeholder="Min %" style="width:78px; font-size:12px;" />
-                <span>–</span>
-                <input id="sv-adv-margin-max" class="input" type="number" placeholder="Max %" style="width:78px; font-size:12px;" />
-              </div>
-            </div>
-            <div class="adv-input-group">
-              <label>Job Number</label>
-              <input id="sv-adv-job" class="input" type="text" placeholder="e.g. JOB-1031" style="width:130px; font-size:12px;" />
-            </div>
-            <!-- Metadata filters -->
-            <div class="meta-filter-section">
+            <!-- Metadata filters (right column) -->
+            <div class="meta-filter-section meta-side">
               <div class="meta-filter-label">Internal Metadata Filters</div>
               <div class="meta-filter-row">
                 <span class="meta-filter-sublabel">Priority</span>
