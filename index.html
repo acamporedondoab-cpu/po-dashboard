@@ -1187,16 +1187,203 @@
 
     /* ── Advanced filter panel ───────────────────────────── */
     .adv-panel { overflow:hidden; max-height:0; opacity:0; transition:max-height .28s cubic-bezier(.4,0,.2,1), opacity .2s ease; }
-    .adv-panel.open { max-height:140px; opacity:1; }
+    .adv-panel.open { max-height:300px; opacity:1; }
     .adv-filter-btn { display:inline-flex; align-items:center; gap:5px; padding:6px 11px; background:transparent; border:1px solid var(--border-color); border-radius:8px; font-size:12px; font-weight:500; color:var(--text-secondary); cursor:pointer; transition:border-color .15s ease, color .15s ease, background .15s ease; white-space:nowrap; }
     .adv-filter-btn:hover { border-color:var(--green-primary); color:var(--green-primary); }
     .adv-filter-btn.active { border-color:var(--green-primary); background:rgba(76,175,80,.08); color:var(--green-primary); }
     .adv-filter-btn svg.adv-chevron { transition:transform .2s ease; }
     .adv-filter-btn.active svg.adv-chevron { transform:rotate(180deg); }
     .adv-input-group { display:flex; flex-direction:column; gap:4px; }
+
+    /* ── Metadata filter section ──────────────────────────── */
+    .meta-filter-section { border-top:1px solid var(--border-color); padding-top:10px; margin-top:4px; width:100%; }
+    .meta-filter-label { font-size:10px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:7px; }
+    .meta-filter-row { display:flex; flex-wrap:wrap; align-items:center; gap:5px; margin-bottom:5px; }
+    .meta-filter-sublabel { font-size:10.5px; font-weight:600; color:var(--text-muted); min-width:50px; }
+    .meta-tag-btn { display:inline-flex; align-items:center; height:22px; padding:0 9px; border-radius:20px; font-size:11px; font-weight:500; border:1px solid var(--border-color); background:transparent; color:var(--text-secondary); cursor:pointer; white-space:nowrap; transition:border-color .15s, color .15s, background .15s; }
+    .meta-tag-btn:hover { border-color:var(--green-primary); color:var(--green-primary); }
+    .meta-tag-btn.active { border-color:var(--green-primary); background:rgba(76,175,80,.12); color:var(--green-primary); }
+    .meta-tag-btn[data-meta="prio:Watch"].active    { border-color:rgba(245,158,11,.55); background:rgba(245,158,11,.12); color:#f59e0b; }
+    .meta-tag-btn[data-meta="prio:Urgent"].active   { border-color:rgba(249,115,22,.55); background:rgba(249,115,22,.12); color:#fb923c; }
+    .meta-tag-btn[data-meta="prio:Critical"].active { border-color:rgba(239,68,68,.55);  background:rgba(239,68,68,.12);  color:#f87171; }
+    .meta-tag-btn[data-meta^="tag:"].active { border-color:rgba(139,148,255,.48); background:rgba(139,148,255,.11); color:#a5b4fc; }
+    html[data-theme="light"] .meta-tag-btn[data-meta="prio:Watch"].active    { border-color:rgba(245,158,11,.5); background:rgba(245,158,11,.10); color:#b45309; }
+    html[data-theme="light"] .meta-tag-btn[data-meta="prio:Urgent"].active   { border-color:rgba(249,115,22,.5); background:rgba(249,115,22,.10); color:#c2410c; }
+    html[data-theme="light"] .meta-tag-btn[data-meta="prio:Critical"].active { border-color:rgba(239,68,68,.5);  background:rgba(239,68,68,.10);  color:#b91c1c; }
+    html[data-theme="light"] .meta-tag-btn[data-meta^="tag:"].active { border-color:rgba(99,102,241,.4); background:rgba(99,102,241,.09); color:#4f46e5; }
     .adv-input-group label { font-size:10.5px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em; }
     .adv-input-row { display:flex; align-items:center; gap:6px; }
     .adv-input-row span { font-size:12px; color:var(--text-muted); }
+
+    /* ── PO Detail Drawer ───────────────────────────────────── */
+    #po-drawer-backdrop {
+      position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:1000;
+      opacity:0; pointer-events:none; transition:opacity .3s ease;
+      backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);
+    }
+    html[data-theme="light"] #po-drawer-backdrop { background:rgba(0,0,0,.32); }
+    #po-drawer-backdrop.open { opacity:1; pointer-events:all; }
+
+    #po-drawer {
+      position:fixed; top:0; right:0; height:100%; width:520px; max-width:96vw;
+      background:var(--bg-secondary); border-left:1px solid var(--border-color);
+      z-index:1001; transform:translateX(100%);
+      transition:transform .38s cubic-bezier(.16,1,.3,1);
+      will-change:transform;
+      display:flex; flex-direction:column; overflow:hidden;
+      box-shadow:-20px 0 60px rgba(0,0,0,.45), -4px 0 12px rgba(0,0,0,.2);
+    }
+    html[data-theme="light"] #po-drawer {
+      background:#f4f5f7;
+      box-shadow:-20px 0 60px rgba(0,0,0,.12), -4px 0 12px rgba(0,0,0,.06);
+    }
+    #po-drawer.open { transform:translateX(0); }
+
+    /* Top accent bar */
+    #po-drawer::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:2px;
+      background:linear-gradient(90deg, var(--green-primary) 0%, rgba(76,175,80,.25) 100%);
+      z-index:2;
+    }
+
+    .drawer-header {
+      padding:20px 22px 16px; border-bottom:1px solid var(--border-color);
+      background:var(--bg-card);
+      display:flex; align-items:flex-start; justify-content:space-between;
+      gap:12px; flex-shrink:0;
+    }
+    html[data-theme="light"] .drawer-header {
+      background:#fff;
+      box-shadow:0 1px 0 rgba(0,0,0,.06);
+    }
+    .drawer-close {
+      width:30px; height:30px; border-radius:8px; background:transparent;
+      border:1px solid var(--border-color); display:flex; align-items:center;
+      justify-content:center; cursor:pointer; color:var(--text-muted);
+      transition:background .15s ease, color .15s ease, border-color .15s ease;
+      flex-shrink:0; padding:0;
+    }
+    .drawer-close:hover { background:var(--bg-tertiary); color:var(--text-primary); border-color:var(--text-muted); }
+    .drawer-body { flex:1; overflow-y:auto; padding:16px 16px 28px; display:flex; flex-direction:column; gap:10px; }
+    /* Custom scrollbar */
+    .drawer-body::-webkit-scrollbar { width:5px; }
+    .drawer-body::-webkit-scrollbar-track { background:transparent; }
+    .drawer-body::-webkit-scrollbar-thumb { background:var(--border-color); border-radius:10px; }
+    .drawer-body::-webkit-scrollbar-thumb:hover { background:var(--text-muted); }
+
+    .drawer-section {
+      display:flex; flex-direction:column; gap:10px;
+      background:var(--bg-card); border:1px solid var(--border-color);
+      border-radius:10px; padding:14px 16px;
+    }
+    html[data-theme="light"] .drawer-section {
+      background:#fff;
+      box-shadow:0 1px 3px rgba(0,0,0,.05), 0 0 0 1px rgba(0,0,0,.04);
+      border-color:rgba(0,0,0,.08);
+    }
+    .drawer-section-label {
+      font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+      color:var(--text-muted); display:flex; align-items:center; gap:8px;
+    }
+    .drawer-section-label::after {
+      content:''; flex:1; height:1px; background:var(--border-color); opacity:.6;
+    }
+
+    .drawer-info-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px 16px; }
+    .drawer-info-item { display:flex; flex-direction:column; gap:3px; }
+    .drawer-info-label { font-size:10px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em; }
+    .drawer-info-value { font-size:13px; color:var(--text-primary); font-weight:500; }
+
+    .drawer-fin-row { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; }
+    .drawer-fin-card {
+      background:var(--bg-tertiary); border-radius:8px; padding:10px 11px;
+      border:1px solid var(--border-color);
+    }
+    html[data-theme="light"] .drawer-fin-card {
+      background:var(--bg-primary);
+      box-shadow:0 1px 2px rgba(0,0,0,.04);
+    }
+    .drawer-fin-label { font-size:9.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); margin-bottom:5px; }
+    .drawer-fin-value { font-size:15px; font-weight:700; font-variant-numeric:tabular-nums; line-height:1.2; }
+
+    .drawer-lines-wrap { overflow-x:auto; margin:0 -4px; padding:0 4px; }
+    .drawer-lines-table { width:100%; border-collapse:collapse; font-size:12px; min-width:460px; }
+    .drawer-lines-table th { padding:5px 8px 7px; text-align:left; color:var(--text-muted); font-size:10px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; border-bottom:1px solid var(--border-color); white-space:nowrap; }
+    .drawer-lines-table td { padding:7px 8px; border-bottom:1px solid rgba(255,255,255,.04); }
+    html[data-theme="light"] .drawer-lines-table td { border-bottom-color:rgba(0,0,0,.05); }
+    .drawer-lines-table tr:last-child td { border-bottom:none; }
+    .drawer-lines-table tbody tr { transition:background .12s ease; }
+    .drawer-lines-table tbody tr:hover td { background:rgba(76,175,80,.05); }
+
+    .drawer-row-clickable { cursor:pointer; transition:background .12s ease; }
+    .drawer-row-clickable:hover td { background:rgba(76,175,80,.04); }
+    html[data-theme="light"] .drawer-row-clickable:hover td { background:rgba(76,175,80,.06); }
+
+    /* Priority row highlights (table rows) */
+    .row-flag-urgent   { box-shadow:inset 3px 0 0 #f97316; }
+    .row-flag-critical { box-shadow:inset 3px 0 0 #ef4444; }
+    .row-flag-urgent td   { background:rgba(249,115,22,.04) !important; }
+    .row-flag-critical td { background:rgba(239,68,68,.05) !important; }
+    html[data-theme="light"] .row-flag-urgent td   { background:rgba(249,115,22,.07) !important; }
+    html[data-theme="light"] .row-flag-critical td { background:rgba(239,68,68,.07) !important; }
+    /* Don't double-apply on expand rows */
+    .row-flag-urgent:hover td, .row-flag-critical:hover td { filter:brightness(1.06); }
+
+    /* Drawer — Internal Notes */
+    .drawer-notes-area {
+      width:100%; min-height:80px; max-height:160px; resize:vertical;
+      background:var(--bg-tertiary); border:1.5px solid var(--border-color);
+      border-radius:8px; padding:10px 12px; color:var(--text-primary);
+      font-size:13px; font-family:inherit; line-height:1.65; box-sizing:border-box;
+      transition:border-color .18s ease, box-shadow .18s ease; outline:none;
+    }
+    html[data-theme="light"] .drawer-notes-area { background:var(--bg-primary); }
+    .drawer-notes-area:focus { border-color:var(--green-primary); box-shadow:0 0 0 3px rgba(76,175,80,.13); }
+    .drawer-notes-area::placeholder { color:var(--text-muted); opacity:.5; }
+
+    /* Drawer — Priority / Tag pills */
+    .drawer-pills { display:flex; flex-wrap:wrap; gap:6px; }
+    .drawer-pill {
+      padding:5px 14px; border-radius:20px; font-size:11.5px; font-weight:600;
+      letter-spacing:.02em; cursor:pointer; border:1.5px solid var(--border-color);
+      background:var(--bg-tertiary); color:var(--text-muted);
+      transition:background .14s ease, color .14s ease, border-color .14s ease, box-shadow .14s ease, transform .1s ease;
+      user-select:none; line-height:1.4;
+    }
+    html[data-theme="light"] .drawer-pill { background:var(--bg-primary); }
+    .drawer-pill:hover { background:var(--bg-secondary); color:var(--text-primary); border-color:var(--text-muted); transform:translateY(-1px); }
+    .drawer-pill:active { transform:translateY(0); }
+
+    /* Priority active states */
+    .drawer-pill.flag-normal   { background:rgba(100,116,139,.15); color:#94a3b8; border-color:#475569; box-shadow:0 0 0 3px rgba(100,116,139,.1); }
+    .drawer-pill.flag-watch    { background:rgba(245,158,11,.13);  color:#f59e0b; border-color:#d97706; box-shadow:0 0 0 3px rgba(245,158,11,.12); }
+    .drawer-pill.flag-urgent   { background:rgba(249,115,22,.14);  color:#f97316; border-color:#ea580c; box-shadow:0 0 0 3px rgba(249,115,22,.12); }
+    .drawer-pill.flag-critical { background:rgba(239,68,68,.16);   color:#ef4444; border-color:#dc2626; box-shadow:0 0 0 3px rgba(239,68,68,.14); }
+
+    /* Attention tag active state */
+    .drawer-pill.tag-active { background:rgba(76,175,80,.13); color:var(--green-primary); border-color:var(--green-primary); box-shadow:0 0 0 3px rgba(76,175,80,.11); }
+
+    /* ── Row metadata chips (inline supplier cell) ──────────── */
+    .row-meta-chips { display:flex; flex-wrap:wrap; gap:4px; margin-top:3px; }
+    .rmc {
+      display:inline-flex; align-items:center; gap:4px; height:18px;
+      padding:0 8px; border-radius:20px; font-size:9.5px; font-weight:600;
+      letter-spacing:.04em; text-transform:uppercase; white-space:nowrap; line-height:1;
+      border:1px solid transparent;
+    }
+    .rmc svg { flex-shrink:0; }
+    /* Dark mode */
+    .rmc-watch    { background:rgba(245,158,11,.15);  color:#f59e0b; border-color:rgba(245,158,11,.32); box-shadow:0 0 6px rgba(245,158,11,.12); }
+    .rmc-urgent   { background:rgba(249,115,22,.15);  color:#fb923c; border-color:rgba(249,115,22,.32); box-shadow:0 0 6px rgba(249,115,22,.12); }
+    .rmc-critical { background:rgba(239,68,68,.15);   color:#f87171; border-color:rgba(239,68,68,.32);  box-shadow:0 0 6px rgba(239,68,68,.12); }
+    .rmc-tag      { background:rgba(139,148,255,.13); color:#a5b4fc; border-color:rgba(139,148,255,.28); box-shadow:0 0 6px rgba(139,148,255,.10); }
+    .rmc-notes    { background:rgba(96,130,182,.13);  color:#7eaee0; border-color:rgba(96,130,182,.30);  box-shadow:0 0 6px rgba(96,130,182,.11); }
+    /* Light mode */
+    html[data-theme="light"] .rmc-watch    { background:rgba(245,158,11,.12); color:#b45309; border-color:rgba(245,158,11,.30); box-shadow:0 0 5px rgba(245,158,11,.10); }
+    html[data-theme="light"] .rmc-urgent   { background:rgba(249,115,22,.11); color:#c2410c; border-color:rgba(249,115,22,.30); box-shadow:0 0 5px rgba(249,115,22,.10); }
+    html[data-theme="light"] .rmc-critical { background:rgba(239,68,68,.11);  color:#b91c1c; border-color:rgba(239,68,68,.30);  box-shadow:0 0 5px rgba(239,68,68,.10); }
+    html[data-theme="light"] .rmc-tag      { background:rgba(99,102,241,.10); color:#4f46e5; border-color:rgba(99,102,241,.26);  box-shadow:0 0 5px rgba(99,102,241,.08); }
+    html[data-theme="light"] .rmc-notes    { background:rgba(59,104,168,.09);  color:#2563a8; border-color:rgba(59,104,168,.25);  box-shadow:0 0 5px rgba(59,104,168,.09); }
   </style>
 </head>
 <body>
@@ -1796,6 +1983,28 @@ html[data-theme="light"] .login-input {
               <label>Job Number</label>
               <input id="por-adv-job" class="input" type="text" placeholder="e.g. JOB-1031" style="width:130px; font-size:12px;" />
             </div>
+            <!-- Metadata filters -->
+            <div class="meta-filter-section">
+              <div class="meta-filter-label">Internal Metadata Filters</div>
+              <div class="meta-filter-row">
+                <span class="meta-filter-sublabel">Priority</span>
+                <button type="button" class="meta-tag-btn" data-meta="prio:Watch">Watch</button>
+                <button type="button" class="meta-tag-btn" data-meta="prio:Urgent">Urgent</button>
+                <button type="button" class="meta-tag-btn" data-meta="prio:Critical">Critical</button>
+              </div>
+              <div class="meta-filter-row">
+                <span class="meta-filter-sublabel">Tag</span>
+                <button type="button" class="meta-tag-btn" data-meta="tag:Needs Review">Needs Review</button>
+                <button type="button" class="meta-tag-btn" data-meta="tag:Delayed">Delayed</button>
+                <button type="button" class="meta-tag-btn" data-meta="tag:Issue Reported">Issue Reported</button>
+                <button type="button" class="meta-tag-btn" data-meta="tag:Waiting Approval">Waiting Approval</button>
+                <button type="button" class="meta-tag-btn" data-meta="tag:Escalated">Escalated</button>
+              </div>
+              <div class="meta-filter-row">
+                <button type="button" class="meta-tag-btn" data-meta="special:hasNotes">Has Notes</button>
+                <button type="button" class="meta-tag-btn" data-meta="special:flagged">Flagged Only</button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -2045,6 +2254,28 @@ html[data-theme="light"] .login-input {
             <div class="adv-input-group">
               <label>Job Number</label>
               <input id="sv-adv-job" class="input" type="text" placeholder="e.g. JOB-1031" style="width:130px; font-size:12px;" />
+            </div>
+            <!-- Metadata filters -->
+            <div class="meta-filter-section">
+              <div class="meta-filter-label">Internal Metadata Filters</div>
+              <div class="meta-filter-row">
+                <span class="meta-filter-sublabel">Priority</span>
+                <button type="button" class="meta-tag-btn" data-meta="prio:Watch">Watch</button>
+                <button type="button" class="meta-tag-btn" data-meta="prio:Urgent">Urgent</button>
+                <button type="button" class="meta-tag-btn" data-meta="prio:Critical">Critical</button>
+              </div>
+              <div class="meta-filter-row">
+                <span class="meta-filter-sublabel">Tag</span>
+                <button type="button" class="meta-tag-btn" data-meta="tag:Needs Review">Needs Review</button>
+                <button type="button" class="meta-tag-btn" data-meta="tag:Delayed">Delayed</button>
+                <button type="button" class="meta-tag-btn" data-meta="tag:Issue Reported">Issue Reported</button>
+                <button type="button" class="meta-tag-btn" data-meta="tag:Waiting Approval">Waiting Approval</button>
+                <button type="button" class="meta-tag-btn" data-meta="tag:Escalated">Escalated</button>
+              </div>
+              <div class="meta-filter-row">
+                <button type="button" class="meta-tag-btn" data-meta="special:hasNotes">Has Notes</button>
+                <button type="button" class="meta-tag-btn" data-meta="special:flagged">Flagged Only</button>
+              </div>
             </div>
           </div>
         </div>
@@ -3622,6 +3853,8 @@ setInterval(async () => {
     }
   }
 
+  let _nsRows = [];
+
   async function load() {
     const headers = await window.API.get('po_headers');
     if (!headers) return; // keep last known badge — don't wipe on API failure
@@ -3657,8 +3890,8 @@ setInterval(async () => {
       return;
     }
 
-    tbody.innerHTML = rows.map(r => `
-      <tr>
+    tbody.innerHTML = rows.map((r, i) => `
+      <tr class="ns-row drawer-row-clickable" data-idx="${i}" data-po="${r.po_number || ''}">
         <td style="font-family:monospace; font-size:12px; color:var(--green-primary); white-space:nowrap;">${r.po_number || '—'}</td>
         <td style="white-space:nowrap;">${r.supplier_name || '—'}</td>
         <td style="white-space:nowrap;">${r.client_name || '—'}</td>
@@ -3668,6 +3901,25 @@ setInterval(async () => {
         <td style="text-align:right; padding-right:16px; font-family:'Inter',sans-serif; font-variant-numeric:tabular-nums; color:var(--text-secondary);">${Utils.formatCurrency(parseMoney(r.total_customer_price))}</td>
         <td>${Utils.statusBadge(r.delivery_status)}</td>
       </tr>`).join('');
+
+    _nsRows = rows;
+    if (window.updateRowFlags) window.updateRowFlags();
+    tbody.querySelectorAll('.ns-row').forEach(row => {
+      row.addEventListener('click', () => {
+        const r = _nsRows[+row.dataset.idx];
+        if (!r || !window.openPODrawer) return;
+        window.openPODrawer({
+          po_number:           r.po_number,
+          supplier_name:       r.supplier_name,
+          client_name:         r.client_name,
+          job_number:          r.job_number,
+          date_required_by:    toISO(r.date_required_by),
+          delivery_status:     r.delivery_status,
+          total_supplier_cost: r.total_supplier_cost,
+          total_customer_price: r.total_customer_price,
+        });
+      });
+    });
   }
 
   load();
@@ -3771,7 +4023,9 @@ setInterval(async () => {
       return;
     }
 
-    tbody.innerHTML = enriched.map(r => {
+    let _dtRows = [];
+
+    tbody.innerHTML = enriched.map((r, i) => {
       const s = URGENCY_STYLE[r.urgency];
       const today = new Date(); today.setHours(0,0,0,0);
       const req   = new Date(toISO(r.date_required_by) + 'T00:00:00');
@@ -3779,7 +4033,7 @@ setInterval(async () => {
       const daysLabel = days === null ? '' : days < 0 ? `${Math.abs(days)}d overdue` : days === 0 ? 'Today' : `${days}d`;
 
       return `
-        <tr style="${s.rowBg ? 'background:'+s.rowBg+';' : ''}">
+        <tr class="dt-row drawer-row-clickable" data-idx="${i}" data-po="${r.po_number || ''}" style="${s.rowBg ? 'background:'+s.rowBg+';' : ''}">
           <td>
             <span class="badge" style="${s.badge} font-size:10.5px; font-weight:700; letter-spacing:0.05em; padding:3px 9px;">${r.urgency}</span>
           </td>
@@ -3795,6 +4049,26 @@ setInterval(async () => {
           <td>${Utils.statusBadge(r.delivery_status)}</td>
         </tr>`;
     }).join('');
+
+    _dtRows = enriched;
+    if (window.updateRowFlags) window.updateRowFlags();
+    tbody.querySelectorAll('.dt-row').forEach(row => {
+      row.addEventListener('click', () => {
+        const r = _dtRows[+row.dataset.idx];
+        if (!r || !window.openPODrawer) return;
+        window.openPODrawer({
+          po_number:       r.po_number,
+          supplier_name:   r.supplier_name,
+          client_name:     r.client_name,
+          job_number:      r.job_number,
+          date_required_by: toISO(r.date_required_by),
+          delivery_status: r.delivery_status,
+          urgency:         r.urgency,
+          description:     r.description,
+          qty:             r.qty,
+        });
+      });
+    });
   }
 
   // ── Load ───────────────────────────────────────────────────
@@ -3849,6 +4123,7 @@ setInterval(async () => {
   let filtered   = [];
   let expandedPOs = new Set();
   let currentQ   = '';
+  let metaFilters = new Set(); // "prio:Watch", "tag:Escalated", "special:hasNotes", "special:flagged"
 
   // ── Search highlight helper ────────────────────────────────
   function hlText(str, q) {
@@ -3874,14 +4149,27 @@ setInterval(async () => {
       { id:'sv-adv-margin-max',  label: v => `Margin ≤ ${v}%`,          clear: () => { document.getElementById('sv-adv-margin-max').value=''; } },
       { id:'sv-adv-job',         label: v => `Job: ${v}`,               clear: () => { document.getElementById('sv-adv-job').value=''; } },
     ];
-    const chips = defs.filter(d => (document.getElementById(d.id)?.value || '').trim() !== '');
-    row.style.display = chips.length ? 'flex' : 'none';
-    row.innerHTML = chips.map((d, i) => {
-      const val = document.getElementById(d.id).value;
-      return `<span class="filter-chip">${d.label(val)}<span class="chip-x" data-chip="${i}" title="Remove">×</span></span>`;
-    }).join('');
+    const allChips = defs
+      .filter(d => (document.getElementById(d.id)?.value || '').trim() !== '')
+      .map(d => ({ label: d.label(document.getElementById(d.id).value), clear: d.clear }));
+    // Metadata filter chips
+    metaFilters.forEach(f => {
+      let label;
+      if (f.startsWith('prio:'))          label = `Priority: ${f.slice(5)}`;
+      else if (f.startsWith('tag:'))      label = `Tag: ${f.slice(4)}`;
+      else if (f === 'special:hasNotes')  label = 'Has Notes';
+      else if (f === 'special:flagged')   label = 'Flagged Only';
+      if (label) allChips.push({ label, clear: () => {
+        metaFilters.delete(f);
+        document.querySelector(`#sv-adv-panel [data-meta="${f}"]`)?.classList.remove('active');
+      }});
+    });
+    row.style.display = allChips.length ? 'flex' : 'none';
+    row.innerHTML = allChips.map((c, i) =>
+      `<span class="filter-chip">${c.label}<span class="chip-x" data-chip="${i}" title="Remove">×</span></span>`
+    ).join('');
     row.querySelectorAll('.chip-x').forEach(x => {
-      x.addEventListener('click', () => { chips[+x.dataset.chip].clear(); applyFilters(); });
+      x.addEventListener('click', () => { allChips[+x.dataset.chip].clear(); applyFilters(); });
     });
   }
 
@@ -3991,6 +4279,26 @@ setInterval(async () => {
       filtered = filtered.filter(r => validPOs.has(r.po_number));
     }
 
+    // Metadata filters — group-level, reads localStorage per PO
+    if (metaFilters.size > 0) {
+      const sanitize = po => 'pod_' + (po || '').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const groups   = groupByPO(filtered);
+      const validPOs = new Set(groups.filter(g => {
+        const k     = sanitize(g.po_number);
+        const prio  = localStorage.getItem(k + '_priority') || 'Normal';
+        const tag   = localStorage.getItem(k + '_tag')      || '';
+        const notes = localStorage.getItem(k + '_notes')    || '';
+        return [...metaFilters].some(f => {
+          if (f.startsWith('prio:'))        return prio === f.slice(5);
+          if (f.startsWith('tag:'))         return tag  === f.slice(4);
+          if (f === 'special:hasNotes')     return notes.trim().length > 0;
+          if (f === 'special:flagged')      return prio !== 'Normal' || tag.trim().length > 0;
+          return false;
+        });
+      }).map(g => g.po_number));
+      filtered = filtered.filter(r => validPOs.has(r.po_number));
+    }
+
     renderChips();
     renderTable();
   }
@@ -4019,11 +4327,12 @@ setInterval(async () => {
       // ── Group (summary) row ──
       rows.push(`
         <tr class="sv-group-row" data-po="${poKey}" style="cursor:pointer; background:var(--bg-card);">
-          <td style="white-space:nowrap; font-weight:500;">
-            <span style="display:inline-flex; align-items:center; gap:6px;">
+          <td class="sv-expand-cell" style="font-weight:500;" title="Expand lines">
+            <span style="display:inline-flex; align-items:center; gap:6px; white-space:nowrap;">
               <svg style="width:12px; height:12px; transition:transform .2s; transform:rotate(${open?90:0}deg); flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
               ${hlText(g.supplier_name || '—', currentQ)}
             </span>
+            ${window.rowMetaChips ? window.rowMetaChips(g.po_number) : ''}
           </td>
           <td style="white-space:nowrap; font-size:12px;">${Utils.formatDate(g.date_required_by)}</td>
           <td style="font-size:12px; color:var(--text-muted);">${hlText(g.job_number || '—', currentQ)}</td>
@@ -4080,11 +4389,32 @@ setInterval(async () => {
     });
 
     tbody.innerHTML = rows.join('');
+    if (window.updateRowFlags) window.updateRowFlags();
 
-    // Wire expand/collapse
+    // Row click → open detail drawer
     tbody.querySelectorAll('.sv-group-row').forEach(row => {
-      row.addEventListener('click', () => {
-        const po = row.dataset.po;
+      row.addEventListener('click', e => {
+        if (e.target.closest('.sv-expand-cell')) return; // expand cell handles itself
+        const po    = row.dataset.po;
+        const group = groups.find(g => (g.po_number || '—') === po);
+        if (group && window.openPODrawer) {
+          window.openPODrawer({
+            ...group,
+            price_ex_tax:  group.supplier_cost,
+            gross_profit:  group.gross_profit,
+            customer_price: group.customer_price,
+          });
+        }
+      });
+    });
+
+    // Expand-cell click → toggle inline detail
+    tbody.querySelectorAll('.sv-expand-cell').forEach(cell => {
+      cell.addEventListener('click', e => {
+        e.stopPropagation();
+        const row = cell.closest('tr');
+        const po  = row?.dataset.po;
+        if (!po) return;
         if (expandedPOs.has(po)) expandedPOs.delete(po);
         else expandedPOs.add(po);
         renderTable();
@@ -4113,6 +4443,16 @@ setInterval(async () => {
       document.getElementById(id)?.addEventListener('input', applyFilters);
     });
     document.getElementById('sv-adv-job')?.addEventListener('input', applyFilters);
+    // Metadata filter toggle buttons
+    document.querySelectorAll('#sv-adv-panel .meta-tag-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.meta;
+        if (metaFilters.has(key)) metaFilters.delete(key);
+        else metaFilters.add(key);
+        btn.classList.toggle('active', metaFilters.has(key));
+        applyFilters();
+      });
+    });
 
     document.getElementById('sv-clear')?.addEventListener('click', () => {
       ['sv-filter-supplier','sv-filter-status','sv-date-from','sv-date-to',
@@ -4122,6 +4462,9 @@ setInterval(async () => {
       });
       const s = document.getElementById('sv-search');
       if (s) s.value = '';
+      // Clear metadata filters
+      metaFilters.clear();
+      document.querySelectorAll('#sv-adv-panel .meta-tag-btn').forEach(b => b.classList.remove('active'));
       applyFilters();
     });
   }
@@ -4129,7 +4472,8 @@ setInterval(async () => {
   // ── Load ──────────────────────────────────────────────────────────────────
   async function load() {
     const raw = await window.API.get('supplier_view') || await window.API.get('po_line_items');
-    allRows = (raw || []).map(normalizeRow);
+    if (!raw || !raw.length) { applyFilters(); return; }
+    allRows = raw.map(normalizeRow);
     populateSuppliers(allRows);
     applyFilters();
   }
@@ -4400,6 +4744,7 @@ setInterval(async () => {
   let currentPage = 1;
   let selectedPOs = new Set();
   let currentQ    = '';
+  let metaFilters = new Set(); // "prio:Watch", "tag:Escalated", "special:hasNotes", "special:flagged"
 
   // Normalise sheet date strings to ISO YYYY-MM-DD for comparison
   const MO = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
@@ -4438,14 +4783,27 @@ setInterval(async () => {
       { id:'por-adv-margin-max',  label: v => `Margin ≤ ${v}%`,          clear: () => { document.getElementById('por-adv-margin-max').value=''; } },
       { id:'por-adv-job',         label: v => `Job: ${v}`,               clear: () => { document.getElementById('por-adv-job').value=''; } },
     ];
-    const chips = defs.filter(d => (document.getElementById(d.id)?.value || '').trim() !== '');
-    row.style.display = chips.length ? 'flex' : 'none';
-    row.innerHTML = chips.map((d, i) => {
-      const val = document.getElementById(d.id).value;
-      return `<span class="filter-chip">${d.label(val)}<span class="chip-x" data-chip="${i}" title="Remove">×</span></span>`;
-    }).join('');
+    const allChips = defs
+      .filter(d => (document.getElementById(d.id)?.value || '').trim() !== '')
+      .map(d => ({ label: d.label(document.getElementById(d.id).value), clear: d.clear }));
+    // Metadata filter chips
+    metaFilters.forEach(f => {
+      let label;
+      if (f.startsWith('prio:'))          label = `Priority: ${f.slice(5)}`;
+      else if (f.startsWith('tag:'))      label = `Tag: ${f.slice(4)}`;
+      else if (f === 'special:hasNotes')  label = 'Has Notes';
+      else if (f === 'special:flagged')   label = 'Flagged Only';
+      if (label) allChips.push({ label, clear: () => {
+        metaFilters.delete(f);
+        document.querySelector(`#por-adv-panel [data-meta="${f}"]`)?.classList.remove('active');
+      }});
+    });
+    row.style.display = allChips.length ? 'flex' : 'none';
+    row.innerHTML = allChips.map((c, i) =>
+      `<span class="filter-chip">${c.label}<span class="chip-x" data-chip="${i}" title="Remove">×</span></span>`
+    ).join('');
     row.querySelectorAll('.chip-x').forEach(x => {
-      x.addEventListener('click', () => { chips[+x.dataset.chip].clear(); applyFilters(); });
+      x.addEventListener('click', () => { allChips[+x.dataset.chip].clear(); applyFilters(); });
     });
   }
 
@@ -4506,6 +4864,26 @@ setInterval(async () => {
       filtered = filtered.filter(r => validPOs.has(r.po_number));
     }
 
+    // Metadata filters — group-level, reads localStorage per PO
+    if (metaFilters.size > 0) {
+      const sanitize = po => 'pod_' + (po || '').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const groups   = groupByPO(filtered);
+      const validPOs = new Set(groups.filter(g => {
+        const k     = sanitize(g.po_number);
+        const prio  = localStorage.getItem(k + '_priority') || 'Normal';
+        const tag   = localStorage.getItem(k + '_tag')      || '';
+        const notes = localStorage.getItem(k + '_notes')    || '';
+        return [...metaFilters].some(f => {
+          if (f.startsWith('prio:'))         return prio === f.slice(5);
+          if (f.startsWith('tag:'))          return tag  === f.slice(4);
+          if (f === 'special:hasNotes')      return notes.trim().length > 0;
+          if (f === 'special:flagged')       return prio !== 'Normal' || tag.trim().length > 0;
+          return false;
+        });
+      }).map(g => g.po_number));
+      filtered = filtered.filter(r => validPOs.has(r.po_number));
+    }
+
     if (sortCol) {
       filtered.sort((a, b) => {
         let av = a[sortCol] ?? '';
@@ -4531,6 +4909,7 @@ setInterval(async () => {
         map.set(key, {
           po_number:       r.po_number,
           supplier_name:   r.supplier_name,
+          customer_name:   r.customer_name || r.client_name || '',
           job_number:      r.job_number,
           date_required_by:r.date_required_by,
           delivery_status: r.delivery_status,
@@ -4598,11 +4977,14 @@ setInterval(async () => {
       return `
         <tr class="por-group-row" data-po="${g.po_number || ''}" style="cursor:pointer;">
           <td style="text-align:center; padding:0 8px;" class="por-cb-cell"><input type="checkbox" class="por-cb" data-po="${g.po_number || ''}" ${isChecked ? 'checked' : ''} style="cursor:pointer; accent-color:var(--green-primary);"></td>
-          <td style="white-space:nowrap; max-width:160px; overflow:hidden; text-overflow:ellipsis;">${hlText(g.supplier_name || '—', currentQ)}</td>
+          <td style="max-width:180px;">
+            <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${hlText(g.supplier_name || '—', currentQ)}</div>
+            ${window.rowMetaChips ? window.rowMetaChips(g.po_number) : ''}
+          </td>
           <td style="font-size:12px; color:var(--text-muted);">${hlText(g.job_number || '—', currentQ)}</td>
           <td style="font-family:monospace; font-size:12px; color:var(--green-primary); white-space:nowrap;">${hlText(g.po_number || '—', currentQ)}</td>
           <td style="white-space:nowrap; font-size:12px;">${Utils.formatDate(g.date_required_by)}</td>
-          <td style="font-size:12px; color:var(--text-muted);">
+          <td class="por-expand-cell" style="font-size:12px; color:var(--text-muted);" title="Expand lines">
             <span class="por-chevron" style="display:inline-block; transition:transform 0.2s; margin-right:5px; font-size:10px;">▶</span>${g.lines.length} item${g.lines.length !== 1 ? 's' : ''}
           </td>
           <td style="text-align:right; padding-right:20px; font-weight:500;">${Utils.formatCurrency(g.price_ex_tax)}</td>
@@ -4632,14 +5014,27 @@ setInterval(async () => {
           </td>
         </tr>`;
     }).join('');
+    if (window.updateRowFlags) window.updateRowFlags();
 
-    // Toggle expand on group row click (skip if clicking checkbox)
+    // Row click → open detail drawer
     tbody.querySelectorAll('.por-group-row').forEach(row => {
       row.addEventListener('click', e => {
-        if (e.target.closest('.por-cb-cell')) return; // let checkbox handle itself
-        const po      = row.dataset.po;
-        const detail  = tbody.querySelector(`.por-detail-row[data-po="${po}"]`);
-        const chevron = row.querySelector('.por-chevron');
+        if (e.target.closest('.por-cb-cell'))    return; // checkbox
+        if (e.target.closest('.por-expand-cell')) return; // expand cell handles itself
+        const po    = row.dataset.po;
+        const group = page.find(g => (g.po_number || '') === po);
+        if (group && window.openPODrawer) window.openPODrawer(group);
+      });
+    });
+
+    // Expand-cell click → toggle inline line-item detail
+    tbody.querySelectorAll('.por-expand-cell').forEach(cell => {
+      cell.addEventListener('click', e => {
+        e.stopPropagation();
+        const row     = cell.closest('tr');
+        const po      = row?.dataset.po;
+        const detail  = tbody.querySelector(`.por-detail-row[data-po="${CSS.escape(po)}"]`);
+        const chevron = row?.querySelector('.por-chevron');
         if (!detail) return;
         const open = detail.style.display !== 'none';
         detail.style.display = open ? 'none' : '';
@@ -4901,6 +5296,16 @@ setInterval(async () => {
       document.getElementById(id)?.addEventListener('input', applyFilters);
     });
     document.getElementById('por-adv-job')?.addEventListener('input', applyFilters);
+    // Metadata filter toggle buttons
+    document.querySelectorAll('#por-adv-panel .meta-tag-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.meta;
+        if (metaFilters.has(key)) metaFilters.delete(key);
+        else metaFilters.add(key);
+        btn.classList.toggle('active', metaFilters.has(key));
+        applyFilters();
+      });
+    });
     document.getElementById('por-prev')           ?.addEventListener('click',  () => { if (currentPage > 1) { currentPage--; renderTable(); }});
 
     // Select-all checkbox
@@ -4931,10 +5336,18 @@ setInterval(async () => {
 
   // ── Load data ──────────────────────────────────────────────
   async function loadData() {
-    const raw = await window.API.get('supplier_view');
+    const [raw, headers] = await Promise.all([
+      window.API.get('supplier_view'),
+      window.API.get('po_headers'),
+    ]);
+    if (!raw || !raw.length) { applyFilters(); return; }
+    // Build po_number → client_name fallback map from po_headers
+    const clientMap = {};
+    (headers || []).forEach(h => { if (h.po_number) clientMap[h.po_number] = h.client_name || ''; });
     // Normalise keys from parseGeneric output to what the render expects
-    allRows = (raw || []).map(r => ({
+    allRows = raw.map(r => ({
       supplier_name:    r.supplier_name    || '',
+      customer_name:    r.customer_name    || r.client_name || clientMap[r.po_number] || '',
       job_number:       r.job_number       || '',
       po_number:        r.po_number        || '',
       date_required_by: r.date_required_by || '',
@@ -5740,6 +6153,298 @@ setInterval(async () => {
     success: (title, message = '', duration = DURATIONS.success) => show({ type: 'success', title, message, duration }),
     error:   (title, message = '', duration = DURATIONS.error)   => show({ type: 'error',   title, message, duration }),
     warning: (title, message = '', duration = DURATIONS.warning) => show({ type: 'warning', title, message, duration }),
+  };
+})();
+</script>
+
+<!-- ── PO Detail Drawer ──────────────────────────────────────── -->
+<div id="po-drawer-backdrop"></div>
+<aside id="po-drawer" aria-modal="true" role="dialog" aria-label="PO Detail">
+  <div class="drawer-header">
+    <div style="min-width:0; flex:1;">
+      <div id="drawer-po-number" style="font-family:'Syne',sans-serif; font-size:17px; font-weight:700; color:var(--green-primary); line-height:1.15; margin-bottom:6px; word-break:break-all;">—</div>
+      <div id="drawer-status-wrap" style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;"></div>
+    </div>
+    <button class="drawer-close" id="drawer-close-btn" title="Close (Esc)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="drawer-body" id="drawer-body">
+    <!-- populated by window.openPODrawer() -->
+  </div>
+</aside>
+
+<script>
+// ── PO Detail Drawer — global controller ──────────────────────
+(function initPODrawer() {
+  const backdrop = document.getElementById('po-drawer-backdrop');
+  const drawer   = document.getElementById('po-drawer');
+  const body     = document.getElementById('drawer-body');
+  const closeBtn = document.getElementById('drawer-close-btn');
+
+  function closeDrawer() {
+    drawer.classList.remove('open');
+    backdrop.classList.remove('open');
+  }
+
+  closeBtn?.addEventListener('click', closeDrawer);
+  backdrop?.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+  // ── Row metadata chips — build chip HTML for a given PO number ──
+  window.rowMetaChips = function rowMetaChips(poNumber) {
+    const key    = 'pod_' + (poNumber || '').replace(/[^a-zA-Z0-9_-]/g, '_');
+    const prio   = localStorage.getItem(key + '_priority') || 'Normal';
+    const tag    = localStorage.getItem(key + '_tag')      || '';
+    const notes  = localStorage.getItem(key + '_notes')    || '';
+    const noteIcon = `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`;
+    const chips  = [];
+    if (prio && prio !== 'Normal') {
+      const cls = prio === 'Watch' ? 'rmc-watch' : prio === 'Urgent' ? 'rmc-urgent' : 'rmc-critical';
+      chips.push(`<span class="rmc ${cls}">${prio}</span>`);
+    }
+    if (tag)                chips.push(`<span class="rmc rmc-tag">${tag}</span>`);
+    if (notes && notes.trim()) chips.push(`<span class="rmc rmc-notes">${noteIcon}Note</span>`);
+    return `<div class="row-meta-chips" data-po-chips="${poNumber || ''}" style="${chips.length ? '' : 'display:none'}">${chips.join('')}</div>`;
+  };
+
+  // ── Row flag highlights — scan all table rows with data-po and apply priority classes ──
+  window.updateRowFlags = function updateRowFlags() {
+    document.querySelectorAll('tr[data-po]').forEach(row => {
+      const po = row.dataset.po;
+      if (!po) return;
+      const key = 'pod_' + po.replace(/[^a-zA-Z0-9_-]/g, '_');
+      const prio = localStorage.getItem(key + '_priority') || 'Normal';
+      row.classList.toggle('row-flag-urgent',   prio === 'Urgent');
+      row.classList.toggle('row-flag-critical', prio === 'Critical');
+    });
+    // Also refresh inline chips without a full re-render
+    const _noteIcon = `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`;
+    document.querySelectorAll('[data-po-chips]').forEach(el => {
+      const po    = el.dataset.poChips;
+      const key   = 'pod_' + (po || '').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const prio  = localStorage.getItem(key + '_priority') || 'Normal';
+      const tag   = localStorage.getItem(key + '_tag')      || '';
+      const notes = localStorage.getItem(key + '_notes')    || '';
+      const chips = [];
+      if (prio && prio !== 'Normal') {
+        const cls = prio === 'Watch' ? 'rmc-watch' : prio === 'Urgent' ? 'rmc-urgent' : 'rmc-critical';
+        chips.push(`<span class="rmc ${cls}">${prio}</span>`);
+      }
+      if (tag)                chips.push(`<span class="rmc rmc-tag">${tag}</span>`);
+      if (notes && notes.trim()) chips.push(`<span class="rmc rmc-notes">${_noteIcon}Note</span>`);
+      el.innerHTML = chips.join('');
+      el.style.display = chips.length ? '' : 'none';
+    });
+  };
+
+  // Apply row highlights whenever a page renders — tables call this after building rows
+  // Also run on drawer open so any stale rows in DOM get updated
+
+
+  window.openPODrawer = function openPODrawer(data) {
+    if (!drawer || !body) return;
+
+    // ── Header ──────────────────────────────────────────────
+    document.getElementById('drawer-po-number').textContent = data.po_number || '—';
+    const statusWrap = document.getElementById('drawer-status-wrap');
+    if (statusWrap) {
+      statusWrap.innerHTML = Utils.statusBadge(data.delivery_status || '');
+    }
+
+    // ── PO info grid ─────────────────────────────────────────
+    const customer = data.customer_name || data.client_name ||
+                     (data.lines && data.lines[0]?.customer_name) || '—';
+
+    const urgencyColors = {
+      'OVERDUE':'#ef4444','DUE SOON':'#f59e0b',
+      'ON TRACK':'var(--green-primary)','RECEIVED':'#67e8f9',
+    };
+
+    let infoItems = [
+      { label:'Supplier',    value: data.supplier_name || '—' },
+      { label:'Customer',    value: customer },
+      { label:'Job #',       value: data.job_number || '—' },
+      { label:'Required By', value: Utils.formatDate(data.date_required_by || '') || '—' },
+    ];
+    if (data.urgency) {
+      infoItems.push({ label:'Urgency', value: data.urgency, color: urgencyColors[data.urgency] || '' });
+    }
+
+    const infoHTML = `
+      <div class="drawer-section">
+        <div class="drawer-section-label">PO Information</div>
+        <div class="drawer-info-grid">
+          ${infoItems.map(item => `
+            <div class="drawer-info-item" style="${item.span ? 'grid-column:1/-1;' : ''}">
+              <div class="drawer-info-label">${item.label}</div>
+              <div class="drawer-info-value" style="${item.color ? 'color:'+item.color+';font-weight:700;' : ''}">${item.value}</div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+
+    // ── Financials ───────────────────────────────────────────
+    const rawCost  = parseFloat(String(data.price_ex_tax  || data.supplier_cost  || data.total_supplier_cost  || '').replace(/[^0-9.-]/g,'')) || 0;
+    const rawPrice = parseFloat(String(data.customer_price|| data.total_customer_price || '').replace(/[^0-9.-]/g,'')) || 0;
+    const rawGP    = parseFloat(String(data.gross_profit  || '').replace(/[^0-9.-]/g,'')) || 0;
+    const margin   = rawPrice > 0 ? (rawGP / rawPrice * 100) : (parseFloat(data.margin_pct) || 0);
+    const hasAnyFin = rawCost > 0 || rawPrice > 0;
+
+    const finHTML = hasAnyFin ? `
+      <div class="drawer-section">
+        <div class="drawer-section-label">Financials</div>
+        <div class="drawer-fin-row">
+          <div class="drawer-fin-card">
+            <div class="drawer-fin-label">Supplier Cost</div>
+            <div class="drawer-fin-value" style="color:var(--text-primary);">${Utils.formatCurrency(rawCost)}</div>
+          </div>
+          <div class="drawer-fin-card">
+            <div class="drawer-fin-label">Cust. Price</div>
+            <div class="drawer-fin-value" style="color:var(--text-secondary);">${Utils.formatCurrency(rawPrice)}</div>
+          </div>
+          <div class="drawer-fin-card">
+            <div class="drawer-fin-label">Gross Profit</div>
+            <div class="drawer-fin-value" style="color:var(--green-primary);">${rawGP > 0 ? Utils.formatCurrency(rawGP) : '—'}</div>
+          </div>
+          <div class="drawer-fin-card">
+            <div class="drawer-fin-label">Margin</div>
+            <div class="drawer-fin-value" style="color:${Utils.marginColor(margin)};">${margin > 0 ? margin.toFixed(1)+'%' : '—'}</div>
+          </div>
+        </div>
+      </div>` : '';
+
+    // ── Line items ───────────────────────────────────────────
+    let linesHTML = '';
+    const lines = data.lines || [];
+    if (lines.length) {
+      const lineRows = lines.map(l => {
+        const lm    = parseFloat(String(l.margin_pct||'').replace(/[^0-9.-]/g,'')) || 0;
+        const lCost = Utils.formatCurrency(l.price_ex_tax || l.amount_ex_tax);
+        const lPrice = Utils.formatCurrency(l.customer_price);
+        return `<tr>
+          <td style="color:var(--text-muted); text-align:right; width:28px; font-size:11px;">${l.line_number||'—'}</td>
+          <td style="max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${(l.description||'').replace(/"/g,'&quot;')}">${l.description||'—'}</td>
+          <td style="color:var(--text-muted); white-space:nowrap; font-size:11px;">${l.item_code||l.item_number||'—'}</td>
+          <td style="text-align:right;">${l.qty||'—'}</td>
+          <td style="text-align:right; font-variant-numeric:tabular-nums;">${lCost}</td>
+          <td style="text-align:right; font-variant-numeric:tabular-nums;">${lPrice}</td>
+          <td style="text-align:right; color:${Utils.marginColor(lm)};">${lm > 0 ? lm.toFixed(1)+'%' : '—'}</td>
+          <td>${Utils.statusBadge(l.delivery_status || data.delivery_status || '')}</td>
+        </tr>`;
+      }).join('');
+      linesHTML = `
+        <div class="drawer-section">
+          <div class="drawer-section-label">Line Items (${lines.length})</div>
+          <div class="drawer-lines-wrap">
+            <table class="drawer-lines-table">
+              <thead>
+                <tr>
+                  <th style="text-align:right;">#</th>
+                  <th>Description</th>
+                  <th>Item Code</th>
+                  <th style="text-align:right;">Qty</th>
+                  <th style="text-align:right;">Cost</th>
+                  <th style="text-align:right;">Price</th>
+                  <th style="text-align:right;">Margin</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>${lineRows}</tbody>
+            </table>
+          </div>
+        </div>`;
+    }
+
+    // ── Internal Notes ───────────────────────────────────────
+    const poKey       = 'pod_' + (data.po_number || 'unknown').replace(/[^a-zA-Z0-9_-]/g, '_');
+    const savedNotes  = localStorage.getItem(poKey + '_notes')    || '';
+    const savedFlag   = localStorage.getItem(poKey + '_priority') || 'Normal';
+    const savedTag    = localStorage.getItem(poKey + '_tag')      || '';
+
+    const safeNotes = savedNotes.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const notesHTML = `
+      <div class="drawer-section">
+        <div class="drawer-section-label">Internal Notes</div>
+        <textarea class="drawer-notes-area" id="drawer-notes" placeholder="Add notes for this PO…">${safeNotes}</textarea>
+      </div>`;
+
+    // ── Priority Flag ────────────────────────────────────────
+    const FLAGS = ['Normal','Watch','Urgent','Critical'];
+    const flagPills = FLAGS.map(f => {
+      const cls = savedFlag === f ? ` flag-${f.toLowerCase()}` : '';
+      return `<button class="drawer-pill${cls}" data-flag="${f}">${f}</button>`;
+    }).join('');
+    const priorityHTML = `
+      <div class="drawer-section">
+        <div class="drawer-section-label">Priority Flag</div>
+        <div class="drawer-pills" id="drawer-flag-pills">${flagPills}</div>
+      </div>`;
+
+    // ── Attention Tag ────────────────────────────────────────
+    const TAGS = ['Needs Review','Delayed','Issue Reported','Waiting Approval','Escalated'];
+    const tagPills = [
+      `<button class="drawer-pill${!savedTag ? ' tag-active' : ''}" data-attn="">None</button>`,
+      ...TAGS.map(t => {
+        const cls = savedTag === t ? ' tag-active' : '';
+        return `<button class="drawer-pill${cls}" data-attn="${t}">${t}</button>`;
+      })
+    ].join('');
+    const attnHTML = `
+      <div class="drawer-section">
+        <div class="drawer-section-label">Attention Tag</div>
+        <div class="drawer-pills" id="drawer-attn-pills">${tagPills}</div>
+      </div>`;
+
+    body.innerHTML = infoHTML + finHTML + linesHTML + notesHTML + priorityHTML + attnHTML;
+
+    // Wire — notes auto-save with debounced toast
+    const notesEl = body.querySelector('#drawer-notes');
+    if (notesEl) {
+      let notesSaveTimer = null;
+      notesEl.addEventListener('input', () => {
+        localStorage.setItem(poKey + '_notes', notesEl.value);
+        clearTimeout(notesSaveTimer);
+        notesSaveTimer = setTimeout(() => {
+          if (window.showToast) window.showToast('Notes saved', 'success');
+        }, 900);
+      });
+    }
+
+    // Wire — priority flag pills
+    body.querySelectorAll('[data-flag]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const f = btn.dataset.flag;
+        localStorage.setItem(poKey + '_priority', f);
+        body.querySelectorAll('[data-flag]').forEach(b => {
+          b.className = 'drawer-pill' + (b.dataset.flag === f ? ` flag-${f.toLowerCase()}` : '');
+        });
+        const toastType = f === 'Critical' ? 'error' : f === 'Urgent' ? 'warning' : 'success';
+        if (window.showToast) window.showToast(`Priority set to ${f}`, toastType);
+        if (window.updateRowFlags) window.updateRowFlags();
+      });
+    });
+
+    // Wire — attention tag pills
+    body.querySelectorAll('[data-attn]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const t = btn.dataset.attn;
+        localStorage.setItem(poKey + '_tag', t);
+        body.querySelectorAll('[data-attn]').forEach(b => {
+          b.className = 'drawer-pill' + (b.dataset.attn === t ? ' tag-active' : '');
+        });
+        if (window.showToast) {
+          window.showToast(t ? `Tagged: ${t}` : 'Tag cleared', 'success');
+        }
+      });
+    });
+
+    if (!drawer.classList.contains('open')) {
+      drawer.classList.add('open');
+      backdrop.classList.add('open');
+    }
+    body.scrollTop = 0;
+    // Refresh row highlights in case priority changed since last render
+    if (window.updateRowFlags) window.updateRowFlags();
   };
 })();
 </script>

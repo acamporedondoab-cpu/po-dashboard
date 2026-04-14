@@ -7,17 +7,17 @@ ServiceM8 / Field Service (internal tool)
 2026-04-14
 
 ## Last Deployed Commit
-pending — advanced filtering system (search highlight, filter chips, advanced panel)
+pending — smart metadata filters + row metadata chips
 
 ## Current State
-Fully functional SPA dashboard with login wall, polished UI, and full empty state coverage. Auth protects both frontend and /api/sheets. All charts and tables have graceful no-data states. Notification bell in topbar with per-PO detail and mark-as-read on close. Sidebar badges for Not Shipped and Discount Threshold persist independently of bell read state. PO Register and Supplier View have premium enterprise-style filtering: search highlighting, removable filter chips, and collapsible advanced filter panel (cost range, margin range, job number).
+Fully functional SPA dashboard with login wall, polished UI, and full empty state coverage. Auth protects both frontend and /api/sheets. All charts and tables have graceful no-data states. Notification bell in topbar with per-PO detail and mark-as-read on close. Sidebar badges for Not Shipped and Discount Threshold persist independently of bell read state. PO Register and Supplier View have premium enterprise-style filtering: search highlighting, removable filter chips, and collapsible advanced filter panel (cost range, margin range, job number, + smart metadata filters). Global PO detail drawer slides in from right on row click with financials, line items, internal notes, priority flags, and attention tags.
 
 ## What Was Last Changed
-- Search highlighting: matched text in PO Register and Supplier View wrapped in amber `<mark class="hl">` as user types
-- Filter chips: active filters shown as removable green pills above table; × clears individual filter
-- Advanced filter panel: collapsible panel with Supplier Cost range, Margin % range, Job Number text filter
-- Numeric range filters applied at PO group level (post-grouping) for accurate cost/margin matching
-- Covers both PO Register (por- prefix) and Supplier View (sv- prefix)
+- Row metadata chips: compact status pills below supplier name in POR and SV rows showing priority (Watch/Urgent/Critical), attention tag, and notes indicator; live-update without table re-render via `data-po-chips` attribute
+- Smart Metadata Filters: new "Internal Metadata Filters" section inside More Filters panel — toggle-pill buttons for Priority (Watch/Urgent/Critical), Tags (Needs Review/Delayed/Issue Reported/Waiting Approval/Escalated), Has Notes, Flagged Only
+- Meta filters combine with all existing filters; active filters appear as chips; SV Clear resets meta filter states
+- Global PO detail drawer: slide-out panel with header, PO info grid, financials (4 stat cards), line items table; opens from any row in POR, SV, Not Shipped, Delivery Tracker
+- Drawer supports internal notes, priority flags (Normal/Watch/Urgent/Critical), attention tags — saved to localStorage per PO
 
 ## Pages / Features
 - Overview — stats, profit chart, donut chart, recent POs, delivery status
@@ -49,3 +49,5 @@ Fully functional SPA dashboard with login wall, polished UI, and full empty stat
 - checkpoint-013.md — Toast fixes: Not Shipped red, auth guard, poll 10s
 - checkpoint-014.md — Notification bell polish, per-PO detail, amber dot, discount threshold vanish fix
 - checkpoint-015.md — Advanced filtering system: search highlight, filter chips, advanced panel
+- checkpoint-016.md — Global PO detail drawer: slide-out panel, financials, line items, notes/priority/tags
+- checkpoint-017.md — Row metadata chips + smart metadata filters (priority, tag, notes, flagged)
